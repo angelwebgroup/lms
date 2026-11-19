@@ -197,11 +197,89 @@ function edupro_maybe_render_invoice_page() {
 	$student_name  = $student ? $student->display_name : sprintf( __( 'Student #%d', 'edupro' ), (int) $order->user_id );
 	$student_email = $student ? $student->user_email : '—';
 
-	// Course details.
-	$course_id    = absint( $order->course_id );
-	$course_title = $course_id ? get_the_title( $course_id ) : __( 'Course Enrollment', 'edupro' );
-	if ( '' === $course_title ) {
-		$course_title = sprintf( __( 'Course #%d', 'edupro' ), $course_id );
+	// Course line items (supports single-course and multi-course cart orders).
+	$order_course_ids = array();
+	if ( function_exists( 'edupro_get_order_course_ids' ) ) {
+		$order_course_ids = edupro_get_order_course_ids( $order );
+	} else {
+		if ( ! empty( $order->course_ids ) ) {
+			$decoded_ids = json_decode( (string) $order->course_ids, true );
+			if ( is_array( $decoded_ids ) ) {
+				$order_course_ids = array_values( array_unique( array_filter( array_map( 'absint', $decoded_ids ) ) ) );
+			}
+		}
+		if ( empty( $order_course_ids ) && ! empty( $order->course_id ) ) {
+			$order_course_ids = array( absint( $order->course_id ) );
+		}
+	}
+
+	// Optional per-item prices stored in order meta_json at checkout time.
+	$meta_item_prices = array();
+	if ( ! empty( $order->meta_json ) ) {
+		$decoded_meta = json_decode( (string) $order->meta_json, true );
+		if ( is_array( $decoded_meta ) ) {
+			if ( ! empty( $decoded_meta['item_prices'] ) && is_array( $decoded_meta['item_prices'] ) ) {
+				$meta_item_prices = $decoded_meta['item_prices'];
+			} elseif ( ! empty( $decoded_meta['items'] ) && is_array( $decoded_meta['items'] ) ) {
+				foreach ( $decoded_meta['items'] as $meta_item ) {
+					if ( ! isset( $meta_item['course_id'] ) ) {
+						continue;
+					}
+					$snapshot_price = $meta_item['effective'] ?? ( $meta_item['price'] ?? null );
+					if ( null !== $snapshot_price ) {
+						$meta_item_prices[ absint( $meta_item['course_id'] ) ] = (float) $snapshot_price;
+					}
+				}
+			}
+		}
+	}
+
+	$line_items = array();
+	if ( empty( $order_course_ids ) ) {
+		$line_items[] = array(
+			'course_id' => 0,
+			'title'     => __( 'Course Enrollment', 'edupro' ),
+			'subtitle'  => __( 'Online Course Enrollment — Lifetime Access', 'edupro' ),
+			'amount'    => $subtotal,
+		);
+	} elseif ( 1 === count( $order_course_ids ) ) {
+		$cid          = (int) $order_course_ids[0];
+		$course_title = get_the_title( $cid );
+		if ( '' === $course_title ) {
+			$course_title = sprintf( __( 'Course #%d', 'edupro' ), $cid );
+		}
+		$line_items[] = array(
+			'course_id' => $cid,
+			'title'     => $course_title,
+			'subtitle'  => __( 'Online Course Enrollment — Lifetime Access', 'edupro' ),
+			'amount'    => $subtotal,
+		);
+	} else {
+		foreach ( $order_course_ids as $cid ) {
+			$cid          = (int) $cid;
+			$course_title = get_the_title( $cid );
+			if ( '' === $course_title ) {
+				$course_title = sprintf( __( 'Course #%d', 'edupro' ), $cid );
+			}
+
+			if ( isset( $meta_item_prices[ $cid ] ) ) {
+				$item_amount = round( (float) $meta_item_prices[ $cid ], 2 );
+			} elseif ( isset( $meta_item_prices[ (string) $cid ] ) ) {
+				$item_amount = round( (float) $meta_item_prices[ (string) $cid ], 2 );
+			} elseif ( function_exists( 'edupro_get_course_price_data' ) ) {
+				$p_data      = edupro_get_course_price_data( $cid, $order_currency );
+				$item_amount = round( (float) $p_data['effective'], 2 );
+			} else {
+				$item_amount = round( $subtotal / count( $order_course_ids ), 2 );
+			}
+
+			$line_items[] = array(
+				'course_id' => $cid,
+				'title'     => $course_title,
+				'subtitle'  => __( 'Online Course Enrollment — Lifetime Access', 'edupro' ),
+				'amount'    => $item_amount,
+			);
+		}
 	}
 
 	// Status badge styling.
@@ -529,14 +607,16 @@ function edupro_maybe_render_invoice_page() {
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>
-							<div class="inv-item-title"><?php echo esc_html( $course_title ); ?></div>
-							<div class="inv-item-sub"><?php esc_html_e( 'Online Course Enrollment — Lifetime Access', 'edupro' ); ?></div>
-						</td>
-						<td class="num">1</td>
-						<td class="num"><?php echo esc_html( $fmt( $subtotal ) ); ?></td>
-					</tr>
+					<?php foreach ( $line_items as $line_item ) : ?>
+						<tr>
+							<td>
+								<div class="inv-item-title"><?php echo esc_html( $line_item['title'] ); ?></div>
+								<div class="inv-item-sub"><?php echo esc_html( $line_item['subtitle'] ); ?></div>
+							</td>
+							<td class="num">1</td>
+							<td class="num"><?php echo esc_html( $fmt( $line_item['amount'] ) ); ?></td>
+						</tr>
+					<?php endforeach; ?>
 				</tbody>
 			</table>
 

@@ -138,12 +138,12 @@ function edupro_parse_coupon_course_ids( $raw ) {
 }
 
 /**
- * Validate a coupon code against a course, subtotal, and currency.
+ * Validate a coupon code against a course (or array of cart course IDs), subtotal, and currency.
  *
- * @param string $code      Coupon code entered by the student.
- * @param int    $course_id Course post ID being purchased.
- * @param float  $subtotal  Pre-discount subtotal in `$currency`.
- * @param string $currency  Optional ISO currency code (defaults to active currency).
+ * @param string    $code             Coupon code entered by the student.
+ * @param int|int[] $course_id_or_ids Single course post ID or array of cart course IDs.
+ * @param float     $subtotal         Pre-discount subtotal in `$currency`.
+ * @param string    $currency         Optional ISO currency code (defaults to active currency).
  * @return array{
  *     id: int,
  *     code: string,
@@ -154,10 +154,15 @@ function edupro_parse_coupon_course_ids( $raw ) {
  *     currency: string
  * }|WP_Error Validated discount breakdown or WP_Error on failure.
  */
-function edupro_validate_coupon( $code, $course_id, $subtotal, $currency = '' ) {
+function edupro_validate_coupon( $code, $course_id_or_ids, $subtotal, $currency = '' ) {
 	$normalized = edupro_normalize_coupon_code( $code );
-	$course_id  = absint( $course_id );
-	$subtotal   = max( 0.0, round( (float) $subtotal, 2 ) );
+	if ( is_array( $course_id_or_ids ) ) {
+		$target_course_ids = array_values( array_unique( array_filter( array_map( 'absint', $course_id_or_ids ) ) ) );
+	} else {
+		$single_id         = absint( $course_id_or_ids );
+		$target_course_ids = $single_id ? array( $single_id ) : array();
+	}
+	$subtotal = max( 0.0, round( (float) $subtotal, 2 ) );
 
 	if ( '' === $normalized ) {
 		return new WP_Error( 'coupon_empty', __( 'Please enter a coupon code.', 'edupro' ) );
@@ -209,10 +214,13 @@ function edupro_validate_coupon( $code, $course_id, $subtotal, $currency = '' ) 
 		);
 	}
 
-	// 5. Course restriction check.
+	// 5. Course restriction check (allows if at least one course in the order/cart matches).
 	$allowed_courses = edupro_parse_coupon_course_ids( $coupon->course_ids );
-	if ( ! empty( $allowed_courses ) && ( ! $course_id || ! in_array( $course_id, $allowed_courses, true ) ) ) {
-		return new WP_Error( 'coupon_course_mismatch', __( 'This coupon is not valid for the selected course.', 'edupro' ) );
+	if ( ! empty( $allowed_courses ) && ( empty( $target_course_ids ) || empty( array_intersect( $target_course_ids, $allowed_courses ) ) ) ) {
+		$msg = count( $target_course_ids ) > 1
+			? __( 'This coupon is not valid for any of the courses in your cart.', 'edupro' )
+			: __( 'This coupon is not valid for the selected course.', 'edupro' );
+		return new WP_Error( 'coupon_course_mismatch', $msg );
 	}
 
 	// 6. Minimum amount check.
@@ -325,28 +333,50 @@ function edupro_ajax_apply_coupon() {
 	}
 
 	$course_id = isset( $_POST['course_id'] ) ? absint( $_POST['course_id'] ) : 0;
+	$cart_mode = isset( $_POST['cart_mode'] ) && in_array( (string) $_POST['cart_mode'], array( '1', 'true', 'yes' ), true );
 	$currency  = isset( $_POST['currency'] ) ? sanitize_text_field( wp_unslash( $_POST['currency'] ) ) : '';
 
-	if ( ! $course_id ) {
-		wp_send_json_error( array( 'message' => __( 'Invalid course specified.', 'edupro' ) ), 400 );
-	}
+	if ( $cart_mode && ! $course_id ) {
+		if ( ! function_exists( 'edupro_get_cart_summary' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Cart system is unavailable.', 'edupro' ) ), 500 );
+		}
 
-	if ( function_exists( 'edupro_get_course_price_data' ) ) {
-		$price_data = edupro_get_course_price_data( $course_id, $currency );
-		$subtotal   = (float) $price_data['effective'];
-		$currency   = $price_data['currency'];
+		$cart_summary = edupro_get_cart_summary( $currency );
+		if ( empty( $cart_summary['items'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Your cart is empty.', 'edupro' ) ), 400 );
+		}
+
+		$course_target = array_map(
+			function ( $item ) {
+				return absint( $item['course_id'] );
+			},
+			$cart_summary['items']
+		);
+		$subtotal = (float) $cart_summary['subtotal'];
+		$currency = $cart_summary['currency'];
 	} else {
-		$sale     = (float) get_post_meta( $course_id, '_edupro_sale_price', true );
-		$regular  = (float) get_post_meta( $course_id, '_edupro_regular_price', true );
-		$subtotal = ( $sale > 0 && $sale < $regular ) ? $sale : $regular;
-		$currency = $currency ? strtoupper( $currency ) : 'INR';
+		if ( ! $course_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid course specified.', 'edupro' ) ), 400 );
+		}
+
+		$course_target = $course_id;
+		if ( function_exists( 'edupro_get_course_price_data' ) ) {
+			$price_data = edupro_get_course_price_data( $course_id, $currency );
+			$subtotal   = (float) $price_data['effective'];
+			$currency   = $price_data['currency'];
+		} else {
+			$sale     = (float) get_post_meta( $course_id, '_edupro_sale_price', true );
+			$regular  = (float) get_post_meta( $course_id, '_edupro_regular_price', true );
+			$subtotal = ( $sale > 0 && $sale < $regular ) ? $sale : $regular;
+			$currency = $currency ? strtoupper( $currency ) : 'INR';
+		}
 	}
 
 	if ( $subtotal <= 0 ) {
 		wp_send_json_error( array( 'message' => __( 'Coupons are not needed for free courses.', 'edupro' ) ), 400 );
 	}
 
-	$result = edupro_validate_coupon( $raw_code, $course_id, $subtotal, $currency );
+	$result = edupro_validate_coupon( $raw_code, $course_target, $subtotal, $currency );
 
 	if ( is_wp_error( $result ) ) {
 		wp_send_json_error(

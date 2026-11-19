@@ -24,6 +24,8 @@
         siteUrl: (window.edupro_vars && window.edupro_vars.site_url) || window.location.origin,
         currency: (window.edupro_vars && window.edupro_vars.currency) || 'INR',
         currencySymbol: (window.edupro_vars && window.edupro_vars.currency_symbol) || '₹',
+        cartUrl: (window.edupro_vars && window.edupro_vars.cart_url) || `${(window.edupro_vars && window.edupro_vars.site_url) || window.location.origin}/cart/`,
+        checkoutUrl: (window.edupro_vars && window.edupro_vars.checkout_url) || `${(window.edupro_vars && window.edupro_vars.site_url) || window.location.origin}/checkout/`,
         scrollOffset: 90,
         announcementKey: 'edupro_announcement_dismissed_v1',
     };
@@ -2309,6 +2311,7 @@
             }
 
             const courseId = checkoutWrap.dataset.courseId || '';
+            const isCartMode = checkoutWrap.dataset.cartMode === '1';
             const currency = checkoutWrap.dataset.currency || CONFIG.currency;
             const nonce = checkoutWrap.dataset.paymentNonce || checkoutWrap.dataset.authNonce || CONFIG.nonce;
 
@@ -2319,6 +2322,7 @@
                 nonce,
                 coupon_code: code,
                 course_id: courseId,
+                cart_mode: isCartMode ? '1' : '0',
                 currency,
             })
                 .then((res) => {
@@ -2399,6 +2403,7 @@
         if (!checkoutWrap) return;
 
         const courseId = checkoutWrap.dataset.courseId || checkoutWrap.querySelector('input[name="course_id"]')?.value || '';
+        const isCartMode = checkoutWrap.dataset.cartMode === '1';
         const currency = checkoutWrap.dataset.currency || CONFIG.currency;
         const dashboardUrl = checkoutWrap.dataset.dashboardUrl || `${CONFIG.siteUrl}/dashboard/`;
         const checkoutUrl = checkoutWrap.dataset.checkoutUrl || window.location.href;
@@ -2580,7 +2585,7 @@
 
         function mountStripePaymentElement() {
             const mountEl = checkoutWrap.querySelector('#edupro-stripe-payment-element');
-            if (!mountEl || !courseId) return Promise.resolve(null);
+            if (!mountEl || (!isCartMode && (!courseId || courseId === '0'))) return Promise.resolve(null);
 
             const currentCoupon = getActiveCoupon();
             if (stripeSession && stripePaymentElement && stripeSession.couponCode === currentCoupon) {
@@ -2602,6 +2607,7 @@
                 ajaxPost('edupro_checkout_initiate', {
                     nonce: paymentNonce,
                     course_id: courseId,
+                    cart_mode: isCartMode ? '1' : '0',
                     gateway: 'stripe',
                     currency,
                     coupon_code: currentCoupon,
@@ -2956,7 +2962,7 @@
 
         function startGatewayPayment(gateway, triggerBtn) {
             if (isProcessing) return;
-            if (!courseId) {
+            if (!isCartMode && (!courseId || courseId === '0')) {
                 showCheckoutAlert('Course ID is missing.', 'error');
                 return;
             }
@@ -2986,6 +2992,7 @@
             ajaxPost('edupro_checkout_initiate', {
                 nonce: paymentNonce,
                 course_id: courseId,
+                cart_mode: isCartMode ? '1' : '0',
                 gateway: gw,
                 currency,
                 coupon_code: getActiveCoupon(),
@@ -3197,6 +3204,365 @@
     }
 
     /* =========================================================================
+     * 19B. MULTI-COURSE SHOPPING CART & MINI-CART SLIDE-OUT DRAWER
+     * ========================================================================= */
+
+    const Cart = (() => {
+        let lastSummary = null;
+
+        function getDrawerEls() {
+            return {
+                trigger: document.querySelector('#edupro-cart-trigger, .edupro-cart-trigger'),
+                overlay: document.getElementById('edupro-cart-overlay'),
+                drawer: document.getElementById('edupro-cart-drawer'),
+                closeBtn: document.getElementById('edupro-cart-drawer-close'),
+                body: document.getElementById('edupro-cart-drawer-body'),
+                footer: document.getElementById('edupro-cart-drawer-footer'),
+                subtotal: document.getElementById('edupro-cart-drawer-subtotal'),
+                count: document.getElementById('edupro-cart-drawer-count'),
+            };
+        }
+
+        function openDrawer() {
+            const els = getDrawerEls();
+            if (!els.drawer) {
+                window.location.href = CONFIG.cartUrl;
+                return;
+            }
+            els.drawer.classList.add('is-open', 'active');
+            els.drawer.setAttribute('aria-hidden', 'false');
+            if (els.overlay) {
+                els.overlay.classList.add('is-open', 'active');
+                els.overlay.setAttribute('aria-hidden', 'false');
+            }
+            if (els.trigger) {
+                els.trigger.setAttribute('aria-expanded', 'true');
+            }
+            document.body.classList.add('edupro-cart-open');
+        }
+
+        function closeDrawer() {
+            const els = getDrawerEls();
+            if (!els.drawer) return;
+            els.drawer.classList.remove('is-open', 'active');
+            els.drawer.setAttribute('aria-hidden', 'true');
+            if (els.overlay) {
+                els.overlay.classList.remove('is-open', 'active');
+                els.overlay.setAttribute('aria-hidden', 'true');
+            }
+            if (els.trigger) {
+                els.trigger.setAttribute('aria-expanded', 'false');
+            }
+            document.body.classList.remove('edupro-cart-open');
+        }
+
+        function renderDrawerItems(items) {
+            if (!items || !items.length) {
+                const coursesUrl = `${CONFIG.siteUrl}/courses/`;
+                return `
+                    <div class="edupro-cart-drawer__empty">
+                        <div class="edupro-cart-drawer__empty-icon" aria-hidden="true">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </div>
+                        <p>Your shopping cart is empty.</p>
+                        <a href="${escapeHtml(coursesUrl)}" class="edupro-btn edupro-btn-primary edupro-btn--primary btn-primary">Browse Courses</a>
+                    </div>
+                `;
+            }
+
+            return items
+                .map((item) => {
+                    const cid = item.course_id || item.id || 0;
+                    const title = item.title || 'Course';
+                    const permalink = item.permalink || item.url || '#';
+                    const thumb = item.thumbnail
+                        ? `<img src="${escapeHtml(item.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy">`
+                        : `<span class="edupro-cart-drawer__thumb-placeholder">${escapeHtml(title.charAt(0).toUpperCase())}</span>`;
+                    const hasDiscount = Number(item.regular || 0) > Number(item.effective || 0) && !item.is_free;
+                    const priceHtml = item.is_free
+                        ? '<strong>Free</strong>'
+                        : `<strong>${escapeHtml(item.formatted_effective || '')}</strong>${hasDiscount && item.formatted_regular ? ` <del>${escapeHtml(item.formatted_regular)}</del>` : ''}`;
+
+                    return `
+                        <div class="edupro-cart-drawer__item" data-course-id="${escapeHtml(cid)}">
+                            <a href="${escapeHtml(permalink)}" class="edupro-cart-drawer__thumb">${thumb}</a>
+                            <div class="edupro-cart-drawer__info">
+                                <a href="${escapeHtml(permalink)}" class="edupro-cart-drawer__item-title">${escapeHtml(title)}</a>
+                                ${item.instructor ? `<span class="edupro-cart-drawer__item-instructor">${escapeHtml(item.instructor)}</span>` : ''}
+                                <div class="edupro-cart-drawer__item-price">${priceHtml}</div>
+                            </div>
+                            <button type="button" class="edupro-cart-remove-btn edupro-cart-drawer__remove" data-course-id="${escapeHtml(cid)}" aria-label="Remove ${escapeHtml(title)} from cart" title="Remove">&times;</button>
+                        </div>
+                    `;
+                })
+                .join('');
+        }
+
+        function syncCartUI(summary) {
+            if (!summary || typeof summary !== 'object') return;
+            lastSummary = summary;
+
+            const count = parseInt(summary.count, 10) || 0;
+            const items = Array.isArray(summary.items) ? summary.items : [];
+            const idSet = new Set(items.map((it) => String(it.course_id || it.id || '')));
+
+            // 1. Update all header/mobile cart count badges
+            document.querySelectorAll('.edupro-cart-count, .edupro-enrollment-cart__count').forEach((badge) => {
+                badge.textContent = String(count);
+                badge.classList.toggle('is-empty', count === 0);
+            });
+
+            // 2. Update mini-cart drawer
+            const els = getDrawerEls();
+            if (els.count) els.count.textContent = String(count);
+            if (els.subtotal && summary.formatted_subtotal !== undefined) {
+                els.subtotal.textContent = summary.formatted_subtotal;
+            }
+            if (els.body) {
+                els.body.innerHTML = renderDrawerItems(items);
+            }
+            if (els.footer) {
+                els.footer.hidden = count === 0;
+                els.footer.style.display = count === 0 ? 'none' : '';
+                if (summary.checkout_url) {
+                    const checkoutLink = els.footer.querySelector('[data-cart-checkout-link], a[href*="checkout"]');
+                    if (checkoutLink) checkoutLink.href = summary.checkout_url;
+                }
+                if (summary.cart_url) {
+                    const cartLink = els.footer.querySelector('[data-cart-view-link], a[href*="cart"]');
+                    if (cartLink && !cartLink.href.includes('checkout')) cartLink.href = summary.cart_url;
+                }
+            }
+
+            // 3. Sync all .edupro-add-to-cart-btn buttons across the page
+            document.querySelectorAll('.edupro-add-to-cart-btn[data-course-id]').forEach((btn) => {
+                const cid = String(btn.dataset.courseId || '');
+                const inCart = idSet.has(cid);
+                const defaultLabel = btn.dataset.defaultLabel || btn.dataset.defaultText;
+                if (!defaultLabel) {
+                    btn.dataset.defaultText = btn.classList.contains('is-in-cart')
+                        ? 'Add to Cart'
+                        : (btn.textContent.trim() || 'Add to Cart');
+                }
+                btn.classList.toggle('is-in-cart', inCart);
+                btn.setAttribute('aria-pressed', String(inCart));
+                const inCartLabel = btn.dataset.inCartLabel
+                    || btn.dataset.inCartText
+                    || (btn.closest('.edupro-course-sidebar, .course-sidebar-card, .edupro-course-box__cta-stack') ? 'Go to Cart ✓' : 'In Cart ✓');
+                btn.textContent = inCart ? inCartLabel : (btn.dataset.defaultLabel || btn.dataset.defaultText || 'Add to Cart');
+            });
+
+            // 4. Sync /cart/ page if currently viewing it
+            const cartPage = document.querySelector('.edupro-cart-page');
+            if (cartPage) {
+                if (count === 0) {
+                    setTimeout(() => window.location.reload(), 260);
+                    return;
+                }
+
+                cartPage.querySelectorAll('.edupro-cart-item[data-course-id]').forEach((card) => {
+                    if (!idSet.has(String(card.dataset.courseId || ''))) {
+                        card.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateX(-12px)';
+                        setTimeout(() => card.remove(), 220);
+                    }
+                });
+
+                cartPage.querySelectorAll('#edupro-cart-page-count, .edupro-cart-page-count, [data-cart-count]').forEach((el) => {
+                    el.textContent = String(count);
+                });
+                cartPage.querySelectorAll('#edupro-cart-page-subtotal, .edupro-cart-summary-subtotal, [data-cart-subtotal]').forEach((el) => {
+                    if (summary.formatted_subtotal !== undefined) el.textContent = summary.formatted_subtotal;
+                });
+                cartPage.querySelectorAll('#edupro-cart-page-savings, .edupro-cart-summary-savings, [data-cart-savings]').forEach((el) => {
+                    if (summary.formatted_savings !== undefined) el.textContent = summary.formatted_savings;
+                });
+            }
+
+            document.dispatchEvent(new CustomEvent('edupro:cart:updated', { detail: summary }));
+        }
+
+        function add(courseId, triggerBtn) {
+            if (!courseId) return Promise.reject(new Error('Missing course ID'));
+            if (triggerBtn) setButtonLoading(triggerBtn, true, 'Adding...');
+
+            return ajaxPost('edupro_cart_add', {
+                nonce: (triggerBtn && triggerBtn.dataset.nonce) || CONFIG.nonce,
+                course_id: courseId,
+                currency: CONFIG.currency,
+            })
+                .then((res) => {
+                    if (triggerBtn) setButtonLoading(triggerBtn, false);
+                    if (res && res.success && res.data) {
+                        const summary = res.data.summary || res.data;
+                        syncCartUI(summary);
+                        Toast.success(res.data.message || 'Course added to cart!');
+                        openDrawer();
+                        return summary;
+                    }
+                    const msg = (res && res.data && res.data.message) || 'Could not add course to cart.';
+                    Toast.error(msg);
+                    return Promise.reject(new Error(msg));
+                })
+                .catch((err) => {
+                    if (triggerBtn) setButtonLoading(triggerBtn, false);
+                    if (!err || !err.message || err.message.startsWith('HTTP ')) {
+                        Toast.error('Network error adding course to cart.');
+                    }
+                    throw err;
+                });
+        }
+
+        function remove(courseId, triggerBtn) {
+            if (!courseId) return Promise.reject(new Error('Missing course ID'));
+            if (triggerBtn) triggerBtn.disabled = true;
+
+            return ajaxPost('edupro_cart_remove', {
+                nonce: (triggerBtn && triggerBtn.dataset.nonce) || CONFIG.nonce,
+                course_id: courseId,
+                currency: CONFIG.currency,
+            })
+                .then((res) => {
+                    if (res && res.success && res.data) {
+                        const summary = res.data.summary || res.data;
+                        syncCartUI(summary);
+                        Toast.info(res.data.message || 'Course removed from cart.');
+                        return summary;
+                    }
+                    if (triggerBtn) triggerBtn.disabled = false;
+                    const msg = (res && res.data && res.data.message) || 'Could not remove course.';
+                    Toast.error(msg);
+                    return Promise.reject(new Error(msg));
+                })
+                .catch((err) => {
+                    if (triggerBtn) triggerBtn.disabled = false;
+                    throw err;
+                });
+        }
+
+        function clear(triggerBtn) {
+            if (triggerBtn) setButtonLoading(triggerBtn, true, 'Clearing...');
+
+            return ajaxPost('edupro_cart_clear', {
+                nonce: CONFIG.nonce,
+                currency: CONFIG.currency,
+            })
+                .then((res) => {
+                    if (triggerBtn) setButtonLoading(triggerBtn, false);
+                    if (res && res.success && res.data) {
+                        const summary = res.data.summary || res.data;
+                        syncCartUI(summary);
+                        Toast.info(res.data.message || 'Cart cleared.');
+                        if (document.querySelector('.edupro-cart-page')) {
+                            setTimeout(() => window.location.reload(), 250);
+                        }
+                        return summary;
+                    }
+                    const msg = (res && res.data && res.data.message) || 'Could not clear cart.';
+                    Toast.error(msg);
+                    return Promise.reject(new Error(msg));
+                })
+                .catch((err) => {
+                    if (triggerBtn) setButtonLoading(triggerBtn, false);
+                    throw err;
+                });
+        }
+
+        function refresh() {
+            return ajaxPost('edupro_cart_get', {
+                nonce: CONFIG.nonce,
+                currency: CONFIG.currency,
+            }).then((res) => {
+                if (res && res.success && res.data) {
+                    const summary = res.data.summary || res.data;
+                    syncCartUI(summary);
+                    return summary;
+                }
+                return null;
+            });
+        }
+
+        function init() {
+            // Open / close mini-cart drawer
+            document.addEventListener('click', (e) => {
+                const trigger = e.target.closest('#edupro-cart-trigger, .edupro-cart-trigger');
+                if (trigger) {
+                    e.preventDefault();
+                    const els = getDrawerEls();
+                    if (els.drawer && els.drawer.classList.contains('is-open')) {
+                        closeDrawer();
+                    } else {
+                        openDrawer();
+                    }
+                    return;
+                }
+
+                if (e.target.closest('#edupro-cart-drawer-close') || e.target.id === 'edupro-cart-overlay') {
+                    e.preventDefault();
+                    closeDrawer();
+                    return;
+                }
+
+                // Add to Cart button delegation
+                const addBtn = e.target.closest('.edupro-add-to-cart-btn');
+                if (addBtn) {
+                    e.preventDefault();
+                    if (addBtn.classList.contains('is-in-cart')) {
+                        openDrawer();
+                        return;
+                    }
+                    const cid = addBtn.dataset.courseId;
+                    if (cid) add(cid, addBtn).catch(() => {});
+                    return;
+                }
+
+                // Remove from Cart button delegation (drawer & /cart/ page)
+                const removeBtn = e.target.closest('.edupro-cart-remove-btn');
+                if (removeBtn) {
+                    e.preventDefault();
+                    const cid = removeBtn.dataset.courseId;
+                    if (cid) remove(cid, removeBtn).catch(() => {});
+                    return;
+                }
+
+                // Clear Cart button delegation
+                const clearBtn = e.target.closest('.edupro-cart-clear-btn');
+                if (clearBtn) {
+                    e.preventDefault();
+                    clear(clearBtn).catch(() => {});
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const els = getDrawerEls();
+                    if (els.drawer && els.drawer.classList.contains('is-open')) {
+                        closeDrawer();
+                        if (els.trigger) els.trigger.focus();
+                    }
+                }
+            });
+        }
+
+        return {
+            init,
+            open: openDrawer,
+            close: closeDrawer,
+            add,
+            remove,
+            clear,
+            refresh,
+            syncUI: syncCartUI,
+            getSummary: () => lastSummary,
+        };
+    })();
+
+    /* =========================================================================
      * 20. PUBLIC API & BOOTSTRAP
      * ========================================================================= */
 
@@ -3210,6 +3576,7 @@
         setButtonLoading,
         toast: Toast,
         modal: Modal,
+        cart: Cart,
         validator: Validator,
         markLessonComplete,
         renderCircularProgressRing,
@@ -3239,6 +3606,7 @@
         initCourseTabs();
         initLessonMarkComplete();
         initCurrencySwitcher();
+        Cart.init();
         initCheckoutCoupons();
         initCheckout();
         initDashboard();

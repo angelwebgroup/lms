@@ -3,20 +3,23 @@
  * Template Name: Course Checkout
  * Template Post Type: page
  *
- * Modular Multi-Currency & 5-Gateway EduPro Course Checkout Page (No WooCommerce):
+ * Modular Multi-Currency, Multi-Course Cart & 5-Gateway EduPro Checkout Page (No WooCommerce):
+ * - Supports BOTH modes seamlessly:
+ *   * Cart Mode (?mode=cart OR course_id=0 with cart items) -> checks out all unpaid cart courses together
+ *   * Single-Course Buy Now Mode (?course_id=ID) -> checks out a single course directly
+ *   * Gateway Return Mode (Cashfree, PayPal v2, Stripe) -> recovers ALL courses from edupro_get_order_course_ids()
  * - Active currency pricing via edupro_get_course_price_data() + inline currency switcher
  * - Coupon Code Box (Apply/Remove via edupro_apply_coupon) with live Subtotal/Discount/Tax/Total
- * - Handles gateway return URLs cleanly (Cashfree, PayPal v2, Stripe) with verification banner
  * - Renders ONLY enabled gateways returned by edupro_get_enabled_gateways($currency) in priority order:
- *   1. Cashfree (Primary India — UPI, Cards, NetBanking)
- *   2. Razorpay (Secondary/Backup India — UPI, RuPay, Cards, EMI)
- *   3. Stripe (UK & Global — Stripe Payment Element: Cards, Apple Pay, Google Pay, Klarna)
- *   4. PayPal (International — PayPal Orders v2 & Pay in 3)
+ *   1. Cashfree (Primary India)
+ *   2. Razorpay (Backup India)
+ *   3. Stripe (UK & Global — Stripe Payment Element)
+ *   4. PayPal (International — PayPal Orders v2)
  *   5. Bank Transfer (India Bank/UPI + UK Sort Code/IBAN — creates pending order only)
- * - Exposes structured data-* config on #edupro-checkout-app for assets/js/main.js (no duplicate SDK scripts)
+ * - Exposes structured data-* config (including data-cart-mode="1"|"0") on #edupro-checkout-app for assets/js/main.js
  *
  * @package EduPro
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -24,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 get_header();
 
 // -----------------------------------------------------------------------------
-// 1. Gateway Return Parameters & Course Resolution
+// 1. Gateway Return Parameters & Checkout Mode Detection
 // -----------------------------------------------------------------------------
 $return_gateway  = '';
 $return_order_id = isset( $_GET['order_id'] ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : '';
@@ -43,19 +46,50 @@ if ( isset( $_GET['edupro_cashfree_return'] ) && '1' === $_GET['edupro_cashfree_
 
 $return_order = ( $return_order_id && function_exists( 'edupro_get_order' ) ) ? edupro_get_order( $return_order_id ) : null;
 
-$course_id = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0;
-if ( ! $course_id && isset( $_GET['course'] ) ) {
-	$course_id = absint( $_GET['course'] );
+$requested_course_id = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0;
+if ( ! $requested_course_id && isset( $_GET['course'] ) ) {
+	$requested_course_id = absint( $_GET['course'] );
 }
-if ( ! $course_id && $return_order && ! empty( $return_order->course_id ) ) {
-	$course_id = absint( $return_order->course_id );
+$mode_param = isset( $_GET['mode'] ) ? sanitize_key( wp_unslash( $_GET['mode'] ) ) : '';
+$cart_count = function_exists( 'edupro_get_cart_count' ) ? (int) edupro_get_cart_count() : 0;
+
+$is_cart_mode        = false;
+$checkout_course_ids = array();
+
+if ( $return_gateway && $return_order ) {
+	if ( function_exists( 'edupro_get_order_course_ids' ) ) {
+		$checkout_course_ids = edupro_get_order_course_ids( $return_order );
+	} elseif ( ! empty( $return_order->course_id ) ) {
+		$checkout_course_ids = array( absint( $return_order->course_id ) );
+	}
+	$is_cart_mode = ( count( $checkout_course_ids ) > 1 );
+} elseif ( 'cart' === $mode_param || ( 0 === $requested_course_id && $cart_count > 0 ) ) {
+	$is_cart_mode = true;
+	$raw_cart_ids = function_exists( 'edupro_get_cart_items' ) ? (array) edupro_get_cart_items() : array();
+	foreach ( $raw_cart_ids as $cid ) {
+		$cid = absint( $cid );
+		if ( ! $cid || 'lms_course' !== get_post_type( $cid ) || 'publish' !== get_post_status( $cid ) ) {
+			continue;
+		}
+		if ( is_user_logged_in() && function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $cid ) ) {
+			continue;
+		}
+		$checkout_course_ids[] = $cid;
+	}
+	$checkout_course_ids = array_values( array_unique( $checkout_course_ids ) );
+} elseif ( $requested_course_id ) {
+	if ( 'lms_course' === get_post_type( $requested_course_id ) && 'publish' === get_post_status( $requested_course_id ) ) {
+		$checkout_course_ids = array( $requested_course_id );
+	}
 }
 
-$course        = ( $course_id && 'lms_course' === get_post_type( $course_id ) && 'publish' === get_post_status( $course_id ) ) ? get_post( $course_id ) : null;
 $dashboard_url = function_exists( 'edupro_get_dashboard_url' ) ? edupro_get_dashboard_url() : home_url( '/dashboard/' );
 $courses_url   = get_post_type_archive_link( 'lms_course' ) ? get_post_type_archive_link( 'lms_course' ) : home_url( '/courses/' );
+$cart_url      = function_exists( 'edupro_get_cart_url' ) ? edupro_get_cart_url() : home_url( '/cart/' );
 $checkout_base = get_permalink();
-$current_url   = $course ? add_query_arg( 'course_id', $course->ID, $checkout_base ) : $checkout_base;
+$current_url   = $is_cart_mode
+	? add_query_arg( 'mode', 'cart', $checkout_base )
+	: ( ! empty( $checkout_course_ids ) ? add_query_arg( 'course_id', $checkout_course_ids[0], $checkout_base ) : $checkout_base );
 
 $auth_nonce    = wp_create_nonce( 'edupro_nonce' );
 $payment_nonce = wp_create_nonce( 'edupro_payment_nonce' );
@@ -138,7 +172,6 @@ if ( function_exists( 'edupro_get_enabled_gateways' ) ) {
 	}
 }
 
-// Check if any gateway exists in the alternate currency when current currency has none.
 $all_enabled_gateways = function_exists( 'edupro_get_enabled_gateways' ) ? edupro_get_enabled_gateways( '' ) : $enabled_gateways;
 $default_gateway      = ! empty( $enabled_gateways ) ? array_key_first( $enabled_gateways ) : '';
 
@@ -164,41 +197,74 @@ $bank_uk = array(
 );
 $bank_instructions = get_option( 'edupro_bank_instructions', '' );
 
-// Pricing & Tax calculation for the selected course.
-$price_data = array(
-	'currency'     => $active_currency,
-	'symbol'       => $currency_symbol,
-	'regular'      => 0.0,
-	'sale'         => 0.0,
-	'effective'    => 0.0,
-	'is_free'      => true,
-	'discount_pct' => 0,
-);
-if ( $course ) {
+// -----------------------------------------------------------------------------
+// 4. Build Checkout Courses List & Combined Pricing / Tax Breakdown
+// -----------------------------------------------------------------------------
+$checkout_courses  = array();
+$combined_regular  = 0.0;
+$combined_subtotal = 0.0;
+
+foreach ( $checkout_course_ids as $cid ) {
+	$c_post = get_post( $cid );
+	if ( ! $c_post || 'lms_course' !== $c_post->post_type ) {
+		continue;
+	}
+
+	$c_price = array(
+		'currency'     => $active_currency,
+		'symbol'       => $currency_symbol,
+		'regular'      => 0.0,
+		'sale'         => 0.0,
+		'effective'    => 0.0,
+		'is_free'      => true,
+		'discount_pct' => 0,
+	);
 	if ( function_exists( 'edupro_get_course_price_data' ) ) {
-		$price_data = wp_parse_args( edupro_get_course_price_data( $course->ID, $active_currency ), $price_data );
+		$c_price = wp_parse_args( edupro_get_course_price_data( $cid, $active_currency ), $c_price );
 	} elseif ( function_exists( 'edupro_get_course_price_info' ) ) {
-		$legacy = edupro_get_course_price_info( $course->ID );
-		$price_data['regular']      = (float) $legacy['regular'];
-		$price_data['sale']         = (float) $legacy['sale'];
-		$price_data['effective']    = (float) $legacy['final'];
-		$price_data['is_free']      = (bool) $legacy['is_free'];
-		$price_data['discount_pct'] = ( $legacy['has_sale'] && $legacy['regular'] > 0 )
+		$legacy                  = edupro_get_course_price_info( $cid );
+		$c_price['regular']      = (float) $legacy['regular'];
+		$c_price['sale']         = (float) $legacy['sale'];
+		$c_price['effective']    = (float) $legacy['final'];
+		$c_price['is_free']      = (bool) $legacy['is_free'];
+		$c_price['discount_pct'] = ( $legacy['has_sale'] && $legacy['regular'] > 0 )
 			? (int) round( ( ( $legacy['regular'] - $legacy['final'] ) / $legacy['regular'] ) * 100 )
 			: 0;
 	}
+
+	$active_currency = $c_price['currency'];
+	$currency_symbol = $c_price['symbol'];
+
+	if ( ! $c_price['is_free'] ) {
+		$combined_subtotal += (float) $c_price['effective'];
+		$combined_regular  += max( (float) $c_price['regular'], (float) $c_price['effective'] );
+	}
+
+	$checkout_courses[] = array(
+		'id'         => $cid,
+		'title'      => $c_post->post_title,
+		'url'        => get_permalink( $cid ),
+		'thumbnail'  => get_the_post_thumbnail_url( $cid, 'course-thumb' ),
+		'instructor' => get_the_author_meta( 'display_name', (int) $c_post->post_author ),
+		'lessons'    => function_exists( 'edupro_get_course_lessons_count' ) ? edupro_get_course_lessons_count( $cid ) : 0,
+		'duration'   => absint( get_post_meta( $cid, '_edupro_duration', true ) ),
+		'rating'     => function_exists( 'edupro_get_course_rating' ) ? edupro_get_course_rating( $cid ) : 0,
+		'price_data' => $c_price,
+	);
 }
 
-$active_currency = $price_data['currency'];
-$currency_symbol = $price_data['symbol'];
-$subtotal        = $price_data['is_free'] ? 0.0 : (float) $price_data['effective'];
-$has_sale        = ( ! $price_data['is_free'] && $price_data['regular'] > 0 && $price_data['effective'] < $price_data['regular'] );
-$sale_savings    = $has_sale ? max( 0.0, (float) $price_data['regular'] - $subtotal ) : 0.0;
+$course_count = count( $checkout_courses );
+$primary_item = ! empty( $checkout_courses ) ? $checkout_courses[0] : null;
+$all_free     = ( $course_count > 0 && $combined_subtotal <= 0 );
+$subtotal     = $all_free ? 0.0 : round( $combined_subtotal, 2 );
+$has_sale     = ( ! $all_free && $combined_regular > $subtotal );
+$sale_savings = $has_sale ? round( $combined_regular - $subtotal, 2 ) : 0.0;
+$discount_pct = ( $has_sale && $combined_regular > 0 ) ? (int) round( ( $sale_savings / $combined_regular ) * 100 ) : 0;
 
-$tax_rate        = max( 0.0, (float) get_option( 'edupro_tax_rate', 0 ) );
-$tax_label       = get_option( 'edupro_tax_label', __( 'VAT / GST', 'edupro' ) );
-$tax_amount      = ( ! $price_data['is_free'] && $tax_rate > 0 ) ? round( $subtotal * ( $tax_rate / 100 ), 2 ) : 0.0;
-$grand_total     = round( $subtotal + $tax_amount, 2 );
+$tax_rate     = max( 0.0, (float) get_option( 'edupro_tax_rate', 0 ) );
+$tax_label    = get_option( 'edupro_tax_label', __( 'VAT / GST', 'edupro' ) );
+$tax_amount   = ( ! $all_free && $tax_rate > 0 ) ? round( $subtotal * ( $tax_rate / 100 ), 2 ) : 0.0;
+$grand_total  = round( $subtotal + $tax_amount, 2 );
 
 $format_money = function ( $amt ) use ( $active_currency, $currency_symbol ) {
 	if ( function_exists( 'edupro_format_price' ) ) {
@@ -207,17 +273,31 @@ $format_money = function ( $amt ) use ( $active_currency, $currency_symbol ) {
 	return $currency_symbol . number_format( (float) $amt, 2, '.', ',' );
 };
 
+$checkout_title = '';
+if ( 1 === $course_count ) {
+	$checkout_title = $primary_item['title'];
+} elseif ( $course_count > 1 ) {
+	$checkout_title = sprintf(
+		/* translators: 1: first course title, 2: remaining count */
+		__( '%1$s (+%2$d more)', 'edupro' ),
+		$primary_item['title'],
+		$course_count - 1
+	);
+}
+
 $current_user       = is_user_logged_in() ? wp_get_current_user() : null;
-$is_enrolled        = ( $course && is_user_logged_in() && function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $course->ID ) );
+$is_enrolled_single = ( ! $is_cart_mode && $primary_item && is_user_logged_in() && function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $primary_item['id'] ) );
 $return_is_complete = ( $return_order && 'completed' === $return_order->status );
 $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gateway : '';
+$final_fmt          = $all_free ? __( 'Free', 'edupro' ) : $format_money( $grand_total );
 ?>
 
 <main id="primary" class="edupro-checkout-section">
 	<div class="edupro-container"
 		 id="edupro-checkout-app"
-		 data-course-id="<?php echo esc_attr( $course ? $course->ID : 0 ); ?>"
-		 data-course-title="<?php echo esc_attr( $course ? $course->post_title : '' ); ?>"
+		 data-cart-mode="<?php echo $is_cart_mode ? '1' : '0'; ?>"
+		 data-course-id="<?php echo esc_attr( $is_cart_mode ? 0 : ( $primary_item ? $primary_item['id'] : 0 ) ); ?>"
+		 data-course-title="<?php echo esc_attr( $checkout_title ); ?>"
 		 data-currency="<?php echo esc_attr( $active_currency ); ?>"
 		 data-currency-symbol="<?php echo esc_attr( $currency_symbol ); ?>"
 		 data-subtotal="<?php echo esc_attr( number_format( $subtotal, 2, '.', '' ) ); ?>"
@@ -239,7 +319,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 		 data-site-name="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 
 		<div class="edupro-checkout-header">
-			<h1><?php esc_html_e( 'Course Checkout', 'edupro' ); ?></h1>
+			<h1><?php echo $is_cart_mode ? esc_html__( 'Cart Checkout', 'edupro' ) : esc_html__( 'Course Checkout', 'edupro' ); ?></h1>
 			<p><?php esc_html_e( 'Complete your enrollment securely and get instant access to all course materials.', 'edupro' ); ?></p>
 		</div>
 
@@ -264,7 +344,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 							<?php
 							printf(
 								/* translators: %s: order id */
-								esc_html__( 'Order %s has been verified and your course is unlocked.', 'edupro' ),
+								esc_html__( 'Order %s has been verified and all courses in your order are now unlocked.', 'edupro' ),
 								'<code>' . esc_html( $return_order_id ) . '</code>'
 							);
 							?>
@@ -301,21 +381,27 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 			<?php endif; ?>
 		<?php endif; ?>
 
-		<?php if ( ! $course ) : ?>
+		<?php if ( empty( $checkout_courses ) ) : ?>
 			<div class="edupro-checkout-empty">
-				<h2><?php esc_html_e( 'No Course Selected', 'edupro' ); ?></h2>
-				<p><?php esc_html_e( 'Please pick a course from our catalog to proceed to checkout.', 'edupro' ); ?></p>
+				<h2><?php echo $is_cart_mode ? esc_html__( 'Your Cart is Empty', 'edupro' ) : esc_html__( 'No Course Selected', 'edupro' ); ?></h2>
+				<p>
+					<?php
+					echo $is_cart_mode
+						? esc_html__( 'Your shopping cart has no unpaid courses left to check out. Explore our catalog to add courses.', 'edupro' )
+						: esc_html__( 'Please pick a course from our catalog to proceed to checkout.', 'edupro' );
+					?>
+				</p>
 				<a href="<?php echo esc_url( $courses_url ); ?>" class="edupro-btn edupro-btn-primary">
 					<?php esc_html_e( 'Browse Courses', 'edupro' ); ?>
 				</a>
 			</div>
 
-		<?php elseif ( $is_enrolled && ! $return_gateway ) : ?>
+		<?php elseif ( $is_enrolled_single && ! $return_gateway ) : ?>
 			<div class="edupro-checkout-enrolled-card">
 				<h2><?php esc_html_e( 'You Are Already Enrolled in This Course!', 'edupro' ); ?></h2>
-				<p><?php echo esc_html( get_the_title( $course->ID ) ); ?></p>
+				<p><?php echo esc_html( $primary_item['title'] ); ?></p>
 				<div class="edupro-enrolled-actions">
-					<a href="<?php echo esc_url( get_permalink( $course->ID ) ); ?>" class="edupro-btn edupro-btn-primary">
+					<a href="<?php echo esc_url( $primary_item['url'] ); ?>" class="edupro-btn edupro-btn-primary">
 						<?php esc_html_e( 'Open Course', 'edupro' ); ?> &rarr;
 					</a>
 					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="edupro-btn edupro-btn-outline">
@@ -325,15 +411,6 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 			</div>
 
 		<?php else : ?>
-			<?php
-			$lessons_cnt = function_exists( 'edupro_get_course_lessons_count' ) ? edupro_get_course_lessons_count( $course->ID ) : 0;
-			$duration    = absint( get_post_meta( $course->ID, '_edupro_duration', true ) );
-			$rating      = function_exists( 'edupro_get_course_rating' ) ? edupro_get_course_rating( $course->ID ) : 0;
-			$author_name = get_the_author_meta( 'display_name', (int) $course->post_author );
-			$thumb_url   = get_the_post_thumbnail_url( $course->ID, 'course-thumb' );
-			$final_fmt   = $price_data['is_free'] ? __( 'Free', 'edupro' ) : $format_money( $grand_total );
-			?>
-
 			<div class="edupro-checkout-grid">
 
 				<!-- ========================================================= -->
@@ -342,8 +419,20 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 				<aside class="edupro-checkout-summary">
 					<div class="edupro-summary-card">
 						<div class="edupro-summary-header-row">
-							<h2 class="edupro-summary-heading"><?php esc_html_e( 'Order Summary', 'edupro' ); ?></h2>
-							<?php if ( ! $price_data['is_free'] ) : ?>
+							<h2 class="edupro-summary-heading">
+								<?php
+								if ( $is_cart_mode || $course_count > 1 ) {
+									printf(
+										/* translators: %d: number of courses */
+										esc_html( _n( 'Order Summary (%d Course)', 'Order Summary (%d Courses)', $course_count, 'edupro' ) ),
+										$course_count
+									);
+								} else {
+									esc_html_e( 'Order Summary', 'edupro' );
+								}
+								?>
+							</h2>
+							<?php if ( ! $all_free ) : ?>
 								<div class="edupro-summary-currency-toggle edupro-currency-switcher" role="group" aria-label="<?php esc_attr_e( 'Switch Currency', 'edupro' ); ?>">
 									<?php foreach ( $switch_currencies as $cur_code => $cur_label ) : ?>
 										<a href="<?php echo esc_url( add_query_arg( 'currency', $cur_code, $current_url ) ); ?>"
@@ -356,34 +445,68 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 							<?php endif; ?>
 						</div>
 
-						<div class="edupro-summary-course">
-							<div class="edupro-summary-thumb">
-								<?php if ( $thumb_url ) : ?>
-									<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( $course->post_title ); ?>">
-								<?php else : ?>
-									<div class="edupro-summary-thumb-placeholder"><?php echo esc_html( mb_substr( $course->post_title, 0, 1 ) ); ?></div>
+						<?php if ( $is_cart_mode || $course_count > 1 ) : ?>
+							<!-- Multi-Course Cart Summary List -->
+							<div class="edupro-summary-courses-list">
+								<?php foreach ( $checkout_courses as $item ) : ?>
+									<?php $item_pd = $item['price_data']; ?>
+									<div class="edupro-summary-course-mini">
+										<div class="edupro-summary-course-mini__thumb">
+											<?php if ( $item['thumbnail'] ) : ?>
+												<img src="<?php echo esc_url( $item['thumbnail'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>">
+											<?php else : ?>
+												<div class="edupro-summary-thumb-placeholder"><?php echo esc_html( mb_substr( $item['title'], 0, 1 ) ); ?></div>
+											<?php endif; ?>
+										</div>
+										<div class="edupro-summary-course-mini__info">
+											<h4><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['title'] ); ?></a></h4>
+											<span class="edupro-summary-course-mini__instructor"><?php echo esc_html( $item['instructor'] ); ?></span>
+										</div>
+										<div class="edupro-summary-course-mini__price">
+											<strong><?php echo esc_html( $item_pd['is_free'] ? __( 'Free', 'edupro' ) : $format_money( $item_pd['effective'] ) ); ?></strong>
+											<?php if ( ! $item_pd['is_free'] && $item_pd['regular'] > $item_pd['effective'] ) : ?>
+												<del><?php echo esc_html( $format_money( $item_pd['regular'] ) ); ?></del>
+											<?php endif; ?>
+										</div>
+									</div>
+								<?php endforeach; ?>
+								<?php if ( $is_cart_mode && ! $return_gateway ) : ?>
+									<div class="edupro-summary-edit-cart">
+										<a href="<?php echo esc_url( $cart_url ); ?>">&larr; <?php esc_html_e( 'Edit Shopping Cart', 'edupro' ); ?></a>
+									</div>
 								<?php endif; ?>
 							</div>
-							<div class="edupro-summary-details">
-								<h3><a href="<?php echo esc_url( get_permalink( $course->ID ) ); ?>"><?php echo esc_html( $course->post_title ); ?></a></h3>
-								<p class="edupro-summary-instructor">
-									<?php printf( esc_html__( 'Instructor: %s', 'edupro' ), esc_html( $author_name ) ); ?>
-								</p>
-								<div class="edupro-summary-meta">
-									<?php if ( $lessons_cnt > 0 ) : ?>
-										<span><?php printf( esc_html( _n( '%d Lesson', '%d Lessons', $lessons_cnt, 'edupro' ) ), $lessons_cnt ); ?></span>
-									<?php endif; ?>
-									<?php if ( $duration > 0 && function_exists( 'edupro_get_duration_label' ) ) : ?>
-										<span><?php echo esc_html( edupro_get_duration_label( $duration ) ); ?></span>
-									<?php endif; ?>
-									<?php if ( $rating > 0 ) : ?>
-										<span>&#9733; <?php echo esc_html( number_format( $rating, 1 ) ); ?></span>
+						<?php else : ?>
+							<!-- Single-Course Summary Card -->
+							<div class="edupro-summary-course">
+								<div class="edupro-summary-thumb">
+									<?php if ( $primary_item['thumbnail'] ) : ?>
+										<img src="<?php echo esc_url( $primary_item['thumbnail'] ); ?>" alt="<?php echo esc_attr( $primary_item['title'] ); ?>">
+									<?php else : ?>
+										<div class="edupro-summary-thumb-placeholder"><?php echo esc_html( mb_substr( $primary_item['title'], 0, 1 ) ); ?></div>
 									<?php endif; ?>
 								</div>
+								<div class="edupro-summary-details">
+									<h3><a href="<?php echo esc_url( $primary_item['url'] ); ?>"><?php echo esc_html( $primary_item['title'] ); ?></a></h3>
+									<p class="edupro-summary-instructor">
+										<?php printf( esc_html__( 'Instructor: %s', 'edupro' ), esc_html( $primary_item['instructor'] ) ); ?>
+									</p>
+									<div class="edupro-summary-meta">
+										<?php if ( $primary_item['lessons'] > 0 ) : ?>
+											<span><?php printf( esc_html( _n( '%d Lesson', '%d Lessons', $primary_item['lessons'], 'edupro' ) ), $primary_item['lessons'] ); ?></span>
+										<?php endif; ?>
+										<?php if ( $primary_item['duration'] > 0 && function_exists( 'edupro_get_duration_label' ) ) : ?>
+											<span><?php echo esc_html( edupro_get_duration_label( $primary_item['duration'] ) ); ?></span>
+										<?php endif; ?>
+										<?php if ( $primary_item['rating'] > 0 ) : ?>
+											<span>&#9733; <?php echo esc_html( number_format( $primary_item['rating'], 1 ) ); ?></span>
+										<?php endif; ?>
+									</div>
+								</div>
 							</div>
-						</div>
+						<?php endif; ?>
 
-						<?php if ( ! $price_data['is_free'] ) : ?>
+						<?php if ( ! $all_free ) : ?>
 							<!-- Coupon Code Box -->
 							<div class="edupro-coupon-box">
 								<form id="edupro-coupon-form" class="edupro-coupon-form" method="post" novalidate>
@@ -412,15 +535,15 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 							<?php if ( $has_sale ) : ?>
 								<div class="edupro-summary-row">
 									<span><?php esc_html_e( 'Original Price', 'edupro' ); ?></span>
-									<del><?php echo esc_html( $format_money( $price_data['regular'] ) ); ?></del>
+									<del><?php echo esc_html( $format_money( $combined_regular ) ); ?></del>
 								</div>
 								<div class="edupro-summary-row edupro-summary-discount">
 									<span>
 										<?php
 										printf(
 											/* translators: %d: discount percentage */
-											esc_html__( 'Course Offer (%d%% OFF)', 'edupro' ),
-											(int) $price_data['discount_pct']
+											esc_html__( 'Course Savings (%d%% OFF)', 'edupro' ),
+											$discount_pct
 										);
 										?>
 									</span>
@@ -430,7 +553,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 
 							<div class="edupro-summary-row">
 								<span><?php esc_html_e( 'Subtotal', 'edupro' ); ?></span>
-								<span id="edupro-summary-subtotal"><?php echo esc_html( $price_data['is_free'] ? __( 'Free', 'edupro' ) : $format_money( $subtotal ) ); ?></span>
+								<span id="edupro-summary-subtotal"><?php echo esc_html( $all_free ? __( 'Free', 'edupro' ) : $format_money( $subtotal ) ); ?></span>
 							</div>
 
 							<div id="edupro-summary-coupon-row" class="edupro-summary-row edupro-summary-discount-row" style="display:none;">
@@ -438,7 +561,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 								<span id="edupro-summary-coupon-amount"></span>
 							</div>
 
-							<?php if ( ! $price_data['is_free'] && $tax_rate > 0 ) : ?>
+							<?php if ( ! $all_free && $tax_rate > 0 ) : ?>
 								<div id="edupro-summary-tax-row" class="edupro-summary-row edupro-summary-tax-row">
 									<span><?php echo esc_html( $tax_label ); ?> (<?php echo esc_html( $tax_rate ); ?>%)</span>
 									<span id="edupro-summary-tax-amount"><?php echo esc_html( $format_money( $tax_amount ) ); ?></span>
@@ -477,7 +600,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 						<!-- Step 1: Login or Register before paying -->
 						<div class="edupro-checkout-card">
 							<h2 class="edupro-checkout-step-title"><?php esc_html_e( 'Step 1: Sign In or Create an Account', 'edupro' ); ?></h2>
-							<p class="edupro-checkout-step-sub"><?php esc_html_e( 'Sign in or register below to link this course and invoice to your student portal.', 'edupro' ); ?></p>
+							<p class="edupro-checkout-step-sub"><?php esc_html_e( 'Sign in or register below to link your courses and invoice to your student portal.', 'edupro' ); ?></p>
 
 							<div class="edupro-checkout-auth-tabs" role="tablist">
 								<button type="button" class="edupro-auth-tab is-active" data-auth-tab="login" role="tab" aria-selected="true">
@@ -551,15 +674,21 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 							</form>
 						</div>
 
-					<?php elseif ( $price_data['is_free'] ) : ?>
-						<!-- Free Course Direct Enrollment -->
+					<?php elseif ( $all_free ) : ?>
+						<!-- Free Course(s) Direct Enrollment -->
 						<div class="edupro-checkout-card">
 							<h2 class="edupro-checkout-step-title"><?php esc_html_e( 'Free Course Enrollment', 'edupro' ); ?></h2>
-							<p><?php esc_html_e( 'This course is completely free. Click below to enroll immediately and start learning!', 'edupro' ); ?></p>
+							<p><?php esc_html_e( 'Your selection is completely free. Click below to enroll immediately and start learning!', 'edupro' ); ?></p>
 							<div id="edupro-checkout-alert" class="edupro-alert" role="alert" style="display:none;"></div>
-							<button type="button" id="edupro-free-checkout-btn" class="edupro-btn edupro-btn-primary edupro-btn-lg edupro-btn-block edupro-free-enroll-btn" data-course-id="<?php echo esc_attr( $course->ID ); ?>" data-nonce="<?php echo esc_attr( $auth_nonce ); ?>">
-								<?php esc_html_e( 'Complete Free Enrollment', 'edupro' ); ?> &rarr;
-							</button>
+							<?php if ( $is_cart_mode ) : ?>
+								<button type="button" id="edupro-free-cart-btn" data-gateway-pay="bank_transfer" class="edupro-btn edupro-btn-primary edupro-btn-lg edupro-btn-block">
+									<?php esc_html_e( 'Complete Free Enrollment', 'edupro' ); ?> &rarr;
+								</button>
+							<?php else : ?>
+								<button type="button" id="edupro-free-checkout-btn" class="edupro-btn edupro-btn-primary edupro-btn-lg edupro-btn-block edupro-free-enroll-btn" data-course-id="<?php echo esc_attr( $primary_item['id'] ); ?>" data-nonce="<?php echo esc_attr( $auth_nonce ); ?>">
+									<?php esc_html_e( 'Complete Free Enrollment', 'edupro' ); ?> &rarr;
+								</button>
+							<?php endif; ?>
 						</div>
 
 					<?php elseif ( empty( $enabled_gateways ) ) : ?>
@@ -603,7 +732,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 						</div>
 
 					<?php else : ?>
-						<!-- Paid Course: Priority-Sorted Dynamic Gateway Selector -->
+						<!-- Paid Checkout: Priority-Sorted Dynamic Gateway Selector -->
 						<div class="edupro-checkout-card" id="edupro-payment-box">
 							<div class="edupro-checkout-account-bar">
 								<span>
@@ -842,7 +971,7 @@ $js_return_gateway  = ( $return_gateway && ! $return_is_complete ) ? $return_gat
 	</div>
 </main>
 
-<?php if ( $course && ! is_user_logged_in() ) : ?>
+<?php if ( ! empty( $checkout_courses ) && ! is_user_logged_in() ) : ?>
 <script>
 (function(){
 	var ajaxUrl = (window.edupro_vars && window.edupro_vars.ajaxurl) ? window.edupro_vars.ajaxurl : <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;

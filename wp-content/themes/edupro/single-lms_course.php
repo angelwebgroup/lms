@@ -839,9 +839,23 @@ while ( have_posts() ) :
                                         </a>
                                     <?php endif; ?>
                                 <?php else : ?>
-                                    <a href="<?php echo esc_url( $checkout_url ); ?>" class="edupro-btn edupro-btn--primary btn-primary edupro-btn--full edupro-btn--lg">
-                                        <?php esc_html_e( 'Enroll Now', 'edupro' ); ?>
-                                    </a>
+                                    <?php
+                                    $is_in_cart = function_exists( 'edupro_is_in_cart' ) && edupro_is_in_cart( $course_id );
+                                    ?>
+                                    <div class="edupro-course-box__cta-stack">
+                                        <button
+                                            type="button"
+                                            class="edupro-btn edupro-btn--primary btn-primary edupro-btn--full edupro-btn--lg edupro-add-to-cart-btn<?php echo $is_in_cart ? ' is-in-cart' : ''; ?>"
+                                            data-course-id="<?php echo absint( $course_id ); ?>"
+                                            data-in-cart-label="<?php esc_attr_e( 'Go to Cart ✓', 'edupro' ); ?>"
+                                            data-default-label="<?php esc_attr_e( 'Add to Cart', 'edupro' ); ?>"
+                                        >
+                                            <?php echo $is_in_cart ? esc_html__( 'Go to Cart ✓', 'edupro' ) : esc_html__( 'Add to Cart', 'edupro' ); ?>
+                                        </button>
+                                        <a href="<?php echo esc_url( $checkout_url ); ?>" class="edupro-btn edupro-btn--outline btn-outline edupro-btn--full edupro-btn--lg">
+                                            <?php esc_html_e( 'Buy Now', 'edupro' ); ?>
+                                        </a>
+                                    </div>
                                 <?php endif; ?>
 
                                 <!-- Money-Back Guarantee Badge -->

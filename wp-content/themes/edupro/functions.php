@@ -6,7 +6,7 @@
  * declares theme-supports, and enqueues assets.
  *
  * @package EduPro
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 // 0. Constants
 // ---------------------------------------------------------------------------
-define( 'EDUPRO_VERSION',   '1.1.0' );
+define( 'EDUPRO_VERSION',   '1.2.1' );
 define( 'EDUPRO_DIR',       get_template_directory() );
 define( 'EDUPRO_URI',       get_template_directory_uri() );
 define( 'EDUPRO_INC',       EDUPRO_DIR . '/inc/' );
@@ -24,6 +24,7 @@ define( 'EDUPRO_INC',       EDUPRO_DIR . '/inc/' );
 // ---------------------------------------------------------------------------
 $edupro_inc_files = [
     'currency.php',
+    'cart.php',
     'helpers.php',
     'site-settings.php',
     'custom-post-types.php',
@@ -198,6 +199,8 @@ if ( ! function_exists( 'edupro_enqueue_scripts' ) ) :
                 'site_url'        => get_site_url(),
                 'currency'        => function_exists( 'edupro_get_active_currency' ) ? edupro_get_active_currency() : 'INR',
                 'currency_symbol' => function_exists( 'edupro_get_currency_symbol' ) ? edupro_get_currency_symbol() : '₹',
+                'cart_url'        => function_exists( 'edupro_get_cart_url' ) ? edupro_get_cart_url() : home_url( '/cart/' ),
+                'checkout_url'    => function_exists( 'edupro_get_checkout_url' ) ? edupro_get_checkout_url() : home_url( '/checkout/' ),
             ]
         );
 

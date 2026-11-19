@@ -341,7 +341,28 @@ function edupro_render_google_reviews( $count = 6, $args = array() ) {
 			</div>
 		<?php endif; ?>
 
-		<div class="edupro-reviews-track edupro-reviews-grid" data-edupro-reviews-slider>
+		<?php
+		$track_classes = 'carousel' === $layout
+			? 'edupro-reviews-track'
+			: 'edupro-reviews-track edupro-reviews-grid';
+		?>
+		<?php if ( 'carousel' === $layout ) : ?>
+		<div class="edupro-reviews-carousel-stage">
+			<?php if ( count( $reviews ) > 1 ) : ?>
+				<button
+					type="button"
+					class="edupro-reviews-nav-btn edupro-reviews-nav-btn--prev carousel-prev"
+					data-carousel-prev
+					aria-label="<?php esc_attr_e( 'Previous reviews', 'edupro' ); ?>"
+				>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<polyline points="15 18 9 12 15 6"></polyline>
+					</svg>
+				</button>
+			<?php endif; ?>
+		<?php endif; ?>
+
+		<div class="<?php echo esc_attr( $track_classes ); ?>" data-edupro-reviews-slider>
 			<?php foreach ( $reviews as $idx => $review ) : ?>
 				<?php
 				$name       = ! empty( $review['name'] ) ? $review['name'] : __( 'Verified Student', 'edupro' );
@@ -406,6 +427,24 @@ function edupro_render_google_reviews( $count = 6, $args = array() ) {
 				</article>
 			<?php endforeach; ?>
 		</div>
+		<?php if ( 'carousel' === $layout ) : ?>
+			<?php if ( count( $reviews ) > 1 ) : ?>
+				<button
+					type="button"
+					class="edupro-reviews-nav-btn edupro-reviews-nav-btn--next carousel-next"
+					data-carousel-next
+					aria-label="<?php esc_attr_e( 'Next reviews', 'edupro' ); ?>"
+				>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<polyline points="9 18 15 12 9 6"></polyline>
+					</svg>
+				</button>
+			<?php endif; ?>
+		</div><!-- .edupro-reviews-carousel-stage -->
+		<?php if ( count( $reviews ) > 1 ) : ?>
+			<div class="edupro-reviews-dots carousel-dots" role="tablist" aria-label="<?php esc_attr_e( 'Review slides navigation', 'edupro' ); ?>"></div>
+		<?php endif; ?>
+		<?php endif; ?>
 	</div>
 	<?php
 	// Print lightweight inline expand script once per page.
@@ -721,13 +760,38 @@ function edupro_render_google_reviews_admin_page() {
 	}
 	?>
 	<div class="wrap edupro-reviews-admin">
-		<h1><?php esc_html_e( 'EduPro — Google Reviews Settings', 'edupro' ); ?></h1>
-		<p class="description">
-			<?php esc_html_e( 'Display authentic Google Reviews via the Google Places API, or manage custom student reviews manually. Embed anywhere using', 'edupro' ); ?>
-			<code>[edupro_reviews count="6"]</code>
-		</p>
+		<div class="edupro-reviews-admin-head">
+			<div>
+				<h1><?php esc_html_e( 'EduPro — Google Reviews Settings', 'edupro' ); ?></h1>
+				<p class="description">
+					<?php esc_html_e( 'Display authentic Google Reviews via the Google Places API, or manage custom student reviews manually. Embed anywhere using', 'edupro' ); ?>
+					<code>[edupro_reviews count="6"]</code>
+				</p>
+			</div>
+			<button type="button" class="button button-secondary edupro-api-guide-trigger" data-open-api-guide>
+				<span class="dashicons dashicons-book-alt" aria-hidden="true"></span>
+				<?php esc_html_e( 'How to Setup Google Review API (Step-by-Step)', 'edupro' ); ?>
+			</button>
+		</div>
 
 		<style>
+			.edupro-reviews-admin .edupro-reviews-admin-head {
+				display: flex; align-items: center; justify-content: space-between;
+				flex-wrap: wrap; gap: 12px; max-width: 960px; margin-bottom: 6px;
+			}
+			.edupro-reviews-admin .edupro-api-guide-trigger {
+				display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+				height: auto; font-weight: 600; color: #1a1a2e; border-color: #cbd5e1;
+				background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+			}
+			.edupro-reviews-admin .edupro-api-guide-trigger:hover {
+				border-color: #e31b23; color: #e31b23; background: #fff5f5;
+			}
+			.edupro-reviews-admin .edupro-api-guide-link {
+				color: #e31b23; font-weight: 600; text-decoration: none; cursor: pointer;
+				background: none; border: none; padding: 0; font-size: 13px;
+			}
+			.edupro-reviews-admin .edupro-api-guide-link:hover { text-decoration: underline; }
 			.edupro-reviews-admin .edupro-admin-card {
 				background: #fff; border: 1px solid #e2e4e7; border-radius: 8px;
 				padding: 20px 24px; margin: 20px 0; max-width: 960px;
@@ -736,6 +800,56 @@ function edupro_render_google_reviews_admin_page() {
 			.edupro-reviews-admin h2.card-title {
 				margin: 0 0 16px; padding-bottom: 10px; border-bottom: 2px solid #e31b23;
 				font-size: 15px; text-transform: uppercase; letter-spacing: .5px; color: #1a1a2e;
+				display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+			}
+			.edupro-reviews-admin .edupro-guide-overlay {
+				position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65);
+				backdrop-filter: blur(3px); z-index: 100050;
+				display: none; align-items: center; justify-content: center; padding: 20px;
+			}
+			.edupro-reviews-admin .edupro-guide-overlay.is-open { display: flex; }
+			.edupro-reviews-admin .edupro-guide-modal {
+				background: #fff; border-radius: 12px; max-width: 680px; width: 100%;
+				max-height: 88vh; display: flex; flex-direction: column;
+				box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35); overflow: hidden;
+			}
+			.edupro-reviews-admin .edupro-guide-modal__head {
+				display: flex; align-items: center; justify-content: space-between;
+				padding: 18px 24px; background: #1a1a2e; color: #fff;
+			}
+			.edupro-reviews-admin .edupro-guide-modal__head h2 {
+				margin: 0; font-size: 17px; color: #fff; font-weight: 700;
+			}
+			.edupro-reviews-admin .edupro-guide-modal__close {
+				background: rgba(255,255,255,0.14); border: none; color: #fff;
+				width: 34px; height: 34px; border-radius: 50%; font-size: 20px;
+				line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+			}
+			.edupro-reviews-admin .edupro-guide-modal__close:hover { background: #e31b23; }
+			.edupro-reviews-admin .edupro-guide-modal__body {
+				padding: 22px 24px; overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #334155;
+			}
+			.edupro-reviews-admin .edupro-guide-step {
+				display: flex; gap: 14px; padding: 14px 16px; margin-bottom: 12px;
+				background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+			}
+			.edupro-reviews-admin .edupro-guide-step__num {
+				width: 28px; height: 28px; border-radius: 50%; background: #e31b23; color: #fff;
+				font-weight: 700; font-size: 13px; display: inline-flex; align-items: center;
+				justify-content: center; flex-shrink: 0; margin-top: 2px;
+			}
+			.edupro-reviews-admin .edupro-guide-step h4 {
+				margin: 0 0 4px; font-size: 14px; color: #0f172a;
+			}
+			.edupro-reviews-admin .edupro-guide-step p { margin: 0 0 6px; }
+			.edupro-reviews-admin .edupro-guide-step p:last-child { margin-bottom: 0; }
+			.edupro-reviews-admin .edupro-guide-tip {
+				background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b;
+				border-radius: 6px; padding: 12px 14px; margin-top: 14px; font-size: 13px; color: #78350f;
+			}
+			.edupro-reviews-admin .edupro-guide-modal__foot {
+				padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc;
+				display: flex; justify-content: flex-end; gap: 10px;
 			}
 			.edupro-mode-switch { display: flex; gap: 16px; margin-bottom: 16px; }
 			.edupro-mode-option {
@@ -787,7 +901,12 @@ function edupro_render_google_reviews_admin_page() {
 
 			<!-- Google Places API Settings -->
 			<div class="edupro-admin-card" id="edupro-google-api-box">
-				<h2 class="card-title"><?php esc_html_e( 'Google Places API Configuration', 'edupro' ); ?></h2>
+				<h2 class="card-title">
+					<span><?php esc_html_e( 'Google Places API Configuration', 'edupro' ); ?></span>
+					<button type="button" class="edupro-api-guide-link" data-open-api-guide>
+						<?php esc_html_e( 'Need help? View API Setup Instructions →', 'edupro' ); ?>
+					</button>
+				</h2>
 				<table class="form-table">
 					<tr>
 						<th scope="row"><label for="edupro_google_place_id"><?php esc_html_e( 'Google Place ID or Listing URL', 'edupro' ); ?></label></th>
@@ -899,6 +1018,100 @@ function edupro_render_google_reviews_admin_page() {
 				</button>
 			</p>
 		</form>
+
+		<!-- Google Reviews API Setup Instructions Modal -->
+		<div id="edupro-api-guide-modal" class="edupro-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="edupro-api-guide-title" aria-hidden="true">
+			<div class="edupro-guide-modal">
+				<div class="edupro-guide-modal__head">
+					<h2 id="edupro-api-guide-title"><?php esc_html_e( 'How to Setup Google Places Reviews API', 'edupro' ); ?></h2>
+					<button type="button" class="edupro-guide-modal__close" data-close-api-guide aria-label="<?php esc_attr_e( 'Close instructions', 'edupro' ); ?>">&times;</button>
+				</div>
+				<div class="edupro-guide-modal__body">
+					<p style="margin-top:0;">
+						<?php esc_html_e( 'Follow these 5 simple steps to automatically sync real reviews from your Google Business Profile. EduPro caches results for 12 hours, so API usage stays well within Google’s free monthly credit.', 'edupro' ); ?>
+					</p>
+
+					<div class="edupro-guide-step">
+						<span class="edupro-guide-step__num">1</span>
+						<div>
+							<h4><?php esc_html_e( 'Create or Open a Google Cloud Project', 'edupro' ); ?></h4>
+							<p>
+								<?php esc_html_e( 'Sign in to', 'edupro' ); ?>
+								<a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console ↗</a>,
+								<?php esc_html_e( 'click the project dropdown at the top, and create a new project (e.g. "My LMS Website"). Make sure a Billing Account is linked (Google includes a free monthly tier for Maps/Places).', 'edupro' ); ?>
+							</p>
+						</div>
+					</div>
+
+					<div class="edupro-guide-step">
+						<span class="edupro-guide-step__num">2</span>
+						<div>
+							<h4><?php esc_html_e( 'Enable the "Places API"', 'edupro' ); ?></h4>
+							<p>
+								<?php esc_html_e( 'Go to', 'edupro' ); ?>
+								<strong>APIs &amp; Services → Library</strong>,
+								<?php esc_html_e( 'search for', 'edupro' ); ?>
+								<code>Places API</code>,
+								<?php esc_html_e( 'and click', 'edupro' ); ?>
+								<strong>Enable</strong>.
+							</p>
+						</div>
+					</div>
+
+					<div class="edupro-guide-step">
+						<span class="edupro-guide-step__num">3</span>
+						<div>
+							<h4><?php esc_html_e( 'Generate & Restrict Your API Key', 'edupro' ); ?></h4>
+							<p>
+								<?php esc_html_e( 'Open', 'edupro' ); ?>
+								<strong>APIs &amp; Services → Credentials → + Create Credentials → API Key</strong>.
+								<?php esc_html_e( 'Copy the generated key and paste it into the "Google Places API Key" field on this page.', 'edupro' ); ?>
+							</p>
+							<p>
+								<strong><?php esc_html_e( 'Security Tip:', 'edupro' ); ?></strong>
+								<?php esc_html_e( 'Under API Restrictions, restrict this key to "Places API" only. (Do NOT use HTTP Referrer restriction since WordPress fetches reviews server-side via PHP — use IP restriction or API-only restriction instead.)', 'edupro' ); ?>
+							</p>
+						</div>
+					</div>
+
+					<div class="edupro-guide-step">
+						<span class="edupro-guide-step__num">4</span>
+						<div>
+							<h4><?php esc_html_e( 'Find Your Google Place ID (or Listing URL)', 'edupro' ); ?></h4>
+							<p>
+								<?php esc_html_e( 'Open Google’s official', 'edupro' ); ?>
+								<a href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder" target="_blank" rel="noopener noreferrer">Place ID Finder ↗</a>,
+								<?php esc_html_e( 'search for your business name, and copy the Place ID (starts with', 'edupro' ); ?>
+								<code>ChIJ...</code><?php esc_html_e( '). Paste it into "Google Place ID or Listing URL" — or simply paste your Google Maps business URL.', 'edupro' ); ?>
+							</p>
+						</div>
+					</div>
+
+					<div class="edupro-guide-step">
+						<span class="edupro-guide-step__num">5</span>
+						<div>
+							<h4><?php esc_html_e( 'Select Live Sync Mode & Save', 'edupro' ); ?></h4>
+							<p>
+								<?php esc_html_e( 'Select "Google Places API (Live Sync)" at the top, click Save Google Reviews Settings, and refresh your homepage. Use "Clear Cached Google Reviews" anytime to pull the latest reviews immediately.', 'edupro' ); ?>
+							</p>
+						</div>
+					</div>
+
+					<div class="edupro-guide-tip">
+						<strong><?php esc_html_e( 'Good to know:', 'edupro' ); ?></strong>
+						<?php esc_html_e( 'Google’s Places API returns up to 5 most relevant reviews per business along with your live overall rating and total review count. If you prefer to showcase more than 5 reviews without an API key, switch to "Manual Reviews Mode" anytime.', 'edupro' ); ?>
+					</div>
+				</div>
+				<div class="edupro-guide-modal__foot">
+					<a href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com" target="_blank" rel="noopener noreferrer" class="button">
+						<?php esc_html_e( 'Open Google Cloud Console ↗', 'edupro' ); ?>
+					</a>
+					<button type="button" class="button button-primary edupro-btn-red" data-close-api-guide>
+						<?php esc_html_e( 'Got It', 'edupro' ); ?>
+					</button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<script>
@@ -906,6 +1119,41 @@ function edupro_render_google_reviews_admin_page() {
 		var list   = document.getElementById('edupro-manual-reviews-list');
 		var addBtn = document.getElementById('edupro-add-review-btn');
 		var nextIdx = <?php echo (int) count( $manual_reviews ); ?>;
+
+		// Setup Instructions Modal Controller
+		var guideModal = document.getElementById('edupro-api-guide-modal');
+		function openGuideModal() {
+			if (!guideModal) return;
+			guideModal.classList.add('is-open');
+			guideModal.setAttribute('aria-hidden', 'false');
+		}
+		function closeGuideModal() {
+			if (!guideModal) return;
+			guideModal.classList.remove('is-open');
+			guideModal.setAttribute('aria-hidden', 'true');
+		}
+		document.querySelectorAll('[data-open-api-guide]').forEach(function(btn){
+			btn.addEventListener('click', function(e){
+				e.preventDefault();
+				openGuideModal();
+			});
+		});
+		document.querySelectorAll('[data-close-api-guide]').forEach(function(btn){
+			btn.addEventListener('click', function(e){
+				e.preventDefault();
+				closeGuideModal();
+			});
+		});
+		if (guideModal) {
+			guideModal.addEventListener('click', function(e){
+				if (e.target === guideModal) closeGuideModal();
+			});
+			document.addEventListener('keydown', function(e){
+				if (e.key === 'Escape' && guideModal.classList.contains('is-open')) {
+					closeGuideModal();
+				}
+			});
+		}
 
 		document.querySelectorAll('input[name="edupro_google_reviews_mode"]').forEach(function(radio){
 			radio.addEventListener('change', function(){

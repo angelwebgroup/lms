@@ -92,8 +92,9 @@ $duration_label = ( $duration_mins > 0 && function_exists( 'edupro_get_duration_
 $author_id   = (int) get_post_field( 'post_author', $course_id );
 $author_name = get_the_author_meta( 'display_name', $author_id );
 
-// Enrollment state for current user.
+// Enrollment & Cart state for current user.
 $is_enrolled = function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $course_id );
+$is_in_cart  = ( ! $is_enrolled && ! $is_free && function_exists( 'edupro_is_in_cart' ) && edupro_is_in_cart( $course_id ) );
 
 // Badges.
 $is_bestseller = ( '1' === (string) get_post_meta( $course_id, '_edupro_is_bestseller', true ) ) || $enrolled_count >= 50 || ( $rating >= 4.7 && $reviews_count >= 5 );
@@ -173,9 +174,15 @@ $checkout_url  = $checkout_page
                     <?php esc_html_e( 'Enroll Free', 'edupro' ); ?>
                 </button>
             <?php else : ?>
-                <a href="<?php echo esc_url( $checkout_url ); ?>" class="edupro-btn edupro-btn--primary btn-primary course-card__quick-btn">
-                    <?php esc_html_e( 'Quick Enroll', 'edupro' ); ?>
-                </a>
+                <button
+                    type="button"
+                    class="edupro-btn edupro-btn--primary btn-primary course-card__quick-btn edupro-add-to-cart-btn<?php echo $is_in_cart ? ' is-in-cart' : ''; ?>"
+                    data-course-id="<?php echo absint( $course_id ); ?>"
+                    data-in-cart-label="<?php esc_attr_e( 'In Cart ✓', 'edupro' ); ?>"
+                    data-default-label="<?php esc_attr_e( 'Add to Cart', 'edupro' ); ?>"
+                >
+                    <?php echo $is_in_cart ? esc_html__( 'In Cart ✓', 'edupro' ) : esc_html__( 'Add to Cart', 'edupro' ); ?>
+                </button>
             <?php endif; ?>
             <a href="<?php echo esc_url( $course_url ); ?>" class="edupro-btn edupro-btn--ghost course-card__preview-btn">
                 <?php esc_html_e( 'View Details', 'edupro' ); ?>
@@ -255,7 +262,17 @@ $checkout_url  = $checkout_page
                 <?php endif; ?>
             </div>
 
-            <?php if ( $lessons_count > 0 ) : ?>
+            <?php if ( ! $is_enrolled && ! $is_free ) : ?>
+                <button
+                    type="button"
+                    class="edupro-btn edupro-btn--outline edupro-btn--sm edupro-add-to-cart-btn course-card__cart-btn<?php echo $is_in_cart ? ' is-in-cart' : ''; ?>"
+                    data-course-id="<?php echo absint( $course_id ); ?>"
+                    data-in-cart-label="<?php esc_attr_e( 'In Cart ✓', 'edupro' ); ?>"
+                    data-default-label="<?php esc_attr_e( 'Add to Cart', 'edupro' ); ?>"
+                >
+                    <?php echo $is_in_cart ? esc_html__( 'In Cart ✓', 'edupro' ) : esc_html__( 'Add to Cart', 'edupro' ); ?>
+                </button>
+            <?php elseif ( $lessons_count > 0 ) : ?>
                 <span class="course-card__lessons-meta">
                     <?php
                     printf(

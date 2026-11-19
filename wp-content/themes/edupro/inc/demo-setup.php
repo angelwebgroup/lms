@@ -281,6 +281,13 @@ function edupro_demo_create_pages( $force = false ) {
 			'option'   => 'edupro_dashboard_page_id',
 			'content'  => '',
 		),
+		'cart'             => array(
+			'title'    => __( 'Shopping Cart', 'edupro' ),
+			'slug'     => 'cart',
+			'template' => 'templates/template-cart.php',
+			'option'   => 'edupro_cart_page_id',
+			'content'  => '',
+		),
 		'checkout'         => array(
 			'title'    => __( 'Course Checkout', 'edupro' ),
 			'slug'     => 'checkout',
@@ -370,6 +377,54 @@ function edupro_demo_create_pages( $force = false ) {
 
 	return $page_ids;
 }
+
+/**
+ * Automatically ensure the /cart/ page exists for v1.1.x sites upgrading to v1.2.0
+ * without needing to re-activate the theme.
+ */
+function edupro_demo_maybe_create_cart_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$cart_page_id = (int) get_option( 'edupro_cart_page_id', 0 );
+	if ( $cart_page_id && 'page' === get_post_type( $cart_page_id ) && 'publish' === get_post_status( $cart_page_id ) ) {
+		return;
+	}
+
+	$existing = get_page_by_path( 'cart' );
+	if ( $existing && 'trash' !== $existing->post_status ) {
+		$cart_page_id = (int) $existing->ID;
+		if ( 'publish' !== $existing->post_status ) {
+			wp_update_post(
+				array(
+					'ID'          => $cart_page_id,
+					'post_status' => 'publish',
+				)
+			);
+		}
+	} else {
+		$cart_page_id = wp_insert_post(
+			array(
+				'post_title'   => __( 'Shopping Cart', 'edupro' ),
+				'post_name'    => 'cart',
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+				'post_content' => '',
+				'post_author'  => get_current_user_id() ?: 1,
+			)
+		);
+		if ( $cart_page_id && ! is_wp_error( $cart_page_id ) ) {
+			update_post_meta( $cart_page_id, '_edupro_demo_item', '1' );
+		}
+	}
+
+	if ( $cart_page_id && ! is_wp_error( $cart_page_id ) ) {
+		update_post_meta( $cart_page_id, '_wp_page_template', 'templates/template-cart.php' );
+		update_option( 'edupro_cart_page_id', (int) $cart_page_id );
+	}
+}
+add_action( 'admin_init', 'edupro_demo_maybe_create_cart_page' );
 
 // =============================================================================
 // 4. TAXONOMIES (CATEGORIES, LEVELS, LANGUAGES)
@@ -2251,6 +2306,7 @@ function edupro_demo_render_admin_page() {
 		'Student Login'    => (int) get_option( 'edupro_login_page_id' ),
 		'Student Register' => (int) get_option( 'edupro_register_page_id' ),
 		'Dashboard'        => (int) get_option( 'edupro_dashboard_page_id' ),
+		'Shopping Cart'    => (int) get_option( 'edupro_cart_page_id' ),
 		'Course Checkout'  => (int) get_option( 'edupro_checkout_page_id' ),
 		'About Us'         => (int) get_option( 'edupro_about_page_id' ),
 		'Contact Us'       => (int) get_option( 'edupro_contact_page_id' ),

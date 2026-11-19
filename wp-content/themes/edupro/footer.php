@@ -434,6 +434,123 @@ if ( is_wp_error( $edupro_footer_cats ) || ! is_array( $edupro_footer_cats ) ) {
 
 </div><!-- #page -->
 
+<!-- Mini-Cart Slide-Out Drawer (SSR pre-populated from inc/cart.php) -->
+<?php
+$edupro_cart_summary = function_exists( 'edupro_get_cart_summary' )
+    ? edupro_get_cart_summary()
+    : array(
+        'items'              => array(),
+        'count'              => 0,
+        'formatted_subtotal' => function_exists( 'edupro_format_price' ) ? edupro_format_price( 0 ) : '₹0.00',
+        'cart_url'           => function_exists( 'edupro_get_cart_url' ) ? edupro_get_cart_url() : home_url( '/cart/' ),
+        'checkout_url'       => add_query_arg( 'mode', 'cart', home_url( '/checkout/' ) ),
+    );
+$edupro_drawer_items        = ! empty( $edupro_cart_summary['items'] ) && is_array( $edupro_cart_summary['items'] ) ? $edupro_cart_summary['items'] : array();
+$edupro_drawer_count        = isset( $edupro_cart_summary['count'] ) ? (int) $edupro_cart_summary['count'] : count( $edupro_drawer_items );
+$edupro_drawer_subtotal     = ! empty( $edupro_cart_summary['formatted_subtotal'] ) ? $edupro_cart_summary['formatted_subtotal'] : '₹0.00';
+$edupro_drawer_cart_url     = ! empty( $edupro_cart_summary['cart_url'] ) ? $edupro_cart_summary['cart_url'] : home_url( '/cart/' );
+$edupro_drawer_checkout_url = ! empty( $edupro_cart_summary['checkout_url'] ) ? $edupro_cart_summary['checkout_url'] : add_query_arg( 'mode', 'cart', home_url( '/checkout/' ) );
+?>
+<div id="edupro-cart-overlay" class="edupro-cart-overlay" aria-hidden="true"></div>
+<aside
+    id="edupro-cart-drawer"
+    class="edupro-cart-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-label="<?php esc_attr_e( 'Shopping Cart', 'edupro' ); ?>"
+    aria-hidden="true"
+>
+    <div class="edupro-cart-drawer__header">
+        <h3 class="edupro-cart-drawer__title">
+            <?php esc_html_e( 'Shopping Cart', 'edupro' ); ?>
+            (<span id="edupro-cart-drawer-count"><?php echo absint( $edupro_drawer_count ); ?></span>)
+        </h3>
+        <button
+            type="button"
+            id="edupro-cart-drawer-close"
+            class="edupro-cart-drawer__close"
+            aria-label="<?php esc_attr_e( 'Close shopping cart', 'edupro' ); ?>"
+        >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <div id="edupro-cart-drawer-body" class="edupro-cart-drawer__body">
+        <?php if ( ! empty( $edupro_drawer_items ) ) : ?>
+            <?php foreach ( $edupro_drawer_items as $c_item ) : ?>
+                <div class="edupro-cart-drawer__item" data-course-id="<?php echo absint( $c_item['course_id'] ); ?>">
+                    <a href="<?php echo esc_url( $c_item['permalink'] ); ?>" class="edupro-cart-drawer__thumb">
+                        <?php if ( ! empty( $c_item['thumbnail'] ) ) : ?>
+                            <img src="<?php echo esc_url( $c_item['thumbnail'] ); ?>" alt="<?php echo esc_attr( $c_item['title'] ); ?>" loading="lazy">
+                        <?php else : ?>
+                            <span class="edupro-cart-drawer__thumb-placeholder" aria-hidden="true">🎓</span>
+                        <?php endif; ?>
+                    </a>
+                    <div class="edupro-cart-drawer__info">
+                        <a href="<?php echo esc_url( $c_item['permalink'] ); ?>" class="edupro-cart-drawer__item-title">
+                            <?php echo esc_html( $c_item['title'] ); ?>
+                        </a>
+                        <?php if ( ! empty( $c_item['instructor'] ) ) : ?>
+                            <span class="edupro-cart-drawer__item-instructor"><?php echo esc_html( $c_item['instructor'] ); ?></span>
+                        <?php endif; ?>
+                        <div class="edupro-cart-drawer__item-price">
+                            <strong><?php echo esc_html( $c_item['formatted_effective'] ); ?></strong>
+                            <?php if ( ! empty( $c_item['discount_pct'] ) && ! empty( $c_item['formatted_regular'] ) ) : ?>
+                                <del><?php echo esc_html( $c_item['formatted_regular'] ); ?></del>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="edupro-cart-remove-btn edupro-cart-drawer__remove"
+                        data-course-id="<?php echo absint( $c_item['course_id'] ); ?>"
+                        aria-label="<?php echo esc_attr( sprintf( __( 'Remove %s from cart', 'edupro' ), $c_item['title'] ) ); ?>"
+                        title="<?php esc_attr_e( 'Remove', 'edupro' ); ?>"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            <?php endforeach; ?>
+        <?php else : ?>
+            <div class="edupro-cart-drawer__empty">
+                <span class="edupro-cart-drawer__empty-icon" aria-hidden="true">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </span>
+                <h4><?php esc_html_e( 'Your cart is empty', 'edupro' ); ?></h4>
+                <p><?php esc_html_e( 'Explore our accredited courses and add them to your cart to enroll together.', 'edupro' ); ?></p>
+                <a href="<?php echo esc_url( $edupro_courses_url ); ?>" class="edupro-btn edupro-btn--primary btn-primary">
+                    <?php esc_html_e( 'Browse Courses', 'edupro' ); ?>
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <div id="edupro-cart-drawer-footer" class="edupro-cart-drawer__footer"<?php echo 0 === $edupro_drawer_count ? ' hidden' : ''; ?>>
+        <div class="edupro-cart-drawer__subtotal-row">
+            <span><?php esc_html_e( 'Subtotal', 'edupro' ); ?></span>
+            <strong id="edupro-cart-drawer-subtotal"><?php echo esc_html( $edupro_drawer_subtotal ); ?></strong>
+        </div>
+        <div class="edupro-cart-drawer__actions">
+            <a href="<?php echo esc_url( $edupro_drawer_checkout_url ); ?>" class="edupro-btn edupro-btn--primary btn-primary edupro-btn--full">
+                <?php esc_html_e( 'Proceed to Checkout →', 'edupro' ); ?>
+            </a>
+            <a href="<?php echo esc_url( $edupro_drawer_cart_url ); ?>" class="edupro-btn edupro-btn--outline btn-outline edupro-btn--full">
+                <?php esc_html_e( 'View Cart', 'edupro' ); ?>
+            </a>
+        </div>
+    </div>
+</aside>
+
 <!-- Floating WhatsApp & Call Quick Widget -->
 <?php if ( $edupro_whatsapp_floating && ( $edupro_whatsapp_url || $edupro_phone_href ) ) : ?>
     <div class="edupro-floating-contact" aria-label="<?php esc_attr_e( 'Quick Contact', 'edupro' ); ?>">

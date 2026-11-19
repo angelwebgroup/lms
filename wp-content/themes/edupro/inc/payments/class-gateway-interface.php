@@ -223,9 +223,19 @@ abstract class EduPro_Payment_Gateway {
      * @return string
      */
     protected function get_checkout_return_url( $order, $extra_args = array() ) {
-        $base = function_exists( 'edupro_get_checkout_url' )
-            ? edupro_get_checkout_url( $order->course_id )
-            : add_query_arg( 'course_id', absint( $order->course_id ), home_url( '/checkout/' ) );
+        $is_multi_course = function_exists( 'edupro_get_order_course_ids' )
+            && count( edupro_get_order_course_ids( $order ) ) > 1;
+
+        if ( $is_multi_course ) {
+            $base = function_exists( 'edupro_get_checkout_url' )
+                ? edupro_get_checkout_url()
+                : home_url( '/checkout/' );
+            $base = add_query_arg( 'mode', 'cart', $base );
+        } else {
+            $base = function_exists( 'edupro_get_checkout_url' )
+                ? edupro_get_checkout_url( $order->course_id )
+                : add_query_arg( 'course_id', absint( $order->course_id ), home_url( '/checkout/' ) );
+        }
 
         return add_query_arg( $extra_args, $base );
     }

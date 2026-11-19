@@ -65,12 +65,8 @@ $edupro_announcement_text     = apply_filters(
 $edupro_announcement_cta_text = $edupro_setting( 'announcement_cta_text', __( 'Shop Now →', 'edupro' ) );
 $edupro_announcement_cta_url  = $edupro_setting( 'announcement_cta_url', $edupro_courses_url );
 
-// Enrolled courses count for cart-style badge.
-$edupro_enrolled_count = 0;
-if ( $edupro_is_logged_in ) {
-    $edupro_enrolled_ids   = get_user_meta( get_current_user_id(), '_edupro_enrolled_courses', true );
-    $edupro_enrolled_count = is_array( $edupro_enrolled_ids ) ? count( $edupro_enrolled_ids ) : 0;
-}
+// Real shopping cart count (unpaid items only — never enrolled courses).
+$edupro_cart_count = function_exists( 'edupro_get_cart_count' ) ? (int) edupro_get_cart_count() : 0;
 
 // Fetch course categories for the Mega Menu & Mobile Drawer.
 $edupro_all_categories = get_terms( array(
@@ -391,23 +387,26 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
                 ?>
             </nav>
 
-            <!-- Header Actions: Cart-style Enrolled Count + User Account / Login -->
+            <!-- Header Actions: Shopping Cart Drawer Trigger + User Account / Login -->
             <div class="edupro-header__actions">
 
-                <!-- Cart-Style Enrollment Counter -->
-                <a
-                    href="<?php echo esc_url( $edupro_is_logged_in ? $edupro_dashboard_url : $edupro_courses_url ); ?>"
-                    class="edupro-enrollment-cart"
-                    title="<?php echo $edupro_is_logged_in ? esc_attr__( 'My Enrolled Courses', 'edupro' ) : esc_attr__( 'Browse Courses', 'edupro' ); ?>"
-                    aria-label="<?php echo esc_attr( sprintf( __( 'Enrolled courses: %d', 'edupro' ), $edupro_enrolled_count ) ); ?>"
+                <!-- Shopping Cart Slide-Out Drawer Trigger -->
+                <button
+                    type="button"
+                    id="edupro-cart-trigger"
+                    class="edupro-enrollment-cart edupro-cart-trigger"
+                    aria-expanded="false"
+                    aria-controls="edupro-cart-drawer"
+                    title="<?php esc_attr_e( 'Shopping Cart', 'edupro' ); ?>"
+                    aria-label="<?php echo esc_attr( sprintf( __( 'Shopping Cart (%d items)', 'edupro' ), $edupro_cart_count ) ); ?>"
                 >
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
-                    <span class="edupro-enrollment-cart__count"><?php echo absint( $edupro_enrolled_count ); ?></span>
-                </a>
+                    <span class="edupro-enrollment-cart__count edupro-cart-count<?php echo 0 === $edupro_cart_count ? ' is-empty' : ''; ?>"><?php echo absint( $edupro_cart_count ); ?></span>
+                </button>
 
                 <?php if ( $edupro_is_logged_in && $edupro_current_user ) : ?>
                     <!-- Logged-in User Avatar Dropdown -->
@@ -577,7 +576,7 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
             <div class="edupro-mobile-auth">
                 <?php if ( $edupro_is_logged_in ) : ?>
                     <a href="<?php echo esc_url( $edupro_dashboard_url ); ?>" class="edupro-btn edupro-btn--primary btn-primary edupro-btn--full">
-                        <?php esc_html_e( 'My Dashboard', 'edupro' ); ?> (<?php echo absint( $edupro_enrolled_count ); ?>)
+                        <?php esc_html_e( 'My Dashboard', 'edupro' ); ?>
                     </a>
                     <a href="<?php echo esc_url( $edupro_logout_url ); ?>" class="edupro-btn edupro-btn--outline btn-outline edupro-btn--full">
                         <?php esc_html_e( 'Log Out', 'edupro' ); ?>

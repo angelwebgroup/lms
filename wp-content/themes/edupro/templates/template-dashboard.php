@@ -557,17 +557,31 @@ $avatar_url = get_avatar_url( $user_id, array( 'size' => 140 ) );
 										'refunded'   => __( 'Refunded', 'edupro' ),
 									);
 									foreach ( $orders as $order ) :
-										$course_title   = get_the_title( $order->course_id );
-										$course_link    = get_permalink( $order->course_id );
-										$order_currency = ! empty( $order->currency ) ? strtoupper( $order->currency ) : 'INR';
-										$gw_key         = strtolower( (string) $order->gateway );
-										$gw_label       = isset( $gateway_labels[ $gw_key ] ) ? $gateway_labels[ $gw_key ] : ucwords( str_replace( '_', ' ', $gw_key ) );
-										$status_key     = strtolower( (string) $order->status );
-										$status_slug    = sanitize_html_class( $status_key );
-										$status_label   = isset( $status_labels[ $status_key ] ) ? $status_labels[ $status_key ] : ucfirst( $status_key );
-										$coupon_code    = ! empty( $order->coupon_code ) ? $order->coupon_code : '';
-										$txn_id         = ! empty( $order->transaction_id ) ? $order->transaction_id : '';
-										$invoice_url    = function_exists( 'edupro_get_invoice_url' ) ? edupro_get_invoice_url( $order->order_id ) : '';
+										$order_course_ids = function_exists( 'edupro_get_order_course_ids' )
+											? edupro_get_order_course_ids( $order )
+											: ( ! empty( $order->course_id ) ? array( absint( $order->course_id ) ) : array() );
+										$primary_cid      = ! empty( $order_course_ids ) ? (int) $order_course_ids[0] : absint( $order->course_id );
+										$course_title     = function_exists( 'edupro_get_order_course_summary_title' )
+											? edupro_get_order_course_summary_title( $order )
+											: ( get_the_title( $primary_cid ) ? get_the_title( $primary_cid ) : '#' . $primary_cid );
+										$course_link      = $primary_cid ? get_permalink( $primary_cid ) : '';
+										$all_titles       = array();
+										foreach ( $order_course_ids as $ocid ) {
+											$t = get_the_title( $ocid );
+											if ( $t ) {
+												$all_titles[] = $t;
+											}
+										}
+										$titles_tooltip   = count( $all_titles ) > 1 ? implode( ', ', $all_titles ) : '';
+										$order_currency   = ! empty( $order->currency ) ? strtoupper( $order->currency ) : 'INR';
+										$gw_key           = strtolower( (string) $order->gateway );
+										$gw_label         = isset( $gateway_labels[ $gw_key ] ) ? $gateway_labels[ $gw_key ] : ucwords( str_replace( '_', ' ', $gw_key ) );
+										$status_key       = strtolower( (string) $order->status );
+										$status_slug      = sanitize_html_class( $status_key );
+										$status_label     = isset( $status_labels[ $status_key ] ) ? $status_labels[ $status_key ] : ucfirst( $status_key );
+										$coupon_code      = ! empty( $order->coupon_code ) ? $order->coupon_code : '';
+										$txn_id           = ! empty( $order->transaction_id ) ? $order->transaction_id : '';
+										$invoice_url      = function_exists( 'edupro_get_invoice_url' ) ? edupro_get_invoice_url( $order->order_id ) : '';
 										?>
 										<tr>
 											<td data-label="<?php esc_attr_e( 'Order ID', 'edupro' ); ?>">
@@ -580,9 +594,13 @@ $avatar_url = get_avatar_url( $user_id, array( 'size' => 140 ) );
 											</td>
 											<td data-label="<?php esc_attr_e( 'Course', 'edupro' ); ?>">
 												<?php if ( $course_link ) : ?>
-													<a href="<?php echo esc_url( $course_link ); ?>"><?php echo esc_html( $course_title ? $course_title : '#' . $order->course_id ); ?></a>
+													<a href="<?php echo esc_url( $course_link ); ?>" <?php echo $titles_tooltip ? 'title="' . esc_attr( $titles_tooltip ) . '"' : ''; ?>>
+														<?php echo esc_html( $course_title ); ?>
+													</a>
 												<?php else : ?>
-													<?php echo esc_html( $course_title ? $course_title : '#' . $order->course_id ); ?>
+													<span <?php echo $titles_tooltip ? 'title="' . esc_attr( $titles_tooltip ) . '"' : ''; ?>>
+														<?php echo esc_html( $course_title ); ?>
+													</span>
 												<?php endif; ?>
 												<?php if ( $coupon_code ) : ?>
 													<div class="edupro-order-coupon">

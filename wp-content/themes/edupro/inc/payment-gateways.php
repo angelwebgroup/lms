@@ -119,7 +119,10 @@ endif;
 // 2. DATABASE SCHEMA (wp_edupro_orders & wp_edupro_payment_logs)
 // ============================================================
 
-define( 'EDUPRO_PAYMENTS_DB_VERSION', '2.0.0' );
+define( 'EDUPRO_PAYMENTS_DB_VERSION', '2.1.0' );
+if ( ! defined( 'EDUPRO_ORDERS_DB_VERSION' ) ) {
+    define( 'EDUPRO_ORDERS_DB_VERSION', EDUPRO_PAYMENTS_DB_VERSION );
+}
 
 if ( ! function_exists( 'edupro_create_orders_table' ) ) :
 /**
@@ -138,6 +141,7 @@ function edupro_create_orders_table() {
         idempotency_key varchar(128) NOT NULL DEFAULT '',
         user_id bigint(20) unsigned NOT NULL DEFAULT 0,
         course_id bigint(20) unsigned NOT NULL DEFAULT 0,
+        course_ids text,
         currency varchar(10) NOT NULL DEFAULT 'INR',
         subtotal decimal(10,2) NOT NULL DEFAULT 0.00,
         discount_amount decimal(10,2) NOT NULL DEFAULT 0.00,
@@ -420,6 +424,7 @@ function edupro_insert_order( $args ) {
         'idempotency_key'  => '',
         'user_id'          => 0,
         'course_id'        => 0,
+        'course_ids'       => null,
         'currency'         => $default_currency,
         'subtotal'         => 0.00,
         'discount_amount'  => 0.00,
@@ -437,6 +442,16 @@ function edupro_insert_order( $args ) {
     $order_id = $args['order_id'] !== '' ? sanitize_text_field( $args['order_id'] ) : edupro_generate_order_id();
     $now      = current_time( 'mysql' );
 
+    $course_ids_val = null;
+    if ( is_array( $args['course_ids'] ) ) {
+        $clean_ids      = array_values( array_unique( array_filter( array_map( 'absint', $args['course_ids'] ) ) ) );
+        $course_ids_val = ! empty( $clean_ids ) ? wp_json_encode( $clean_ids ) : null;
+    } elseif ( is_string( $args['course_ids'] ) && trim( $args['course_ids'] ) !== '' ) {
+        $course_ids_val = trim( $args['course_ids'] );
+    } elseif ( absint( $args['course_id'] ) > 0 ) {
+        $course_ids_val = wp_json_encode( array( absint( $args['course_id'] ) ) );
+    }
+
     $inserted = $wpdb->insert(
         $wpdb->prefix . 'edupro_orders',
         array(
@@ -444,6 +459,7 @@ function edupro_insert_order( $args ) {
             'idempotency_key'  => sanitize_text_field( (string) $args['idempotency_key'] ),
             'user_id'          => absint( $args['user_id'] ),
             'course_id'        => absint( $args['course_id'] ),
+            'course_ids'       => $course_ids_val,
             'currency'         => strtoupper( sanitize_text_field( (string) $args['currency'] ) ),
             'subtotal'         => round( floatval( $args['subtotal'] ), 2 ),
             'discount_amount'  => round( floatval( $args['discount_amount'] ), 2 ),
@@ -458,11 +474,112 @@ function edupro_insert_order( $args ) {
             'created_at'       => $now,
             'updated_at'       => $now,
         ),
-        array( '%s', '%s', '%d', '%d', '%s', '%f', '%f', '%s', '%f', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+        array( '%s', '%s', '%d', '%d', '%s', '%s', '%f', '%f', '%s', '%f', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
     );
 
     return $inserted ? $order_id : false;
 }
+
+if ( ! function_exists( 'edupro_get_order_course_ids' ) ) :
+/**
+ * Return unique positive course IDs attached to an order (multi-course cart or single-course).
+ *
+ * Reads $order->course_ids JSON array (or meta_json['course_ids']), falling back to
+ * [absint($order->course_id)] for full backwards compatibility.
+ *
+ * @param object|array|string $order Order row object, associative array, or order_id string.
+ * @return int[]
+ */
+function edupro_get_order_course_ids( $order ) {
+    if ( is_string( $order ) && $order !== '' ) {
+        $order = edupro_get_order( $order );
+    }
+    if ( is_array( $order ) ) {
+        $order = (object) $order;
+    }
+    if ( ! is_object( $order ) ) {
+        return array();
+    }
+
+    $ids = array();
+
+    if ( ! empty( $order->course_ids ) ) {
+        $decoded = is_array( $order->course_ids )
+            ? $order->course_ids
+            : json_decode( (string) $order->course_ids, true );
+        if ( is_array( $decoded ) ) {
+            $ids = array_values( array_unique( array_filter( array_map( 'absint', $decoded ) ) ) );
+        }
+    }
+
+    if ( empty( $ids ) && ! empty( $order->meta_json ) ) {
+        $meta = is_array( $order->meta_json )
+            ? $order->meta_json
+            : json_decode( (string) $order->meta_json, true );
+        if ( is_array( $meta ) && ! empty( $meta['course_ids'] ) && is_array( $meta['course_ids'] ) ) {
+            $ids = array_values( array_unique( array_filter( array_map( 'absint', $meta['course_ids'] ) ) ) );
+        }
+    }
+
+    if ( empty( $ids ) && ! empty( $order->course_id ) ) {
+        $single = absint( $order->course_id );
+        if ( $single > 0 ) {
+            $ids = array( $single );
+        }
+    }
+
+    return $ids;
+}
+endif;
+
+if ( ! function_exists( 'edupro_get_order_course_titles_list' ) ) :
+/**
+ * Return an array of clean course titles for all courses in an order.
+ *
+ * @param object|array|string $order
+ * @return string[]
+ */
+function edupro_get_order_course_titles_list( $order ) {
+    $ids    = edupro_get_order_course_ids( $order );
+    $titles = array();
+    foreach ( $ids as $cid ) {
+        $t        = wp_strip_all_tags( (string) get_the_title( $cid ) );
+        $titles[] = $t !== '' ? $t : sprintf( __( 'Course #%d', 'edupro' ), $cid );
+    }
+    return $titles;
+}
+endif;
+
+if ( ! function_exists( 'edupro_get_order_course_summary_title' ) ) :
+/**
+ * Return a concise summary title for an order:
+ * - Single course: "Course Title"
+ * - Multi-course:  "First Course (+N more)"
+ *
+ * @param object|array|string $order
+ * @return string
+ */
+function edupro_get_order_course_summary_title( $order ) {
+    $titles = edupro_get_order_course_titles_list( $order );
+    $count  = count( $titles );
+
+    if ( $count === 0 ) {
+        $fallback_id = is_object( $order ) && isset( $order->course_id ) ? absint( $order->course_id ) : 0;
+        return $fallback_id ? '#' . $fallback_id : __( 'Course Order', 'edupro' );
+    }
+
+    if ( $count === 1 ) {
+        return $titles[0];
+    }
+
+    return sprintf(
+        /* translators: 1: first course title, 2: count of additional courses */
+        __( '%1$s (+%2$d more)', 'edupro' ),
+        $titles[0],
+        $count - 1
+    );
+}
+endif;
 
 /**
  * Update arbitrary allowed fields on an order row.
@@ -764,8 +881,14 @@ function edupro_complete_verified_order( $order_id, $transaction_id, $verified_v
         edupro_update_order_fields( $order_id, array( 'meta_json' => wp_json_encode( $existing_meta ) ) );
     }
 
-    // 1. Enroll student
-    edupro_payment_enroll_student( absint( $order->course_id ), absint( $order->user_id ) );
+    // 1. Enroll student in ALL courses included in this order & remove them from student's cart
+    $order_course_ids = edupro_get_order_course_ids( $order );
+    foreach ( $order_course_ids as $cid ) {
+        edupro_payment_enroll_student( $cid, absint( $order->user_id ) );
+        if ( function_exists( 'edupro_remove_from_cart' ) ) {
+            edupro_remove_from_cart( $cid, absint( $order->user_id ) );
+        }
+    }
 
     // 2. Atomically increment coupon usage if a coupon was applied
     if ( ! empty( $order->coupon_code ) && function_exists( 'edupro_increment_coupon_usage' ) ) {
@@ -790,7 +913,7 @@ function edupro_complete_verified_order( $order_id, $transaction_id, $verified_v
         $order->gateway,
         'order_completed',
         'completed',
-        sprintf( 'Verified via %s (txn: %s, amount: %s %.2f)', $verified_via, $transaction_id, $order->currency, floatval( $order->amount ) )
+        sprintf( 'Verified via %s (txn: %s, courses: %s, amount: %s %.2f)', $verified_via, $transaction_id, implode( ',', $order_course_ids ), $order->currency, floatval( $order->amount ) )
     );
 
     do_action( 'edupro_order_completed', $order, $verified_via );
@@ -803,51 +926,103 @@ function edupro_complete_verified_order( $order_id, $transaction_id, $verified_v
 }
 
 // ============================================================
-// 5. MAIN CHECKOUT PROCESSOR (MULTI-CURRENCY, COUPONS, TAX, ANTI-DUP)
+// 5. MAIN CHECKOUT PROCESSOR (MULTI-COURSE CART, CURRENCY, COUPONS, TAX, ANTI-DUP)
 // ============================================================
 
 /**
- * Main checkout orchestrator.
+ * Main checkout orchestrator (supports both single-course Buy Now and multi-course Cart mode).
  *
- * @param int    $course_id
+ * @param int    $course_id   Course ID (or 0 when $cart_mode is true).
  * @param int    $user_id
  * @param string $gateway     cashfree|razorpay|stripe|paypal|bank_transfer|free
  * @param string $currency    Optional ISO-4217 currency ('INR'|'GBP'|'USD')
  * @param string $coupon_code Optional coupon code
+ * @param bool   $cart_mode   When true, checks out all unpaid courses in the student's cart.
  * @return array ['success' => bool, 'data' => array] or ['success' => false, 'message' => string]
  */
-function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = '', $coupon_code = '' ) {
+function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = '', $coupon_code = '', $cart_mode = false ) {
     global $wpdb;
 
     $course_id   = absint( $course_id );
     $user_id     = absint( $user_id );
     $gateway     = sanitize_key( (string) $gateway );
     $coupon_code = strtoupper( sanitize_text_field( (string) $coupon_code ) );
+    $cart_mode   = (bool) $cart_mode;
 
-    if ( ! $course_id || ! $user_id ) {
-        return array( 'success' => false, 'message' => __( 'Invalid course or user.', 'edupro' ) );
+    if ( ! $user_id ) {
+        return array( 'success' => false, 'message' => __( 'Invalid user account.', 'edupro' ) );
     }
 
-    $course = get_post( $course_id );
-    $user   = get_userdata( $user_id );
-    if ( ! $course || $course->post_type !== 'lms_course' || $course->post_status !== 'publish' || ! $user ) {
-        return array( 'success' => false, 'message' => __( 'Course or student account not found.', 'edupro' ) );
+    $user = get_userdata( $user_id );
+    if ( ! $user ) {
+        return array( 'success' => false, 'message' => __( 'Student account not found.', 'edupro' ) );
     }
 
-    // Strict anti-duplication: reject if already enrolled
-    if ( function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $course_id, $user_id ) ) {
-        return array( 'success' => false, 'message' => __( 'You are already enrolled in this course.', 'edupro' ) );
+    // Resolve target course IDs (cart mode vs single-course Buy Now)
+    $course_ids = array();
+    if ( $cart_mode || ( $course_id === 0 && function_exists( 'edupro_get_cart_items' ) ) ) {
+        $cart_mode = true;
+        $raw_cart  = function_exists( 'edupro_get_cart_items' ) ? edupro_get_cart_items( $user_id ) : array();
+        foreach ( (array) $raw_cart as $cid ) {
+            $cid = absint( $cid );
+            if ( ! $cid ) {
+                continue;
+            }
+            $cpost = get_post( $cid );
+            if ( ! $cpost || $cpost->post_type !== 'lms_course' || $cpost->post_status !== 'publish' ) {
+                continue;
+            }
+            if ( function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $cid, $user_id ) ) {
+                continue;
+            }
+            $course_ids[] = $cid;
+        }
+        $course_ids = array_values( array_unique( $course_ids ) );
+
+        if ( empty( $course_ids ) ) {
+            $err = new WP_Error( 'empty_cart', __( 'Your shopping cart is empty or you are already enrolled in all selected courses.', 'edupro' ) );
+            return array(
+                'success' => false,
+                'code'    => $err->get_error_code(),
+                'message' => $err->get_error_message(),
+            );
+        }
+    } else {
+        if ( ! $course_id ) {
+            return array( 'success' => false, 'message' => __( 'Please select a valid course.', 'edupro' ) );
+        }
+        $course = get_post( $course_id );
+        if ( ! $course || $course->post_type !== 'lms_course' || $course->post_status !== 'publish' ) {
+            return array( 'success' => false, 'message' => __( 'Course not found or unavailable.', 'edupro' ) );
+        }
+        // Strict anti-duplication: reject if already enrolled
+        if ( function_exists( 'edupro_is_student_enrolled' ) && edupro_is_student_enrolled( $course_id, $user_id ) ) {
+            return array( 'success' => false, 'message' => __( 'You are already enrolled in this course.', 'edupro' ) );
+        }
+        $course_ids = array( $course_id );
     }
 
-    // Check course enrollment cap
-    $enrollment_limit = absint( get_post_meta( $course_id, '_edupro_enrollment_limit', true ) );
-    if ( $enrollment_limit > 0 && function_exists( 'edupro_get_enrolled_count' ) ) {
-        if ( edupro_get_enrolled_count( $course_id ) >= $enrollment_limit ) {
-            return array( 'success' => false, 'message' => __( 'This course has reached its maximum enrollment limit.', 'edupro' ) );
+    $primary_course_id = $course_ids[0];
+    $primary_course    = get_post( $primary_course_id );
+
+    // Check enrollment cap for every course in the order
+    foreach ( $course_ids as $cid ) {
+        $enrollment_limit = absint( get_post_meta( $cid, '_edupro_enrollment_limit', true ) );
+        if ( $enrollment_limit > 0 && function_exists( 'edupro_get_enrolled_count' ) ) {
+            if ( edupro_get_enrolled_count( $cid ) >= $enrollment_limit ) {
+                return array(
+                    'success' => false,
+                    'message' => sprintf(
+                        /* translators: %s: course title */
+                        __( '"%s" has reached its maximum enrollment limit.', 'edupro' ),
+                        wp_strip_all_tags( get_the_title( $cid ) )
+                    ),
+                );
+            }
         }
     }
 
-    // Resolve active currency & pricing
+    // Resolve active currency & sum active-currency effective prices across ALL courses
     if ( $currency === '' ) {
         $currency = function_exists( 'edupro_get_active_currency' )
             ? edupro_get_active_currency()
@@ -856,24 +1031,47 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
         $currency = strtoupper( sanitize_text_field( $currency ) );
     }
 
-    if ( function_exists( 'edupro_get_course_price_data' ) ) {
-        $price_data = edupro_get_course_price_data( $course_id, $currency );
-        $currency   = strtoupper( (string) ( $price_data['currency'] ?? $currency ) );
-        $is_free    = ! empty( $price_data['is_free'] );
-        $subtotal   = round( floatval( $price_data['effective'] ?? 0 ), 2 );
-    } else {
-        $is_free  = edupro_is_course_free( $course_id );
-        $subtotal = $is_free ? 0.0 : edupro_get_course_effective_price( $course_id, $currency );
+    $subtotal        = 0.00;
+    $all_free        = true;
+    $items_breakdown = array();
+
+    foreach ( $course_ids as $cid ) {
+        if ( function_exists( 'edupro_get_course_price_data' ) ) {
+            $pd         = edupro_get_course_price_data( $cid, $currency );
+            $currency   = strtoupper( (string) ( $pd['currency'] ?? $currency ) );
+            $c_is_free  = ! empty( $pd['is_free'] );
+            $c_eff      = $c_is_free ? 0.00 : round( floatval( $pd['effective'] ?? 0 ), 2 );
+            $c_reg      = round( floatval( $pd['regular'] ?? $c_eff ), 2 );
+        } else {
+            $c_is_free = edupro_is_course_free( $cid );
+            $c_eff     = $c_is_free ? 0.00 : edupro_get_course_effective_price( $cid, $currency );
+            $c_reg     = $c_eff;
+        }
+
+        if ( ! $c_is_free && $c_eff > 0 ) {
+            $all_free = false;
+        }
+        $subtotal          = round( $subtotal + $c_eff, 2 );
+        $items_breakdown[] = array(
+            'course_id' => $cid,
+            'title'     => wp_strip_all_tags( get_the_title( $cid ) ),
+            'regular'   => $c_reg,
+            'effective' => $c_eff,
+            'is_free'   => $c_is_free,
+        );
     }
 
-    // Validate optional coupon
+    $is_free = $all_free;
+
+    // Validate optional coupon against all course IDs and combined subtotal
     $discount_amount = 0.00;
     $applied_coupon  = '';
     if ( ! $is_free && $subtotal > 0 && $coupon_code !== '' ) {
         if ( ! function_exists( 'edupro_validate_coupon' ) ) {
             return array( 'success' => false, 'message' => __( 'Coupon module is not available.', 'edupro' ) );
         }
-        $coupon_res = edupro_validate_coupon( $coupon_code, $course_id, $subtotal, $currency );
+        $coupon_target = count( $course_ids ) === 1 ? $course_ids[0] : $course_ids;
+        $coupon_res    = edupro_validate_coupon( $coupon_code, $coupon_target, $subtotal, $currency );
         if ( is_wp_error( $coupon_res ) ) {
             return array( 'success' => false, 'message' => $coupon_res->get_error_message() );
         }
@@ -887,12 +1085,17 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
     $tax_amount = $taxable > 0 && $tax_rate > 0 ? round( $taxable * ( $tax_rate / 100 ), 2 ) : 0.00;
     $total      = round( $taxable + $tax_amount, 2 );
 
-    // Free course OR 100%-discounted coupon -> direct enrollment (NEVER trust client-supplied gateway='free')
+    $sorted_ids       = $course_ids;
+    sort( $sorted_ids, SORT_NUMERIC );
+    $course_ids_json  = wp_json_encode( $course_ids );
+
+    // Free course(s) OR 100%-discounted coupon -> direct enrollment (NEVER trust client-supplied gateway='free')
     if ( $is_free || $total <= 0 ) {
         $order_id = edupro_insert_order( array(
-            'idempotency_key' => 'free_' . $user_id . '_' . $course_id . '_' . time(),
+            'idempotency_key' => 'free_' . $user_id . '_' . md5( implode( ',', $sorted_ids ) ) . '_' . time(),
             'user_id'         => $user_id,
-            'course_id'       => $course_id,
+            'course_id'       => $primary_course_id,
+            'course_ids'      => $course_ids_json,
             'currency'        => $currency,
             'subtotal'        => $subtotal,
             'discount_amount' => $discount_amount,
@@ -901,13 +1104,18 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
             'amount'          => 0.00,
             'gateway'         => 'free',
             'status'          => 'pending',
+            'meta_json'       => wp_json_encode( array(
+                'course_ids' => $course_ids,
+                'items'      => $items_breakdown,
+                'cart_mode'  => $cart_mode,
+            ) ),
         ) );
 
         if ( ! $order_id ) {
             return array( 'success' => false, 'message' => __( 'Unable to create enrollment record.', 'edupro' ) );
         }
 
-        edupro_complete_verified_order( $order_id, 'FREE-' . $course_id . '-' . time(), 'free_checkout' );
+        edupro_complete_verified_order( $order_id, 'FREE-' . $primary_course_id . '-' . time(), 'free_checkout' );
 
         return array(
             'success' => true,
@@ -916,6 +1124,9 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
                 'local_order_id'  => $order_id,
                 'gateway'         => 'free',
                 'currency'        => $currency,
+                'course_id'       => $primary_course_id,
+                'course_ids'      => $course_ids,
+                'cart_mode'       => $cart_mode,
                 'subtotal'        => $subtotal,
                 'discount_amount' => $discount_amount,
                 'tax_amount'      => 0.00,
@@ -923,7 +1134,9 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
                 'verified'        => true,
                 'enrolled'        => true,
                 'status'          => 'completed',
-                'message'         => __( 'You have been enrolled in this course!', 'edupro' ),
+                'message'         => count( $course_ids ) > 1
+                    ? __( 'You have been enrolled in all selected courses!', 'edupro' )
+                    : __( 'You have been enrolled in this course!', 'edupro' ),
                 'redirect'        => edupro_get_dashboard_url(),
                 'redirect_url'    => edupro_get_dashboard_url(),
             ),
@@ -953,10 +1166,10 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
         );
     }
 
-    // Build deterministic idempotency fingerprint for reusing recent identical pending orders (<= 15 mins)
+    // Deterministic idempotency fingerprint including sorted course_ids so distinct cart combinations never collide
     $idempotency_key = hash( 'sha256', implode( '|', array(
         $user_id,
-        $course_id,
+        implode( ',', $sorted_ids ),
         $gateway,
         $currency,
         number_format( $total, 2, '.', '' ),
@@ -969,7 +1182,6 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
         $wpdb->prepare(
             "SELECT * FROM {$table}
              WHERE user_id = %d
-               AND course_id = %d
                AND gateway = %s
                AND idempotency_key = %s
                AND status = 'pending'
@@ -977,7 +1189,6 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
              ORDER BY id DESC
              LIMIT 1",
             $user_id,
-            $course_id,
             $gateway,
             $idempotency_key,
             $cutoff
@@ -987,7 +1198,7 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
     if ( $recent_pending && ! empty( $recent_pending->meta_json ) ) {
         $meta = json_decode( $recent_pending->meta_json, true );
         if ( is_array( $meta ) && ! empty( $meta['checkout_payload'] ) ) {
-            $reused_payload = $meta['checkout_payload'];
+            $reused_payload                 = $meta['checkout_payload'];
             $reused_payload['reused_order'] = true;
             return array(
                 'success' => true,
@@ -996,26 +1207,41 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
         }
     }
 
-    // Mark stale / superseded pending orders for this user + course (except bank_transfer if still awaiting transfer? supersede old pending attempts so checkout stays clean)
-    $wpdb->query(
-        $wpdb->prepare(
-            "UPDATE {$table}
-             SET status = 'superseded', updated_at = %s
-             WHERE user_id = %d
-               AND course_id = %d
-               AND status = 'pending'
-               AND gateway != 'bank_transfer'",
-            current_time( 'mysql' ),
-            $user_id,
-            $course_id
-        )
-    );
+    // Mark stale / superseded pending online checkout attempts for this user
+    if ( $cart_mode ) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$table}
+                 SET status = 'superseded', updated_at = %s
+                 WHERE user_id = %d
+                   AND status = 'pending'
+                   AND gateway != 'bank_transfer'",
+                current_time( 'mysql' ),
+                $user_id
+            )
+        );
+    } else {
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$table}
+                 SET status = 'superseded', updated_at = %s
+                 WHERE user_id = %d
+                   AND course_id = %d
+                   AND status = 'pending'
+                   AND gateway != 'bank_transfer'",
+                current_time( 'mysql' ),
+                $user_id,
+                $primary_course_id
+            )
+        );
+    }
 
-    // Insert fresh pending order
+    // Insert fresh pending order with both primary course_id and full course_ids JSON array
     $order_id = edupro_insert_order( array(
         'idempotency_key' => $idempotency_key,
         'user_id'         => $user_id,
-        'course_id'       => $course_id,
+        'course_id'       => $primary_course_id,
+        'course_ids'      => $course_ids_json,
         'currency'        => $currency,
         'subtotal'        => $subtotal,
         'discount_amount' => $discount_amount,
@@ -1032,8 +1258,13 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
 
     $order = edupro_get_order( $order_id );
 
+    // Build synthetic course object with summary title so all 5 modular gateways work seamlessly for multi-course orders
+    $course_for_gateway             = clone $primary_course;
+    $course_for_gateway->ID         = $primary_course_id;
+    $course_for_gateway->post_title = edupro_get_order_course_summary_title( $order );
+
     // Delegate remote session / order / intent creation to the modular gateway
-    $gw_result = $gw->create_payment( $order, $course, $user );
+    $gw_result = $gw->create_payment( $order, $course_for_gateway, $user );
 
     if ( is_wp_error( $gw_result ) ) {
         edupro_mark_order_failed( $order_id, $gw_result->get_error_message() );
@@ -1055,17 +1286,24 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
             'coupon_code'     => $applied_coupon,
             'tax_amount'      => $tax_amount,
             'amount'          => $total,
-            'course_id'       => $course_id,
+            'course_id'       => $primary_course_id,
+            'course_ids'      => $course_ids,
+            'cart_mode'       => $cart_mode,
             'user_id'         => $user_id,
         )
     );
 
-    // Save gateway_order_id and cache checkout payload in meta_json for 15-min idempotent reuse
+    // Save gateway_order_id, course_ids breakdown, and cached checkout payload in meta_json
     edupro_update_order_fields(
         $order_id,
         array(
             'gateway_order_id' => $gateway_order_id,
-            'meta_json'        => wp_json_encode( array( 'checkout_payload' => $response_payload ) ),
+            'meta_json'        => wp_json_encode( array(
+                'course_ids'       => $course_ids,
+                'items'            => $items_breakdown,
+                'cart_mode'        => $cart_mode,
+                'checkout_payload' => $response_payload,
+            ) ),
         )
     );
 
@@ -1074,7 +1312,7 @@ function edupro_process_checkout( $course_id, $user_id, $gateway, $currency = ''
         $gateway,
         'checkout_initiated',
         'pending',
-        sprintf( 'Gateway order %s created (%s %.2f)', $gateway_order_id, $currency, $total )
+        sprintf( 'Gateway order %s created (courses: %s, %s %.2f)', $gateway_order_id, implode( ',', $course_ids ), $currency, $total )
     );
 
     return array(
@@ -1198,7 +1436,9 @@ function edupro_refund_order( $order_id, $amount = null, $reason = '', $unenroll
     edupro_record_order_refund( $order->order_id, $refund_id, $refund_amount );
 
     if ( $unenroll && function_exists( 'edupro_unenroll_student' ) ) {
-        edupro_unenroll_student( absint( $order->course_id ), absint( $order->user_id ) );
+        foreach ( edupro_get_order_course_ids( $order ) as $cid ) {
+            edupro_unenroll_student( $cid, absint( $order->user_id ) );
+        }
     }
 
     edupro_log_payment_event(
@@ -1274,21 +1514,26 @@ function edupro_checkout_ajax() {
         ) );
     }
 
-    $course_id   = isset( $_POST['course_id'] )   ? absint( $_POST['course_id'] )                                    : 0;
-    $gateway     = isset( $_POST['gateway'] )     ? sanitize_key( wp_unslash( $_POST['gateway'] ) )                  : '';
+    $course_id   = isset( $_POST['course_id'] )   ? absint( $_POST['course_id'] )                                         : 0;
+    $cart_mode   = isset( $_POST['cart_mode'] )   && in_array( strtolower( (string) wp_unslash( $_POST['cart_mode'] ) ), array( '1', 'true', 'yes' ), true );
+    $gateway     = isset( $_POST['gateway'] )     ? sanitize_key( wp_unslash( $_POST['gateway'] ) )                       : '';
     $currency    = isset( $_POST['currency'] )    ? strtoupper( sanitize_text_field( wp_unslash( $_POST['currency'] ) ) ) : '';
-    $coupon_code = isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) )       : '';
+    $coupon_code = isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) )            : '';
     $user_id     = get_current_user_id();
 
-    if ( ! $course_id ) {
-        wp_send_json_error( array( 'message' => __( 'Please select a valid course.', 'edupro' ) ) );
+    if ( ! $cart_mode && ! $course_id ) {
+        if ( function_exists( 'edupro_get_cart_count' ) && edupro_get_cart_count( $user_id ) > 0 ) {
+            $cart_mode = true;
+        } else {
+            wp_send_json_error( array( 'message' => __( 'Please select a valid course or add courses to your cart.', 'edupro' ) ) );
+        }
     }
 
-    if ( $gateway === '' && edupro_is_course_free( $course_id ) ) {
+    if ( ! $cart_mode && $gateway === '' && edupro_is_course_free( $course_id ) ) {
         $gateway = 'free';
     }
 
-    $result = edupro_process_checkout( $course_id, $user_id, $gateway, $currency, $coupon_code );
+    $result = edupro_process_checkout( $course_id, $user_id, $gateway, $currency, $coupon_code, $cart_mode );
 
     if ( ! empty( $result['success'] ) ) {
         wp_send_json_success( $result['data'] );
@@ -1650,16 +1895,30 @@ add_action( 'rest_api_init', 'edupro_register_payment_rest_routes' );
  * Send payment confirmation & enrollment email (including Invoice link if available).
  */
 function edupro_send_payment_confirmation_email( $user_id, $course_id, $order_id, $gateway_label, $amount, $currency = '' ) {
-    $user         = get_userdata( $user_id );
-    $course_title = wp_strip_all_tags( get_the_title( $course_id ) );
-
-    if ( ! $user || $course_title === '' ) {
+    $user = get_userdata( $user_id );
+    if ( ! $user ) {
         return;
     }
 
+    $order        = edupro_get_order( $order_id );
+    $course_list  = $order ? edupro_get_order_course_titles_list( $order ) : array();
+    if ( empty( $course_list ) && $course_id ) {
+        $single_title = wp_strip_all_tags( get_the_title( $course_id ) );
+        if ( $single_title !== '' ) {
+            $course_list = array( $single_title );
+        }
+    }
+    if ( empty( $course_list ) ) {
+        return;
+    }
+
+    $summary_title    = $order ? edupro_get_order_course_summary_title( $order ) : $course_list[0];
+    $courses_block    = count( $course_list ) > 1
+        ? __( "Courses:\n- ", 'edupro' ) . implode( "\n- ", $course_list )
+        : __( 'Course: ', 'edupro' ) . $course_list[0];
     $formatted_amount = edupro_payment_format_amount( $amount, $currency );
     $site_name        = get_bloginfo( 'name' );
-    $subject          = sprintf( __( '[%1$s] Enrollment Confirmed: %2$s', 'edupro' ), $site_name, $course_title );
+    $subject          = sprintf( __( '[%1$s] Enrollment Confirmed: %2$s', 'edupro' ), $site_name, $summary_title );
 
     $invoice_line = '';
     if ( function_exists( 'edupro_get_invoice_url' ) ) {
@@ -1667,9 +1926,9 @@ function edupro_send_payment_confirmation_email( $user_id, $course_id, $order_id
     }
 
     $message = sprintf(
-        __( "Hi %1\$s,\n\nThank you! Your enrollment is confirmed for:\n\nCourse: %2\$s\nOrder ID: %3\$s\nPayment Method: %4\$s\nAmount Paid: %5\$s%6\$s\n\nStart learning now from your dashboard:\n%7\$s\n\nHappy learning,\n%8\$s", 'edupro' ),
+        __( "Hi %1\$s,\n\nThank you! Your enrollment is confirmed:\n\n%2\$s\nOrder ID: %3\$s\nPayment Method: %4\$s\nAmount Paid: %5\$s%6\$s\n\nStart learning now from your dashboard:\n%7\$s\n\nHappy learning,\n%8\$s", 'edupro' ),
         $user->display_name,
-        $course_title,
+        $courses_block,
         $order_id,
         $gateway_label,
         $formatted_amount,
@@ -1685,12 +1944,26 @@ function edupro_send_payment_confirmation_email( $user_id, $course_id, $order_id
  * Send UK & India bank transfer instructions email to the student.
  */
 function edupro_send_bank_transfer_instructions_email( $user_id, $course_id, $order_id, $amount, $currency = '' ) {
-    $user         = get_userdata( $user_id );
-    $course_title = wp_strip_all_tags( get_the_title( $course_id ) );
-
-    if ( ! $user || $course_title === '' ) {
+    $user = get_userdata( $user_id );
+    if ( ! $user ) {
         return;
     }
+
+    $order       = edupro_get_order( $order_id );
+    $course_list = $order ? edupro_get_order_course_titles_list( $order ) : array();
+    if ( empty( $course_list ) && $course_id ) {
+        $single_title = wp_strip_all_tags( get_the_title( $course_id ) );
+        if ( $single_title !== '' ) {
+            $course_list = array( $single_title );
+        }
+    }
+    if ( empty( $course_list ) ) {
+        return;
+    }
+
+    $course_title = count( $course_list ) > 1
+        ? "\n- " . implode( "\n- ", $course_list )
+        : '"' . $course_list[0] . '"';
 
     $formatted_amount = edupro_payment_format_amount( $amount, $currency );
     $site_name        = get_bloginfo( 'name' );
@@ -1730,7 +2003,7 @@ function edupro_send_bank_transfer_instructions_email( $user_id, $course_id, $or
     $instructions = trim( (string) get_option( 'edupro_bank_instructions', '' ) );
 
     $message = sprintf(
-        __( "Hi %1\$s,\n\nWe have received your bank transfer order for \"%2\$s\".\n\nOrder ID (Reference): %3\$s\nAmount Due: %4\$s\n\n%5\$s%6\$s\n\nYour course access will be unlocked automatically as soon as our team verifies your transfer.\n\nRegards,\n%7\$s", 'edupro' ),
+        __( "Hi %1\$s,\n\nWe have received your bank transfer order for %2\$s\n\nOrder ID (Reference): %3\$s\nAmount Due: %4\$s\n\n%5\$s%6\$s\n\nYour course access will be unlocked automatically as soon as our team verifies your transfer.\n\nRegards,\n%7\$s", 'edupro' ),
         $user->display_name,
         $course_title,
         $order_id,
@@ -2362,7 +2635,7 @@ function edupro_handle_orders_csv_export() {
 
     $out = fopen( 'php://output', 'w' );
     fputcsv( $out, array(
-        'Order ID', 'User ID', 'Student Email', 'Course ID', 'Course Title',
+        'Order ID', 'User ID', 'Student Email', 'Course IDs', 'Course Titles',
         'Currency', 'Subtotal', 'Discount', 'Coupon', 'Tax', 'Total',
         'Gateway', 'Gateway Order ID', 'Transaction ID', 'Status',
         'Verified Via', 'Verified At', 'Refund ID', 'Refund Amount',
@@ -2370,13 +2643,15 @@ function edupro_handle_orders_csv_export() {
     ) );
 
     foreach ( $rows as $row ) {
-        $u = get_userdata( (int) $row['user_id'] );
+        $u          = get_userdata( (int) $row['user_id'] );
+        $order_ids  = edupro_get_order_course_ids( $row );
+        $titles     = edupro_get_order_course_titles_list( $row );
         fputcsv( $out, array(
             $row['order_id'],
             $row['user_id'],
             $u ? $u->user_email : '',
-            $row['course_id'],
-            wp_strip_all_tags( get_the_title( (int) $row['course_id'] ) ),
+            implode( ', ', $order_ids ),
+            implode( ' | ', $titles ),
             $row['currency'],
             $row['subtotal'],
             $row['discount_amount'],
@@ -2682,9 +2957,19 @@ function edupro_orders_admin_page() {
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="<?php echo esc_url( get_edit_post_link( $order->course_id ) ); ?>">
-                                    <?php echo esc_html( get_the_title( $order->course_id ) ?: '#' . $order->course_id ); ?>
+                                <?php
+                                $order_course_ids   = edupro_get_order_course_ids( $order );
+                                $order_course_list  = edupro_get_order_course_titles_list( $order );
+                                $order_summary      = edupro_get_order_course_summary_title( $order );
+                                $primary_cid        = ! empty( $order_course_ids ) ? $order_course_ids[0] : absint( $order->course_id );
+                                ?>
+                                <a href="<?php echo esc_url( get_edit_post_link( $primary_cid ) ); ?>"
+                                   title="<?php echo esc_attr( implode( ', ', $order_course_list ) ); ?>">
+                                    <?php echo esc_html( $order_summary ); ?>
                                 </a>
+                                <?php if ( count( $order_course_ids ) > 1 ) : ?>
+                                    <br><small style="color:#666;"><?php echo esc_html( sprintf( __( '%d courses (Cart order)', 'edupro' ), count( $order_course_ids ) ) ); ?></small>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <strong><?php echo esc_html( edupro_payment_format_amount( $order->amount, $cur ) ); ?></strong>
