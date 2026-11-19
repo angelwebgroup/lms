@@ -6,7 +6,7 @@
  * declares theme-supports, and enqueues assets.
  *
  * @package EduPro
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 // 0. Constants
 // ---------------------------------------------------------------------------
-define( 'EDUPRO_VERSION',   '1.4.2' );
+define( 'EDUPRO_VERSION',   '1.5.0' );
 define( 'EDUPRO_DIR',       get_template_directory() );
 define( 'EDUPRO_URI',       get_template_directory_uri() );
 define( 'EDUPRO_INC',       EDUPRO_DIR . '/inc/' );
@@ -28,6 +28,7 @@ $edupro_inc_files = [
     'helpers.php',
     'site-settings.php',
     'custom-post-types.php',
+    'notifications.php',
     'taxonomies.php',
     'metaboxes.php',
     'student-auth.php',
@@ -203,21 +204,21 @@ add_action( 'wp_enqueue_scripts', 'edupro_enqueue_styles' );
 if ( ! function_exists( 'edupro_enqueue_scripts' ) ) :
     function edupro_enqueue_scripts() {
 
-        // Main JS (global; jQuery as dependency — WordPress ships jQuery)
+        // Main JS (global — 100% pure Vanilla JS, zero jQuery dependency)
         wp_enqueue_script(
             'edupro-main',
             edupro_asset_uri( 'assets/js/main.js' ),
-            [ 'jquery' ],
+            [],
             EDUPRO_VERSION,
             true  // load in footer
         );
 
-        // Course player JS (conditional: single lesson pages only)
+        // Course player JS (conditional: single lesson pages only — zero jQuery dependency)
         if ( is_singular( 'lms_lesson' ) ) {
             wp_enqueue_script(
                 'edupro-course-player',
                 edupro_asset_uri( 'assets/js/course-player.js' ),
-                [ 'jquery', 'edupro-main' ],
+                [ 'edupro-main' ],
                 EDUPRO_VERSION,
                 true
             );
@@ -256,6 +257,52 @@ add_filter( 'script_loader_tag', function( $tag, $handle ) {
     }
     return $tag;
 }, 10, 2 );
+
+// Load Google Fonts asynchronously (non-render-blocking) with noscript fallback.
+add_filter( 'style_loader_tag', function( $html, $handle, $href ) {
+    if ( is_admin() || 'edupro-google-fonts' !== $handle ) {
+        return $html;
+    }
+    $safe_href = esc_url( $href );
+    return '<link rel="stylesheet" id="edupro-google-fonts-css" href="' . $safe_href . '" media="print" onload="this.media=\'all\'">' . "\n"
+        . '<noscript><link rel="stylesheet" href="' . $safe_href . '"></noscript>' . "\n";
+}, 10, 3 );
+
+// Dequeue unused WordPress core frontend CSS on public / custom LMS templates (CWV 100).
+add_action( 'wp_enqueue_scripts', function() {
+    if ( is_admin() ) {
+        return;
+    }
+
+    // Dashicons are not needed on the public frontend for logged-out visitors.
+    if ( ! is_user_logged_in() ) {
+        wp_dequeue_style( 'dashicons' );
+    }
+
+    // Dequeue Gutenberg block styles on custom-coded LMS templates (keep intact on blog posts & standard pages).
+    $is_custom_lms_template = (
+        is_front_page() ||
+        is_post_type_archive( 'lms_course' ) ||
+        is_tax( [ 'course_category', 'course_tag', 'course_level', 'course_language' ] ) ||
+        is_singular( [ 'lms_course', 'lms_lesson' ] ) ||
+        is_page_template( [
+            'templates/template-cart.php',
+            'templates/template-checkout.php',
+            'templates/template-dashboard.php',
+            'templates/template-login.php',
+            'templates/template-register.php',
+            'templates/template-about.php',
+            'templates/template-contact.php',
+        ] )
+    );
+
+    if ( $is_custom_lms_template ) {
+        wp_dequeue_style( 'wp-block-library' );
+        wp_dequeue_style( 'wp-block-library-theme' );
+        wp_dequeue_style( 'classic-theme-styles' );
+        wp_dequeue_style( 'global-styles' );
+    }
+}, 100 );
 
 // ---------------------------------------------------------------------------
 // 5. Register Sidebars / Widget Areas
@@ -407,6 +454,10 @@ add_filter( 'image_size_names_choose', function( $sizes ) {
 // 10. Security & Frontend Bloat Cleanup
 // ---------------------------------------------------------------------------
 remove_action( 'wp_head', 'wp_generator' );
+remove_action( 'wp_head', 'rsd_link' );
+remove_action( 'wp_head', 'wlwmanifest_link' );
+remove_action( 'wp_head', 'wp_shortlink_wp_head', 10 );
+remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
 
 add_action( 'init', function() {
     if ( ! is_admin() ) {

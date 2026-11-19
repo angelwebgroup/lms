@@ -133,20 +133,22 @@ if ( ! function_exists( 'edupro_run_demo_setup' ) ) :
 		$reviews_cnt = edupro_demo_seed_google_reviews( $force );
 		edupro_demo_seed_default_gateway_if_empty();
 		$coupons_cnt = edupro_demo_seed_sample_coupon();
+		$notifs_cnt  = edupro_demo_seed_notifications();
 		$menus       = edupro_demo_create_menus( $force, $pages );
 
 		$summary = array(
-			'pages'       => count( $pages ),
-			'categories'  => $terms['categories'],
-			'levels'      => $terms['levels'],
-			'languages'   => $terms['languages'],
-			'instructors' => count( $instructors ),
-			'courses'     => $catalog['courses'],
-			'lessons'     => $catalog['lessons'],
-			'reviews'     => $reviews_cnt,
-			'coupons'     => $coupons_cnt,
-			'menus'       => count( $menus ),
-			'completed'   => current_time( 'mysql' ),
+			'pages'         => count( $pages ),
+			'categories'    => $terms['categories'],
+			'levels'        => $terms['levels'],
+			'languages'     => $terms['languages'],
+			'instructors'   => count( $instructors ),
+			'courses'       => $catalog['courses'],
+			'lessons'       => $catalog['lessons'],
+			'reviews'       => $reviews_cnt,
+			'coupons'       => $coupons_cnt,
+			'notifications' => $notifs_cnt,
+			'menus'         => count( $menus ),
+			'completed'     => current_time( 'mysql' ),
 		);
 
 		update_option( 'edupro_demo_setup_done', $summary['completed'] );
@@ -166,8 +168,8 @@ endif;
  * @return array Fresh setup summary.
  */
 function edupro_demo_reset_and_reimport() {
-	// 1. Delete demo lessons, courses, instructors, and generated SVG attachments.
-	$post_types_to_clean = array( 'lms_lesson', 'lms_course', 'lms_instructor', 'attachment' );
+	// 1. Delete demo lessons, courses, instructors, notifications, and generated SVG attachments.
+	$post_types_to_clean = array( 'lms_lesson', 'lms_course', 'lms_instructor', 'lms_notification', 'attachment' );
 	foreach ( $post_types_to_clean as $pt ) {
 		$demo_posts = get_posts(
 			array(
@@ -210,6 +212,7 @@ function edupro_demo_reset_and_reimport() {
 	// 3. Reset setup flag and demo reviews so fresh defaults are seeded.
 	delete_option( 'edupro_demo_setup_done' );
 	delete_option( 'edupro_manual_reviews' );
+	delete_option( 'edupro_v15_notifications_seeded' );
 
 	// 4. Re-run complete setup.
 	return edupro_run_demo_setup( true );
@@ -302,14 +305,14 @@ function edupro_demo_create_pages( $force = false ) {
 		'about-us'         => array(
 			'title'    => __( 'About Us', 'edupro' ),
 			'slug'     => 'about-us',
-			'template' => '',
+			'template' => 'templates/template-about.php',
 			'option'   => 'edupro_about_page_id',
 			'content'  => $about_content,
 		),
 		'contact-us'       => array(
 			'title'    => __( 'Contact Us', 'edupro' ),
 			'slug'     => 'contact-us',
-			'template' => '',
+			'template' => 'templates/template-contact.php',
 			'option'   => 'edupro_contact_page_id',
 			'content'  => $contact_content,
 		),
@@ -429,6 +432,80 @@ function edupro_demo_maybe_create_cart_page() {
 	}
 }
 add_action( 'admin_init', 'edupro_demo_maybe_create_cart_page' );
+
+/**
+ * One-time v1.4.3 upgrade hook: assign the new About Us and Contact Us page
+ * templates on existing installs (when currently default/empty) and replace any
+ * legacy "EduPro" string in their post_content with get_bloginfo( 'name' ).
+ */
+function edupro_demo_upgrade_about_contact_v143() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	if ( '1' === get_option( 'edupro_v143_pages_upgraded', '0' ) ) {
+		return;
+	}
+
+	$site_name = trim( (string) get_bloginfo( 'name' ) );
+	$targets   = array(
+		array(
+			'option'   => 'edupro_about_page_id',
+			'slugs'    => array( 'about-us', 'about' ),
+			'template' => 'templates/template-about.php',
+		),
+		array(
+			'option'   => 'edupro_contact_page_id',
+			'slugs'    => array( 'contact-us', 'contact' ),
+			'template' => 'templates/template-contact.php',
+		),
+	);
+
+	foreach ( $targets as $target ) {
+		$page = null;
+
+		$opt_id = (int) get_option( $target['option'], 0 );
+		if ( $opt_id && 'page' === get_post_type( $opt_id ) && 'trash' !== get_post_status( $opt_id ) ) {
+			$page = get_post( $opt_id );
+		}
+
+		if ( ! $page ) {
+			foreach ( $target['slugs'] as $slug ) {
+				$candidate = get_page_by_path( $slug );
+				if ( $candidate && 'trash' !== $candidate->post_status ) {
+					$page = $candidate;
+					break;
+				}
+			}
+		}
+
+		if ( ! $page ) {
+			continue;
+		}
+
+		$current_tpl = (string) get_post_meta( $page->ID, '_wp_page_template', true );
+		if ( '' === $current_tpl || 'default' === $current_tpl ) {
+			update_post_meta( $page->ID, '_wp_page_template', $target['template'] );
+		}
+
+		if ( ! $opt_id ) {
+			update_option( $target['option'], (int) $page->ID );
+		}
+
+		if ( '' !== $site_name && 'EduPro' !== $site_name && false !== strpos( (string) $page->post_content, 'EduPro' ) ) {
+			$updated_content = str_replace( 'EduPro', $site_name, (string) $page->post_content );
+			wp_update_post(
+				array(
+					'ID'           => (int) $page->ID,
+					'post_content' => $updated_content,
+				)
+			);
+		}
+	}
+
+	update_option( 'edupro_v143_pages_upgraded', '1' );
+}
+add_action( 'admin_init', 'edupro_demo_upgrade_about_contact_v143' );
 
 // =============================================================================
 // 4. TAXONOMIES (CATEGORIES, LEVELS, LANGUAGES)
@@ -2181,6 +2258,115 @@ function edupro_demo_seed_sample_coupon() {
 
 	return false !== $inserted ? 1 : 0;
 }
+
+/**
+ * Seed 2 active demo Notifications (`lms_notification`) with live rolling countdown
+ * and promo highlight ONLY if no notifications exist yet.
+ *
+ * @return int Number of demo notifications created or existing.
+ */
+function edupro_demo_seed_notifications() {
+	if ( ! post_type_exists( 'lms_notification' ) && function_exists( 'edupro_register_notification_post_type' ) ) {
+		edupro_register_notification_post_type();
+	}
+	if ( ! post_type_exists( 'lms_notification' ) && function_exists( 'edupro_register_notifications_cpt' ) ) {
+		edupro_register_notifications_cpt();
+	}
+	if ( ! post_type_exists( 'lms_notification' ) ) {
+		return 0;
+	}
+
+	$existing = get_posts(
+		array(
+			'post_type'      => 'lms_notification',
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+		)
+	);
+
+	if ( ! empty( $existing ) ) {
+		update_option( 'edupro_v15_notifications_seeded', '1' );
+		return count( $existing );
+	}
+
+	$author_id   = get_current_user_id() ?: 1;
+	$courses_url = get_post_type_archive_link( 'lms_course' ) ?: home_url( '/courses/' );
+
+	$demo_notifications = array(
+		array(
+			'title'         => __( 'Black Friday Accredited Courses Sale', 'edupro' ),
+			'slug'          => 'black-friday-accredited-courses-sale',
+			'order'         => 1,
+			'badge'         => 'BLACK FRIDAY SALE',
+			'badge_style'   => 'crimson',
+			'prefix'        => 'Up to',
+			'highlight'     => '80% Off',
+			'suffix'        => 'All Accredited CPD & QLS Endorsed Courses',
+			'rolling_hours' => 14,
+			'link'          => $courses_url,
+		),
+		array(
+			'title'         => __( 'Welcome Extra 20% Promo', 'edupro' ),
+			'slug'          => 'welcome-extra-20-promo',
+			'order'         => 2,
+			'badge'         => 'SPECIAL OFFER',
+			'badge_style'   => 'gold',
+			'prefix'        => 'Use code',
+			'highlight'     => 'WELCOME20',
+			'suffix'        => 'at checkout for an extra 20% off any course or bundle',
+			'rolling_hours' => 0,
+			'link'          => $courses_url,
+		),
+	);
+
+	$created = 0;
+	foreach ( $demo_notifications as $item ) {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => $item['title'],
+				'post_name'   => $item['slug'],
+				'post_status' => 'publish',
+				'post_type'   => 'lms_notification',
+				'post_author' => $author_id,
+				'menu_order'  => (int) $item['order'],
+			)
+		);
+
+		if ( $post_id && ! is_wp_error( $post_id ) ) {
+			update_post_meta( $post_id, '_edupro_notif_active', '1' );
+			update_post_meta( $post_id, '_edupro_notif_badge', $item['badge'] );
+			update_post_meta( $post_id, '_edupro_notif_badge_style', $item['badge_style'] );
+			update_post_meta( $post_id, '_edupro_notif_prefix', $item['prefix'] );
+			update_post_meta( $post_id, '_edupro_notif_highlight', $item['highlight'] );
+			update_post_meta( $post_id, '_edupro_notif_suffix', $item['suffix'] );
+			update_post_meta( $post_id, '_edupro_notif_link', esc_url_raw( $item['link'] ) );
+			update_post_meta( $post_id, '_edupro_notif_countdown_end', '' );
+			update_post_meta( $post_id, '_edupro_notif_rolling_hours', absint( $item['rolling_hours'] ) );
+			update_post_meta( $post_id, '_edupro_demo_item', '1' );
+			$created++;
+		}
+	}
+
+	update_option( 'edupro_v15_notifications_seeded', '1' );
+
+	return $created;
+}
+
+/**
+ * One-time v1.5.0 upgrade hook: seed the 2 starter Notifications on existing
+ * installations upgrading to v1.5.0 if none exist yet.
+ */
+function edupro_demo_maybe_seed_v15_notifications() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( '1' === get_option( 'edupro_v15_notifications_seeded', '0' ) ) {
+		return;
+	}
+	edupro_demo_seed_notifications();
+}
+add_action( 'admin_init', 'edupro_demo_maybe_seed_v15_notifications' );
 
 // =============================================================================
 // 9. NAVIGATION MENUS (primary, footer-1, footer-2, footer-3)

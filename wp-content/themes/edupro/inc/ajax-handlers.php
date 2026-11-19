@@ -1173,3 +1173,106 @@ function edupro_ajax_update_settings() {
 }
 add_action( 'wp_ajax_edupro_update_settings', 'edupro_ajax_update_settings' );
 add_action( 'wp_ajax_nopriv_edupro_update_settings', 'edupro_ajax_update_settings' );
+
+// =============================================================================
+// 11. AJAX: CONTACT FORM SUBMISSION (edupro_submit_contact_form)
+// =============================================================================
+
+/**
+ * Handle AJAX submission from the Contact Us page template.
+ * Verifies `edupro_nonce`, checks anti-spam honeypot, validates inputs,
+ * and emails Website Settings support email (with Reply-To header).
+ */
+function edupro_ajax_submit_contact_form() {
+	if ( ! edupro_verify_ajax_nonce() ) {
+		wp_send_json_error( array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'edupro' ) ), 403 );
+	}
+
+	// Honeypot check: silently succeed so bots don't retry.
+	$honeypot = isset( $_POST['website_url'] ) ? trim( (string) wp_unslash( $_POST['website_url'] ) ) : '';
+	if ( '' !== $honeypot ) {
+		wp_send_json_success(
+			array(
+				'message' => __( 'Thank you! Your message has been sent. Our team will get back to you shortly.', 'edupro' ),
+			)
+		);
+	}
+
+	$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+	$email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	$phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
+	$topic   = isset( $_POST['topic'] ) ? sanitize_text_field( wp_unslash( $_POST['topic'] ) ) : __( 'General Enquiry', 'edupro' );
+	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+
+	if ( '' === $name ) {
+		wp_send_json_error( array( 'message' => __( 'Please enter your full name.', 'edupro' ) ) );
+	}
+
+	if ( ! is_email( $email ) ) {
+		wp_send_json_error( array( 'message' => __( 'Please enter a valid email address.', 'edupro' ) ) );
+	}
+
+	if ( mb_strlen( trim( $message ) ) < 10 ) {
+		wp_send_json_error( array( 'message' => __( 'Please write a message of at least 10 characters.', 'edupro' ) ) );
+	}
+
+	$site_name = function_exists( 'edupro_get_site_setting' )
+		? (string) edupro_get_site_setting( 'site_name', get_bloginfo( 'name' ) )
+		: get_bloginfo( 'name' );
+	if ( '' === trim( $site_name ) ) {
+		$site_name = get_bloginfo( 'name' );
+	}
+
+	$recipient = function_exists( 'edupro_get_site_setting' )
+		? (string) edupro_get_site_setting( 'email_support', get_option( 'admin_email' ) )
+		: (string) get_option( 'admin_email' );
+	if ( ! is_email( $recipient ) ) {
+		$recipient = (string) get_option( 'admin_email' );
+	}
+
+	$subject = sprintf(
+		/* translators: 1: site name, 2: inquiry topic, 3: sender name */
+		__( '[%1$s Contact] %2$s — %3$s', 'edupro' ),
+		$site_name,
+		$topic,
+		$name
+	);
+
+	$body_lines = array(
+		sprintf( __( 'New contact enquiry received on %s:', 'edupro' ), $site_name ),
+		'',
+		sprintf( __( 'Name: %s', 'edupro' ), $name ),
+		sprintf( __( 'Email: %s', 'edupro' ), $email ),
+		sprintf( __( 'Phone / WhatsApp: %s', 'edupro' ), $phone ? $phone : __( 'Not provided', 'edupro' ) ),
+		sprintf( __( 'Topic: %s', 'edupro' ), $topic ),
+		'',
+		__( 'Message:', 'edupro' ),
+		$message,
+		'',
+		sprintf( __( 'Submitted: %s', 'edupro' ), current_time( 'mysql' ) ),
+	);
+
+	$safe_header_name = str_replace( array( "\r", "\n" ), '', $name );
+	$headers          = array(
+		'Content-Type: text/plain; charset=UTF-8',
+		sprintf( 'Reply-To: %s <%s>', $safe_header_name, $email ),
+	);
+
+	$sent = wp_mail( $recipient, $subject, implode( "\n", $body_lines ), $headers );
+
+	if ( ! $sent ) {
+		wp_send_json_error(
+			array(
+				'message' => __( 'We could not deliver your message right now. Please email or WhatsApp us directly.', 'edupro' ),
+			)
+		);
+	}
+
+	wp_send_json_success(
+		array(
+			'message' => __( 'Thank you! Your message has been received and our team will respond shortly.', 'edupro' ),
+		)
+	);
+}
+add_action( 'wp_ajax_edupro_submit_contact_form', 'edupro_ajax_submit_contact_form' );
+add_action( 'wp_ajax_nopriv_edupro_submit_contact_form', 'edupro_ajax_submit_contact_form' );

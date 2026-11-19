@@ -183,10 +183,10 @@ $giftcard_cta_url     = $edupro_setting( 'giftcard_cta_url', $courses_url );
 
         <div class="edupro-container container edupro-hero__inner">
             <div class="edupro-hero__content">
-                <span class="edupro-hero__eyebrow">
-                    <span class="edupro-hero__pulse" aria-hidden="true"></span>
-                    <?php echo esc_html( $hero_badge ); ?>
-                </span>
+                <p class="edupro-hero__eyebrow-editorial">
+                    <span class="edupro-hero__eyebrow-rule" aria-hidden="true"></span>
+                    <span><?php echo esc_html( $hero_badge ); ?></span>
+                </p>
 
                 <h1 class="edupro-hero__title">
                     <?php echo esc_html( $hero_heading ); ?>
@@ -203,16 +203,18 @@ $giftcard_cta_url     = $edupro_setting( 'giftcard_cta_url', $courses_url );
                         <?php esc_html_e( 'Search for online courses', 'edupro' ); ?>
                     </label>
                     <div class="edupro-hero__search-box">
-                        <svg class="edupro-hero__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input
-                            type="search"
-                            id="edupro-hero-search-input"
-                            name="s"
-                            placeholder="<?php esc_attr_e( 'Search 500+ courses (e.g., Phlebotomy, Functional Skills, Python)…', 'edupro' ); ?>"
-                        >
+                        <div class="edupro-hero__search-field">
+                            <svg class="edupro-hero__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input
+                                type="search"
+                                id="edupro-hero-search-input"
+                                name="s"
+                                placeholder="<?php esc_attr_e( 'Search 500+ courses (e.g., Phlebotomy, Functional Skills, Python)…', 'edupro' ); ?>"
+                            >
+                        </div>
                         <input type="hidden" name="post_type" value="lms_course">
                         <button type="submit" class="edupro-btn edupro-btn--primary btn-primary edupro-btn--pill">
                             <?php esc_html_e( 'Search Courses', 'edupro' ); ?>

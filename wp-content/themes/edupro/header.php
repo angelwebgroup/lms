@@ -131,8 +131,10 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
 
 <div id="page" class="site edupro-site">
 
-    <?php if ( $edupro_announcement_enabled ) : ?>
-        <!-- Top Announcement Bar -->
+    <?php if ( function_exists( 'edupro_render_notification_bar' ) ) : ?>
+        <?php echo edupro_render_notification_bar(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+    <?php elseif ( $edupro_announcement_enabled ) : ?>
+        <!-- Fallback Top Announcement Bar -->
         <div id="edupro-announcement-bar" class="edupro-announcement-bar top-bar" role="region" aria-label="<?php esc_attr_e( 'Site Announcement', 'edupro' ); ?>" style="background-color:#1a1a2e;color:#ffffff;">
             <div class="edupro-container container edupro-announcement-bar__inner">
                 <div class="edupro-announcement-bar__text">
@@ -144,27 +146,6 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
                     <?php endif; ?>
                 </div>
                 <div class="edupro-announcement-bar__right">
-                    <?php if ( $edupro_phone_href || $edupro_whatsapp_url ) : ?>
-                        <div class="edupro-topbar-contact">
-                            <?php if ( $edupro_phone_href ) : ?>
-                                <a href="<?php echo esc_url( $edupro_phone_href ); ?>" class="edupro-topbar-link edupro-topbar-phone" title="<?php esc_attr_e( 'Call Us', 'edupro' ); ?>">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                    </svg>
-                                    <span><?php echo esc_html( $edupro_phone_primary ); ?></span>
-                                </a>
-                            <?php endif; ?>
-                            <?php if ( $edupro_whatsapp_url ) : ?>
-                                <a href="<?php echo esc_url( $edupro_whatsapp_url ); ?>" target="_blank" rel="noopener noreferrer" class="edupro-topbar-link edupro-topbar-whatsapp" title="<?php esc_attr_e( 'Chat on WhatsApp', 'edupro' ); ?>">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M20.52 3.48A11.86 11.86 0 0 0 12.06 0C5.47 0 .11 5.36.11 11.95c0 2.1.55 4.16 1.6 5.97L0 24l6.25-1.64a11.9 11.9 0 0 0 5.8 1.48h.01c6.59 0 11.95-5.36 11.95-11.95 0-3.19-1.24-6.19-3.49-8.41zM12.06 21.8h-.01a9.87 9.87 0 0 1-5.04-1.38l-.36-.21-3.71.97.99-3.62-.24-.37a9.86 9.86 0 0 1-1.52-5.24c0-5.45 4.43-9.88 9.89-9.88 2.64 0 5.12 1.03 6.98 2.9a9.82 9.82 0 0 1 2.9 6.99c0 5.45-4.44 9.84-9.88 9.84zm5.42-7.41c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.21 5.09 4.5.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z"/>
-                                    </svg>
-                                    <span><?php esc_html_e( 'WhatsApp', 'edupro' ); ?></span>
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-
                     <div class="edupro-currency-switcher" role="group" aria-label="<?php esc_attr_e( 'Switch currency', 'edupro' ); ?>">
                         <?php foreach ( $edupro_currency_items as $curr_item ) : ?>
                             <?php
@@ -182,15 +163,6 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
                             </a>
                         <?php endforeach; ?>
                     </div>
-                    <?php if ( ! $edupro_is_logged_in ) : ?>
-                        <a href="<?php echo esc_url( $edupro_login_url ); ?>" class="edupro-topbar-link">
-                            <?php esc_html_e( 'Student Login', 'edupro' ); ?>
-                        </a>
-                    <?php else : ?>
-                        <a href="<?php echo esc_url( $edupro_dashboard_url ); ?>" class="edupro-topbar-link">
-                            <?php esc_html_e( 'My Dashboard', 'edupro' ); ?>
-                        </a>
-                    <?php endif; ?>
                     <button
                         type="button"
                         id="edupro-announcement-close"
@@ -387,8 +359,24 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
                 ?>
             </nav>
 
-            <!-- Header Actions: Shopping Cart Drawer Trigger + User Account / Login -->
+            <!-- Header Actions: Mobile Search + Shopping Cart Drawer Trigger + User Account / Login + Hamburger -->
             <div class="edupro-header__actions">
+
+                <!-- Mobile Search Toggle Button -->
+                <button
+                    type="button"
+                    id="edupro-mobile-search-toggle"
+                    class="edupro-mobile-search-toggle"
+                    aria-expanded="false"
+                    aria-controls="edupro-mobile-search-bar"
+                    aria-label="<?php esc_attr_e( 'Search courses', 'edupro' ); ?>"
+                    title="<?php esc_attr_e( 'Search courses', 'edupro' ); ?>"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
 
                 <!-- Shopping Cart Slide-Out Drawer Trigger -->
                 <button
@@ -466,6 +454,27 @@ foreach ( $edupro_supported_currencies as $curr_key => $curr_val ) {
                 </button>
             </div>
 
+        </div>
+
+        <!-- Collapsible Mobile Search Bar Strip -->
+        <div id="edupro-mobile-search-bar" class="edupro-mobile-search-bar" hidden>
+            <div class="edupro-container container">
+                <form role="search" method="get" class="edupro-mobile-search-bar__form" action="<?php echo esc_url( $edupro_courses_url ); ?>">
+                    <label for="edupro-mobile-header-search" class="screen-reader-text"><?php esc_html_e( 'Search courses', 'edupro' ); ?></label>
+                    <input
+                        type="search"
+                        id="edupro-mobile-header-search"
+                        name="s"
+                        value="<?php echo esc_attr( get_search_query() ); ?>"
+                        placeholder="<?php esc_attr_e( 'What do you want to learn today?', 'edupro' ); ?>"
+                        autocomplete="off"
+                    >
+                    <input type="hidden" name="post_type" value="lms_course">
+                    <button type="submit" class="edupro-btn edupro-btn--primary btn-primary edupro-btn--pill">
+                        <?php esc_html_e( 'Search', 'edupro' ); ?>
+                    </button>
+                </form>
+            </div>
         </div>
     </header>
 

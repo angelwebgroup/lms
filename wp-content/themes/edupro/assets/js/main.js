@@ -400,7 +400,7 @@
             // localStorage unavailable (private browsing)
         }
 
-        const closeBtn = bar.querySelector('.announcement-close, .announcement-bar__close, [data-dismiss="announcement"], button');
+        const closeBtn = bar.querySelector('#edupro-announcement-close, .edupro-announcement-bar__close, .announcement-close, .announcement-bar__close, [data-dismiss="announcement"]');
         if (closeBtn) {
             closeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -423,6 +423,229 @@
                 }
             });
         }
+    }
+
+    /* =========================================================================
+     * 4B. NOTIFICATION BAR SLIDER & LIVE TICKING COUNTDOWN TIMER
+     * ========================================================================= */
+
+    function initNotificationSlider() {
+        const bar = document.getElementById('edupro-announcement-bar') || document.querySelector('.edupro-announcement-bar');
+        if (!bar) return;
+
+        // 1. Multi-notification slide rotation (5000ms auto-rotate + Prev/Next)
+        const slides = Array.from(bar.querySelectorAll('.edupro-notif-slide'));
+        if (slides.length > 1) {
+            const prevBtn = bar.querySelector('.edupro-notif-nav--prev');
+            const nextBtn = bar.querySelector('.edupro-notif-nav--next');
+            const intervalMs = parseInt(bar.dataset.interval, 10) || 5000;
+
+            let activeIdx = slides.findIndex((s) => s.classList.contains('is-active'));
+            if (activeIdx < 0) activeIdx = 0;
+            let timer = null;
+
+            function showSlide(nextIdx) {
+                activeIdx = (nextIdx + slides.length) % slides.length;
+                slides.forEach((slide, idx) => {
+                    const active = idx === activeIdx;
+                    slide.classList.toggle('is-active', active);
+                    slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+                });
+            }
+
+            function stopAuto() {
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+            }
+
+            function startAuto() {
+                stopAuto();
+                timer = setInterval(() => showSlide(activeIdx + 1), intervalMs);
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showSlide(activeIdx - 1);
+                    startAuto();
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showSlide(activeIdx + 1);
+                    startAuto();
+                });
+            }
+
+            bar.addEventListener('mouseenter', stopAuto);
+            bar.addEventListener('mouseleave', startAuto);
+            bar.addEventListener('focusin', stopAuto);
+            bar.addEventListener('focusout', (e) => {
+                if (!bar.contains(e.relatedTarget)) {
+                    startAuto();
+                }
+            });
+
+            showSlide(activeIdx);
+            startAuto();
+        } else if (slides.length === 1) {
+            slides[0].classList.add('is-active');
+            slides[0].setAttribute('aria-hidden', 'false');
+        }
+
+        // 2. Live 1-second Countdown Timers (fixed ISO end or evergreen rolling hours)
+        const countdownEls = Array.from(document.querySelectorAll('.edupro-notif-countdown'));
+        if (!countdownEls.length) return;
+
+        const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+
+        const timers = countdownEls
+            .map((el, idx) => {
+                const timeDisplay = el.querySelector('.edupro-notif-countdown__time') || el;
+                const fixedEndStr = (el.dataset.countdownEnd || '').trim();
+                const rollingHours = parseFloat(el.dataset.rollingHours || '0');
+                const notifId = el.dataset.notifId || el.dataset.id || el.closest('.edupro-notif-slide')?.dataset.notifId || String(idx + 1);
+                const storageKey = `edupro_notif_end_${notifId}`;
+
+                let mode = '';
+                let targetMs = 0;
+
+                if (fixedEndStr) {
+                    const parsed = Date.parse(fixedEndStr);
+                    if (!Number.isNaN(parsed)) {
+                        mode = 'fixed';
+                        targetMs = parsed;
+                    }
+                }
+
+                if (!mode && rollingHours > 0) {
+                    mode = 'rolling';
+                    let stored = 0;
+                    try {
+                        stored = parseInt(localStorage.getItem(storageKey) || '0', 10);
+                    } catch (err) {
+                        stored = 0;
+                    }
+                    if (!stored || stored <= Date.now()) {
+                        stored = Date.now() + Math.round(rollingHours * 3600 * 1000);
+                        try {
+                            localStorage.setItem(storageKey, String(stored));
+                        } catch (err) {
+                            // ignore
+                        }
+                    }
+                    targetMs = stored;
+                }
+
+                if (!mode) return null;
+                return { el, timeDisplay, mode, targetMs, rollingHours, storageKey };
+            })
+            .filter(Boolean);
+
+        if (!timers.length) return;
+
+        function tickCountdowns() {
+            const now = Date.now();
+            timers.forEach((t) => {
+                let diff = t.targetMs - now;
+
+                if (diff <= 0) {
+                    if (t.mode === 'rolling' && t.rollingHours > 0) {
+                        t.targetMs = now + Math.round(t.rollingHours * 3600 * 1000);
+                        try {
+                            localStorage.setItem(t.storageKey, String(t.targetMs));
+                        } catch (err) {
+                            // ignore
+                        }
+                        diff = t.targetMs - now;
+                    } else {
+                        t.timeDisplay.textContent = '00h : 00m : 00s';
+                        return;
+                    }
+                }
+
+                const totalSec = Math.floor(diff / 1000);
+                const days = Math.floor(totalSec / 86400);
+                const hours = Math.floor((totalSec % 86400) / 3600);
+                const mins = Math.floor((totalSec % 3600) / 60);
+                const secs = totalSec % 60;
+
+                if (days > 0) {
+                    t.timeDisplay.textContent = `${days}d ${pad2(hours)}h : ${pad2(mins)}m : ${pad2(secs)}s`;
+                } else {
+                    t.timeDisplay.textContent = `${pad2(hours)}h : ${pad2(mins)}m : ${pad2(secs)}s`;
+                }
+            });
+        }
+
+        tickCountdowns();
+        setInterval(tickCountdowns, 1000);
+    }
+
+    /* =========================================================================
+     * 4C. MOBILE HEADER SEARCH BAR TOGGLE
+     * ========================================================================= */
+
+    function initMobileSearch() {
+        const toggleBtn = document.getElementById('edupro-mobile-search-toggle');
+        const searchBar = document.getElementById('edupro-mobile-search-bar');
+        if (!toggleBtn || !searchBar) return;
+
+        const searchInput = searchBar.querySelector('input[type="search"], input[type="text"], input');
+
+        function openSearch() {
+            searchBar.hidden = false;
+            searchBar.classList.add('is-open');
+            toggleBtn.classList.add('is-active');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            if (searchInput) {
+                setTimeout(() => searchInput.focus(), 40);
+            }
+        }
+
+        function closeSearch(restoreFocus = false) {
+            if (searchBar.hidden && !searchBar.classList.contains('is-open')) return;
+            searchBar.classList.remove('is-open');
+            searchBar.hidden = true;
+            toggleBtn.classList.remove('is-active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            if (restoreFocus) {
+                toggleBtn.focus();
+            }
+        }
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (searchBar.hidden || !searchBar.classList.contains('is-open')) {
+                openSearch();
+            } else {
+                closeSearch(false);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (searchBar.hidden) return;
+            if (!searchBar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                closeSearch(false);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !searchBar.hidden) {
+                closeSearch(true);
+            }
+        });
+
+        window.addEventListener('resize', debounce(() => {
+            if (window.innerWidth > 992 && !searchBar.hidden) {
+                closeSearch(false);
+            }
+        }, 150));
     }
 
     /* =========================================================================
@@ -3854,6 +4077,8 @@
     function boot() {
         initStickyHeader();
         initAnnouncementBar();
+        initNotificationSlider();
+        initMobileSearch();
         initMobileMenu();
         initMegaMenu();
         initSmoothScroll();

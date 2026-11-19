@@ -362,57 +362,56 @@ if ( is_wp_error( $edupro_footer_cats ) || ! is_array( $edupro_footer_cats ) ) {
                     <?php echo wp_kses_post( $edupro_copyright ); ?>
                 </div>
 
-                <!-- Inline SVG Payment Icons -->
-                <div class="edupro-footer__payments" aria-label="<?php esc_attr_e( 'Accepted Payment Methods', 'edupro' ); ?>">
-                    <!-- Cashfree -->
-                    <span class="edupro-payment-icon" title="Cashfree">
-                        <svg width="62" height="28" viewBox="0 0 62 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cashfree">
-                            <rect width="62" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <text x="31" y="17.5" text-anchor="middle" fill="#4ade80" font-family="Inter,sans-serif" font-weight="700" font-size="9">Cashfree</text>
+                <!-- High-Contrast Dark Glass Payment Tiles -->
+                <div class="edupro-footer__payments edupro-footer-payments" aria-label="<?php esc_attr_e( 'Accepted Payment Methods', 'edupro' ); ?>">
+                    <!-- PayPal -->
+                    <span class="edupro-payment-tile" title="PayPal">
+                        <svg width="58" height="22" viewBox="0 0 64 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayPal">
+                            <text x="32" y="16" text-anchor="middle" fill="#38bdf8" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="800" font-style="italic" font-size="13.5" letter-spacing="-0.3">PayPal</text>
                         </svg>
                     </span>
-                    <!-- Razorpay -->
-                    <span class="edupro-payment-icon" title="Razorpay">
-                        <svg width="64" height="28" viewBox="0 0 64 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Razorpay">
-                            <rect width="64" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <path d="M13 19L16 9H19L15.5 19H13Z" fill="#3395FF"/>
-                            <text x="40" y="17.5" text-anchor="middle" fill="#ffffff" font-family="Inter,sans-serif" font-weight="700" font-size="9">Razorpay</text>
-                        </svg>
-                    </span>
-                    <!-- UPI -->
-                    <span class="edupro-payment-icon" title="UPI">
-                        <svg width="44" height="28" viewBox="0 0 44 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UPI">
-                            <rect width="44" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <text x="22" y="18" text-anchor="middle" fill="#2ecc71" font-family="Poppins,sans-serif" font-weight="800" font-size="11">UPI</text>
-                        </svg>
-                    </span>
-                    <!-- Visa -->
-                    <span class="edupro-payment-icon" title="Visa">
-                        <svg width="46" height="28" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visa">
-                            <rect width="46" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <text x="23" y="18" text-anchor="middle" fill="#ffffff" font-family="Poppins,sans-serif" font-weight="800" font-style="italic" font-size="11" letter-spacing="0.5">VISA</text>
+                    <!-- VISA -->
+                    <span class="edupro-payment-tile" title="Visa">
+                        <svg width="48" height="22" viewBox="0 0 54 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visa">
+                            <text x="27" y="16.5" text-anchor="middle" fill="#ffffff" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="800" font-style="italic" font-size="14.5" letter-spacing="0.8">VISA</text>
                         </svg>
                     </span>
                     <!-- Mastercard -->
-                    <span class="edupro-payment-icon" title="Mastercard">
-                        <svg width="46" height="28" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mastercard">
-                            <rect width="46" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <circle cx="19" cy="14" r="7" fill="#EB001B"/>
-                            <circle cx="27" cy="14" r="7" fill="#F79E1B" fill-opacity="0.9"/>
+                    <span class="edupro-payment-tile" title="Mastercard">
+                        <svg width="42" height="22" viewBox="0 0 42 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mastercard">
+                            <circle cx="15.5" cy="11" r="8.2" fill="#eb001b"/>
+                            <circle cx="26.5" cy="11" r="8.2" fill="#f79e1b" fill-opacity="0.92"/>
                         </svg>
                     </span>
-                    <!-- Stripe -->
-                    <span class="edupro-payment-icon" title="Stripe">
-                        <svg width="50" height="28" viewBox="0 0 50 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stripe">
-                            <rect width="50" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <text x="25" y="17.5" text-anchor="middle" fill="#a29bfe" font-family="Poppins,sans-serif" font-weight="700" font-size="10">stripe</text>
+                    <!-- AMEX -->
+                    <span class="edupro-payment-tile" title="American Express">
+                        <svg width="50" height="22" viewBox="0 0 54 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AMEX">
+                            <text x="27" y="15.5" text-anchor="middle" fill="#60a5fa" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="800" font-size="12.5" letter-spacing="0.6">AMEX</text>
                         </svg>
                     </span>
-                    <!-- PayPal -->
-                    <span class="edupro-payment-icon" title="PayPal">
-                        <svg width="56" height="28" viewBox="0 0 56 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayPal">
-                            <rect width="56" height="28" rx="4" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.2"/>
-                            <text x="28" y="17.5" text-anchor="middle" fill="#64B5F6" font-family="Poppins,sans-serif" font-weight="700" font-style="italic" font-size="10">PayPal</text>
+                    <!-- Apple Pay -->
+                    <span class="edupro-payment-tile" title="Apple Pay">
+                        <svg width="62" height="22" viewBox="0 0 68 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Apple Pay">
+                            <path d="M16.2 7.2c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2zm.9 1.5c-1.4-.1-2.6.8-3.2.8-.7 0-1.7-.7-2.8-.7-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.6 2.2 2.7 2.1 1.1 0 1.5-.7 2.8-.7 1.3 0 1.7.7 2.8.7 1.2 0 1.9-1 2.6-2.1.8-1.2 1.2-2.4 1.2-2.4-.1 0-2.3-.9-2.3-3.5 0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.6-3.3-1.6z" fill="#ffffff"/>
+                            <text x="45" y="16" text-anchor="middle" fill="#ffffff" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="700" font-size="13.5">Pay</text>
+                        </svg>
+                    </span>
+                    <!-- Google Pay -->
+                    <span class="edupro-payment-tile" title="Google Pay">
+                        <svg width="58" height="22" viewBox="0 0 64 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Google Pay">
+                            <text x="32" y="16" text-anchor="middle" fill="#ffffff" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="700" font-size="13.5"><tspan fill="#93c5fd" font-weight="800">G</tspan> Pay</text>
+                        </svg>
+                    </span>
+                    <!-- UPI -->
+                    <span class="edupro-payment-tile" title="UPI">
+                        <svg width="44" height="22" viewBox="0 0 46 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UPI">
+                            <text x="23" y="16" text-anchor="middle" fill="#34d399" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="800" font-size="13.5" letter-spacing="0.8">UPI</text>
+                        </svg>
+                    </span>
+                    <!-- Cashfree -->
+                    <span class="edupro-payment-tile" title="Cashfree">
+                        <svg width="68" height="22" viewBox="0 0 74 22" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cashfree">
+                            <text x="37" y="15.5" text-anchor="middle" fill="#a78bfa" font-family="Plus Jakarta Sans,Inter,sans-serif" font-weight="700" font-size="12.5" letter-spacing="0.2">Cashfree</text>
                         </svg>
                     </span>
                 </div>

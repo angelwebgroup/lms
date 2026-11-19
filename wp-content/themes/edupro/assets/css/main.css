@@ -4927,15 +4927,20 @@ input.is-valid {
     height: 44px;
     border-radius: var(--radius-circle);
     object-fit: cover;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    color: var(--color-white);
+    background: #18181b;
+    color: #ffffff;
+    border: 2px solid #e2e8f0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     flex-shrink: 0;
+}
+
+.edupro-review-card:nth-child(even) .edupro-review-card__initials {
+    background: #334155;
 }
 
 .edupro-review-card__name {
@@ -12223,8 +12228,9 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--gradient-crimson);
+    background: #18181b;
     color: #ffffff;
+    border: 2px solid #e2e8f0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -12232,6 +12238,10 @@ body {
     font-size: 0.85rem;
     font-weight: 700;
     flex-shrink: 0;
+}
+
+.edupro-review-card:nth-child(even) .edupro-review-card__avatar--initials {
+    background: #334155;
 }
 
 .edupro-reviews-nav-btn,
@@ -13425,4 +13435,1287 @@ body {
     border-color: #059669;
     color: #ffffff;
     box-shadow: 0 6px 16px rgba(5, 150, 105, 0.28);
+}
+
+
+/* ==========================================================================
+   25. v1.4.3 PREMIUM GLASSMORPHISM CONTACT US & ABOUT US PAGE TEMPLATES
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   25.1 Luminous Ambient Glass Page Hero (.edupro-page-hero--glass)
+   -------------------------------------------------------------------------- */
+.edupro-page-hero--glass {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(3rem, 5.5vw, 4.75rem) 0 clamp(2.5rem, 4.5vw, 3.75rem);
+    background: linear-gradient(135deg, #fff5f7 0%, #fdf4ff 48%, #fff7ed 100%);
+    color: var(--color-secondary);
+    border-bottom: 1px solid rgba(190, 18, 60, 0.08);
+    isolation: isolate;
+}
+
+.edupro-page-hero--glass .edupro-breadcrumb__link,
+.edupro-page-hero--glass .edupro-breadcrumb__sep {
+    color: var(--color-text-light);
+}
+
+.edupro-page-hero--glass .edupro-breadcrumb__link:hover {
+    color: var(--color-primary);
+}
+
+.edupro-page-hero--glass .edupro-breadcrumb__current {
+    color: var(--color-secondary);
+}
+
+.edupro-page-hero--glass h1,
+.edupro-page-hero--glass .edupro-page-hero__title {
+    color: #120e18;
+    font-size: clamp(2rem, 4vw, 3.15rem);
+    font-weight: 800;
+    line-height: 1.14;
+    letter-spacing: -0.03em;
+    max-width: 780px;
+    margin-bottom: 1rem;
+}
+
+.edupro-page-hero--glass .edupro-page-hero__subtitle,
+.edupro-page-hero--glass p {
+    color: var(--color-text-medium);
+    font-size: clamp(0.98rem, 1.4vw, 1.12rem);
+    line-height: 1.7;
+    max-width: 680px;
+}
+
+.edupro-page-hero__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 1.75rem;
+}
+
+.edupro-page-hero__actions .edupro-quick-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    min-height: 44px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(190, 18, 60, 0.16);
+    color: var(--color-secondary);
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition-fast);
+}
+
+.edupro-page-hero__actions .edupro-quick-pill:hover {
+    background: var(--gradient-crimson);
+    border-color: transparent;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
+}
+
+.edupro-page-hero__actions .edupro-quick-pill--whatsapp {
+    background: #25D366;
+    border-color: #25D366;
+    color: #ffffff;
+}
+
+.edupro-page-hero__actions .edupro-quick-pill--whatsapp:hover {
+    background: #1ebe5b;
+    border-color: #1ebe5b;
+    color: #ffffff;
+}
+
+/* About Us 4-Column Frosted KPI Stat Grid */
+.edupro-about-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.edupro-about-kpi-card {
+    padding: 1.5rem 1.35rem;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.edupro-about-kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+.edupro-about-kpi-card strong,
+.edupro-about-kpi-card__val {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: clamp(1.65rem, 2.8vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: var(--gradient-crimson);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+}
+
+.edupro-about-kpi-card span,
+.edupro-about-kpi-card__label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-medium);
+}
+
+/* --------------------------------------------------------------------------
+   25.2 Contact Us Page (templates/template-contact.php)
+   -------------------------------------------------------------------------- */
+.edupro-contact-page-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: clamp(1.75rem, 3.5vw, 2.75rem);
+    align-items: start;
+}
+
+.edupro-contact-form-card {
+    padding: 36px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+}
+
+.edupro-contact-form-card h2 {
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+    margin-bottom: 0.4rem;
+}
+
+.edupro-contact-form-card .edupro-contact-form-sub {
+    color: var(--color-text-medium);
+    font-size: 0.94rem;
+    margin-bottom: 1.5rem;
+}
+
+.edupro-contact-form-card .edupro-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.edupro-contact-form-card input[type="text"],
+.edupro-contact-form-card input[type="email"],
+.edupro-contact-form-card input[type="tel"],
+.edupro-contact-form-card select,
+.edupro-contact-form-card textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 15px;
+    background: #ffffff;
+    border: 1.5px solid rgba(18, 14, 24, 0.14);
+    border-radius: 12px;
+    color: var(--color-secondary);
+    font-size: 0.94rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edupro-contact-form-card textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.edupro-contact-form-card input:focus,
+.edupro-contact-form-card select:focus,
+.edupro-contact-form-card textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(190, 18, 60, 0.12);
+}
+
+.edupro-contact-honeypot {
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+.edupro-contact-status {
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    border: 1px solid transparent;
+}
+
+.edupro-contact-status.is-success,
+.edupro-contact-status--success {
+    background: var(--color-success-bg);
+    border-color: rgba(46, 204, 113, 0.4);
+    color: #19733f;
+}
+
+.edupro-contact-status.is-error,
+.edupro-contact-status--error {
+    background: var(--color-danger-bg);
+    border-color: rgba(190, 18, 60, 0.35);
+    color: var(--color-primary-dark);
+}
+
+/* Contact Right Sidebar Frosted Cards */
+.edupro-contact-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+}
+
+.edupro-contact-sidebar .edupro-contact-card,
+.edupro-contact-info-card {
+    padding: 24px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+}
+
+.edupro-contact-info-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.edupro-contact-info-card__head h3 {
+    font-size: 1.05rem;
+    margin: 0 0 2px;
+    color: var(--color-secondary);
+}
+
+.edupro-contact-info-card__head p {
+    font-size: 0.84rem;
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+.edupro-contact-info-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edupro-contact-sidebar .edupro-contact-card__icon,
+.edupro-contact-icon-tile {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.edupro-contact-icon-tile--rose {
+    background: #ffe4e6;
+    color: #be123c;
+}
+
+.edupro-contact-icon-tile--indigo {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.edupro-contact-icon-tile--emerald {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.edupro-contact-detail-link {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin-bottom: 4px;
+    word-break: break-word;
+    transition: var(--transition-fast);
+}
+
+.edupro-contact-detail-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.edupro-contact-sidebar__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.edupro-contact-whatsapp-btn,
+.edupro-btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
+    background: #25D366 !important;
+    border-color: #25D366 !important;
+    color: #ffffff !important;
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
+    font-weight: 700;
+    box-shadow: 0 8px 20px -4px rgba(37, 211, 102, 0.38);
+    transition: var(--transition-fast);
+}
+
+.edupro-contact-whatsapp-btn {
+    width: 100%;
+    margin-top: 0.65rem;
+}
+
+.edupro-contact-whatsapp-btn:hover,
+.edupro-btn-whatsapp:hover {
+    background: #1ebe5b !important;
+    border-color: #1ebe5b !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
+.edupro-contact-address-row,
+.edupro-contact-hours-row {
+    padding: 10px 12px;
+    background: rgba(253, 246, 248, 0.8);
+    border: 1px solid rgba(190, 18, 60, 0.08);
+    border-radius: 10px;
+    font-size: 0.86rem;
+    color: var(--color-text-medium);
+    line-height: 1.55;
+}
+
+.edupro-contact-address-row strong,
+.edupro-contact-hours-row strong {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-secondary);
+    margin-bottom: 3px;
+}
+
+.edupro-contact-map-section {
+    padding: 0 0 clamp(3rem, 5vw, 4.5rem);
+}
+
+.edupro-contact-map-card {
+    padding: 18px;
+    background: var(--glass-bg-strong);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+}
+
+.edupro-contact-map-card .edupro-map-wrap {
+    margin: 0;
+}
+
+.edupro-contact-faq-section {
+    padding: clamp(3rem, 5.5vw, 4.75rem) 0;
+}
+
+.edupro-contact-faq-section .edupro-faq-list {
+    max-width: 860px;
+    margin: 0 auto;
+    gap: 12px;
+}
+
+.edupro-contact-faq-section .edupro-accordion-item {
+    background: var(--glass-bg-strong);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 14px;
+    box-shadow: var(--glass-shadow);
+}
+
+/* --------------------------------------------------------------------------
+   25.3 About Us Page (templates/template-about.php)
+   -------------------------------------------------------------------------- */
+.edupro-about-mv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem;
+}
+
+.edupro-about-mv-card {
+    padding: clamp(1.75rem, 3.5vw, 2.5rem);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.edupro-about-mv-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+.edupro-about-mv-card__icon,
+.edupro-about-mv-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.14), rgba(225, 29, 72, 0.06));
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.15rem;
+}
+
+.edupro-about-mv-icon--rose {
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.14), rgba(225, 29, 72, 0.06));
+    color: #be123c;
+}
+
+.edupro-about-mv-card:nth-child(2) .edupro-about-mv-card__icon,
+.edupro-about-mv-icon--violet {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.14), rgba(168, 85, 247, 0.06));
+    color: #7e22ce;
+}
+
+.edupro-about-mv-card__icon svg,
+.edupro-about-mv-icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.edupro-about-mv-card h2,
+.edupro-about-mv-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+}
+
+/* 4-Column Core Pillars Grid */
+.edupro-about-pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.edupro-about-pillar-card {
+    padding: 28px 24px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.edupro-about-pillar-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+.edupro-about-pillar-card__icon,
+.edupro-about-pillar-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #ffe4e6;
+    color: #be123c;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.1rem;
+}
+
+.edupro-about-pillar-icon--rose {
+    background: #ffe4e6;
+    color: #be123c;
+}
+
+.edupro-about-pillar-card:nth-child(4n+2) .edupro-about-pillar-card__icon,
+.edupro-about-pillar-icon--violet {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+.edupro-about-pillar-card:nth-child(4n+3) .edupro-about-pillar-card__icon,
+.edupro-about-pillar-icon--emerald {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.edupro-about-pillar-card:nth-child(4n+4) .edupro-about-pillar-card__icon,
+.edupro-about-pillar-icon--amber {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.edupro-about-pillar-card__icon svg,
+.edupro-about-pillar-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.edupro-about-pillar-card h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.5rem;
+}
+
+.edupro-about-pillar-card p {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    margin: 0;
+}
+
+/* 4-Column Expert Instructors Grid */
+.edupro-about-instructors-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.edupro-about-instructor-card {
+    padding: 28px 22px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.edupro-about-instructor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+.edupro-about-instructor-card__avatar,
+.edupro-about-instructor__avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 3px solid rgba(190, 18, 60, 0.18);
+    background: #18181b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 1.55rem;
+    font-weight: 800;
+}
+
+.edupro-about-instructor-card__avatar img,
+.edupro-about-instructor__avatar img,
+.edupro-about-instructor__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.edupro-about-instructor__initials {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #18181b;
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.edupro-about-instructor-card__name,
+.edupro-about-instructor__name {
+    font-size: 1.08rem;
+    margin-bottom: 4px;
+    color: var(--color-secondary);
+}
+
+.edupro-about-instructor-card__role,
+.edupro-about-instructor__role {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.7rem;
+}
+
+.edupro-about-instructor-card__bio,
+.edupro-about-instructor__bio {
+    font-size: 0.86rem;
+    color: var(--color-text-medium);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Bottom Dark Crimson-Obsidian CTA Banner */
+.edupro-about-cta-banner {
+    padding: clamp(2.75rem, 5.5vw, 4.25rem) clamp(1.75rem, 4vw, 3.5rem);
+    border-radius: 24px;
+    background: linear-gradient(135deg, #120e18 0%, #3b0d20 52%, #be123c 100%);
+    color: #ffffff;
+    text-align: center;
+    box-shadow: 0 24px 54px -14px rgba(18, 14, 24, 0.42);
+    position: relative;
+    overflow: hidden;
+}
+
+.edupro-about-cta-banner h2 {
+    color: #ffffff;
+    font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+    max-width: 680px;
+    margin: 0 auto 0.85rem;
+}
+
+.edupro-about-cta-banner p {
+    color: rgba(255, 255, 255, 0.86);
+    max-width: 580px;
+    margin: 0 auto 1.75rem;
+    font-size: 1.02rem;
+}
+
+.edupro-about-cta-actions,
+.edupro-about-cta-banner__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.edupro-about-cta-banner .edupro-btn-white {
+    background: #ffffff;
+    color: var(--color-secondary);
+    border-radius: var(--radius-pill);
+    border: 1.5px solid #ffffff;
+}
+
+.edupro-about-cta-banner .edupro-btn-white:hover {
+    background: #fff1f2;
+    color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.edupro-about-cta-banner .edupro-btn-glass {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    border-radius: var(--radius-pill);
+    backdrop-filter: blur(8px);
+}
+
+.edupro-about-cta-banner .edupro-btn-glass:hover {
+    background: rgba(255, 255, 255, 0.24);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   25.4 Responsive Breakpoints for Contact Us & About Us Pages
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+    .edupro-contact-page-grid,
+    .edupro-about-mv-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-about-kpis,
+    .edupro-about-pillars-grid,
+    .edupro-about-instructors-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .edupro-contact-form-card {
+        padding: 24px 20px;
+    }
+
+    .edupro-contact-form-card,
+    .edupro-about-kpi-card,
+    .edupro-about-mv-card,
+    .edupro-about-pillar-card,
+    .edupro-about-instructor-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255, 255, 255, 0.96);
+    }
+
+    .edupro-contact-form-card .edupro-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .edupro-about-pillars-grid,
+    .edupro-about-instructors-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-about-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .edupro-about-cta-actions .edupro-btn,
+    .edupro-about-cta-actions .btn,
+    .edupro-about-cta-banner__actions .edupro-btn,
+    .edupro-about-cta-banner__actions .btn {
+        width: 100%;
+    }
+}
+
+
+/* ==========================================================================
+   26. v1.5.0 NOTIFICATION SLIDER BAR, DARK GLASS PAYMENT TILES, MOBILE
+       HEADER & SEARCH FIX, BESPOKE EDITORIAL HERO & CORE WEB VITALS 100
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   26.1 Top Multi-Notification Slider Bar & Live Countdown
+   -------------------------------------------------------------------------- */
+.edupro-notif-bar {
+    background: linear-gradient(90deg, #1a050c 0%, #440b1e 50%, #1a050c 100%);
+    color: rgba(255, 255, 255, 0.94);
+    min-height: 44px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: calc(var(--z-header) + 2);
+    font-size: 0.83rem;
+}
+
+.edupro-notif-bar.is-dismissed {
+    display: none;
+}
+
+.edupro-notif-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.edupro-notif-bar__center,
+.edupro-notif-slider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.edupro-notif-slides {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+}
+
+.edupro-notif-slide {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.edupro-notif-slide.is-active {
+    display: inline-flex;
+    animation: eduproNotifFade 0.35s ease;
+}
+
+@keyframes eduproNotifFade {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.edupro-notif-link,
+.edupro-notif-slide__link,
+.edupro-notif-slide__inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    color: rgba(255, 255, 255, 0.95);
+    text-decoration: none;
+}
+
+.edupro-notif-link:hover,
+.edupro-notif-slide__link:hover {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.edupro-notif-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #be123c;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.edupro-notif-badge svg,
+.edupro-notif-badge__icon {
+    color: #fbbf24;
+    flex-shrink: 0;
+}
+
+.edupro-notif-badge--crimson {
+    background: #be123c;
+    color: #ffffff;
+}
+
+.edupro-notif-badge--gold {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-color: rgba(255, 255, 255, 0.45);
+    color: #120e18;
+}
+
+.edupro-notif-badge--gold svg,
+.edupro-notif-badge--gold .edupro-notif-badge__icon {
+    color: #120e18;
+}
+
+.edupro-notif-badge--emerald {
+    background: #059669;
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}
+
+.edupro-notif-message,
+.edupro-notif-text,
+.edupro-notif-copy {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+}
+
+.edupro-notif-highlight {
+    color: #fbbf24;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.edupro-notif-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 3px 12px;
+    color: #fde68a;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.edupro-notif-countdown__time {
+    font-variant-numeric: tabular-nums;
+}
+
+.edupro-notif-nav {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.85);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.edupro-notif-nav:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.edupro-notif-bar__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   26.2 Dark Glass Footer Payment Tiles
+   -------------------------------------------------------------------------- */
+.edupro-footer-payments {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.edupro-payment-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    min-width: 66px;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.edupro-payment-tile:hover {
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-2px);
+}
+
+.edupro-payment-tile svg {
+    height: 19px;
+    width: auto;
+    display: block;
+}
+
+/* --------------------------------------------------------------------------
+   26.3 Mobile Header Search Button, Collapsible Search Strip & Zero-Clip Fix
+   -------------------------------------------------------------------------- */
+.edupro-mobile-search-toggle {
+    display: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.edupro-mobile-search-toggle:hover,
+.edupro-mobile-search-toggle[aria-expanded="true"] {
+    background: rgba(190, 18, 60, 0.12);
+    border-color: rgba(190, 18, 60, 0.3);
+    color: var(--color-primary);
+}
+
+.edupro-mobile-search-bar {
+    padding: 10px 16px 14px;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    box-shadow: 0 10px 24px -8px rgba(18, 14, 24, 0.12);
+}
+
+.edupro-mobile-search-bar[hidden] {
+    display: none !important;
+}
+
+.edupro-mobile-search-bar__form {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.edupro-mobile-search-bar input[type="search"],
+.edupro-mobile-search-bar input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0 18px;
+    border: 1.5px solid rgba(18, 14, 24, 0.14);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-secondary);
+    font-size: 0.92rem;
+}
+
+.edupro-mobile-search-bar input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.12);
+}
+
+.edupro-mobile-search-bar button[type="submit"] {
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--gradient-crimson);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 0.86rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Mobile Hero Search Inline Icon+Input Wrapper */
+.edupro-hero__search-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+.edupro-hero__search-field input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-text-dark);
+    font-size: 0.95rem;
+    height: 42px;
+}
+
+.edupro-hero__search-field input:focus {
+    outline: none;
+}
+
+@media (max-width: 992px) {
+    .edupro-mobile-search-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(190, 18, 60, 0.06);
+        border: 1px solid rgba(190, 18, 60, 0.14);
+        color: #120e18;
+    }
+
+    .edupro-header__logo {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+    }
+
+    .edupro-header__logo .edupro-logo-link {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .edupro-header__logo .site-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .edupro-header__actions {
+        flex-shrink: 0;
+        gap: 8px;
+    }
+
+    .edupro-notif-bar__right {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .edupro-header__inner {
+        padding-left: 12px;
+        padding-right: 12px;
+        gap: 8px;
+    }
+
+    .edupro-logo-text .site-description,
+    .edupro-user-menu__name,
+    .edupro-user-menu__trigger svg {
+        display: none !important;
+    }
+
+    .edupro-user-menu__trigger {
+        width: 38px;
+        height: 38px;
+        padding: 2px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .edupro-user-menu__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
+    .edupro-mobile-search-toggle,
+    .edupro-enrollment-cart,
+    .edupro-hamburger {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+    .edupro-header__actions {
+        gap: 6px;
+    }
+
+    .edupro-notif-nav {
+        width: 24px;
+        height: 24px;
+    }
+
+    .edupro-notif-bar {
+        font-size: 0.76rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .edupro-hero__search-box {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    .edupro-hero__search-field {
+        padding: 0 6px;
+    }
+
+    .edupro-hero__search-box button,
+    .edupro-hero__search-box .edupro-btn {
+        width: 100%;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   26.4 Human Bespoke Editorial Hero Redesign (Non-AI Aesthetic)
+   -------------------------------------------------------------------------- */
+.edupro-hero--glass {
+    background: linear-gradient(180deg, #fffafb 0%, #fdf6f8 65%, #ffffff 100%);
+}
+
+.edupro-hero--glass .edupro-ambient-blob {
+    opacity: 0.2;
+}
+
+.edupro-hero__eyebrow-editorial {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 1rem;
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: #9f1239;
+}
+
+.edupro-hero__eyebrow-rule {
+    width: 28px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: #be123c;
+    flex-shrink: 0;
+}
+
+.edupro-text-gradient {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: #be123c;
+    color: #be123c;
+    position: relative;
+    display: inline-block;
+}
+
+.edupro-text-gradient::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.08em;
+    height: 0.18em;
+    border-radius: 4px;
+    background: rgba(190, 18, 60, 0.16);
+    z-index: -1;
+}
+
+/* --------------------------------------------------------------------------
+   26.5 Core Web Vitals Rendering & Zero-CLS Layout Stability
+   -------------------------------------------------------------------------- */
+.edupro-header {
+    min-height: 72px;
+}
+
+.edupro-courses-section,
+.edupro-spotlight-section,
+.edupro-giftcard-section,
+.edupro-stats-section,
+.edupro-why-section,
+.edupro-reviews-section,
+.edupro-newsletter-section,
+.site-footer {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 540px;
 }
