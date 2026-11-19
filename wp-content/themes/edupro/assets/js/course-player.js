@@ -1,0 +1,1141 @@
+/**
+ * EduPro LMS Theme — Lesson & Course Player JavaScript
+ *
+ * Full-featured lesson player supporting:
+ *  - Self-hosted HTML5 video with custom controls overlay
+ *  - YouTube IFrame API integration (window.onYouTubeIframeAPIReady)
+ *  - Vimeo Player API integration
+ *  - Resume from last position (localStorage)
+ *  - Auto-mark lesson complete at 90% watch progress
+ *  - Embedded PDF viewer with zoom, fullscreen & download toolbar
+ *  - Curriculum sidebar active-lesson highlight, auto-scroll & collapse
+ *  - Lesson Notes persistence & resource tabs
+ *  - Keyboard shortcuts: Space (play/pause), F (fullscreen), Left/Right (±5s),
+ *    Up/Down (volume), M (mute), < / > (playback rate)
+ *
+ * @package EduPro
+ * @version 1.0.0
+ */
+
+(function (window, document, $) {
+    'use strict';
+
+    const STORAGE_PREFIX = 'edupro_lesson_pos_';
+    const NOTES_PREFIX = 'edupro_lesson_notes_';
+    const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    const COMPLETE_THRESHOLD = 0.90;
+
+    /* =========================================================================
+     * 1. HELPERS
+     * ========================================================================= */
+
+    function formatTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+        const total = Math.floor(seconds);
+        const hrs = Math.floor(total / 3600);
+        const mins = Math.floor((total % 3600) / 60);
+        const secs = total % 60;
+        const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
+        return hrs > 0 ? `${hrs}:${pad(mins)}:${pad(secs)}` : `${mins}:${pad(secs)}`;
+    }
+
+    function storageGet(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function storageSet(key, val) {
+        try {
+            localStorage.setItem(key, String(val));
+        } catch (e) {
+            // ignore quota / private browsing errors
+        }
+    }
+
+    function storageRemove(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    function loadScript(src, isReady) {
+        if (window.EduPro && typeof window.EduPro.loadScript === 'function') {
+            return window.EduPro.loadScript(src, isReady);
+        }
+        if (isReady && isReady()) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+            const existing = document.querySelector(`script[src="${src}"]`);
+            if (existing) {
+                existing.addEventListener('load', () => resolve());
+                existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)));
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = src;
+            s.async = true;
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(s);
+        });
+    }
+
+    function extractYouTubeId(url) {
+        if (!url) return '';
+        const m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        return m ? m[1] : '';
+    }
+
+    function extractVimeoId(url) {
+        if (!url) return '';
+        const m = String(url).match(/vimeo\.com\/(?:video\/)?(\d+)/);
+        return m ? m[1] : '';
+    }
+
+    function toggleElementFullscreen(el) {
+        if (!el) return;
+        const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+        if (!fsEl) {
+            const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+            if (req) req.call(el);
+        } else {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+            if (exit) exit.call(document);
+        }
+    }
+
+    function notify(message, type = 'info') {
+        if (window.EduPro && window.EduPro.toast) {
+            window.EduPro.toast.show(message, type);
+        }
+    }
+
+    /* =========================================================================
+     * 2. UNIFIED LESSON PLAYER CLASS
+     * ========================================================================= */
+
+    class EduProCoursePlayer {
+        constructor(root) {
+            this.root = root;
+            this.stage = root.querySelector('.edupro-player-stage, .ep-player-stage, .lesson-video-wrapper, .video-player-container, [data-video-stage]');
+            this.lessonId = root.dataset.lessonId || (this.stage && this.stage.dataset.lessonId) || '';
+            this.courseId = root.dataset.courseId || (this.stage && this.stage.dataset.courseId) || '';
+            this.nextUrl = root.dataset.nextUrl || (this.stage && this.stage.dataset.nextUrl) || '';
+            this.isCompleted = root.dataset.completed === '1' || root.dataset.completed === 'true';
+            this.autoMarked = this.isCompleted;
+
+            this.provider = 'none'; // 'html5' | 'youtube' | 'vimeo' | 'pdf'
+            this.adapter = null;
+            this.lastSavedAt = 0;
+            this.idleTimer = null;
+            this.speedIndex = PLAYBACK_RATES.indexOf(1);
+
+            this.initSidebar();
+            this.initNotesAndPanels();
+            this.initPdfViewer();
+            this.initVideoPlayer();
+            this.initKeyboardShortcuts();
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2A. Video Provider Detection & Initialization
+         * ------------------------------------------------------------------- */
+
+        initVideoPlayer() {
+            if (!this.stage) return;
+
+            const videoUrl = this.stage.dataset.videoUrl || '';
+            const explicitType = (this.stage.dataset.provider || this.stage.dataset.videoType || '').toLowerCase();
+            const existingVideo = this.stage.querySelector('video');
+            const existingIframe = this.stage.querySelector('iframe');
+            const stageVideoId = this.stage.dataset.videoId || '';
+
+            const ytId = this.stage.dataset.youtubeId
+                || (explicitType === 'youtube' ? stageVideoId : '')
+                || extractYouTubeId(videoUrl)
+                || (existingIframe ? extractYouTubeId(existingIframe.src) : '');
+            const vimeoId = this.stage.dataset.vimeoId
+                || (explicitType === 'vimeo' ? stageVideoId : '')
+                || extractVimeoId(videoUrl)
+                || (existingIframe ? extractVimeoId(existingIframe.src) : '');
+
+            if (explicitType === 'youtube' || ytId) {
+                this.provider = 'youtube';
+                this.initYouTubePlayer(ytId, existingIframe);
+            } else if (explicitType === 'vimeo' || vimeoId) {
+                this.provider = 'vimeo';
+                this.initVimeoPlayer(vimeoId, existingIframe);
+            } else if (existingVideo || videoUrl) {
+                this.provider = 'html5';
+                this.initHtml5Player(existingVideo, videoUrl);
+            }
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2B. Self-Hosted HTML5 Video + Full Custom Controls Overlay
+         * ------------------------------------------------------------------- */
+
+        initHtml5Player(videoEl, srcUrl) {
+            let video = videoEl;
+            if (!video) {
+                video = document.createElement('video');
+                video.className = 'ep-html5-video';
+                video.setAttribute('playsinline', '');
+                video.setAttribute('preload', 'metadata');
+                const source = document.createElement('source');
+                source.src = srcUrl;
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                this.stage.innerHTML = '';
+                this.stage.appendChild(video);
+            }
+
+            // Disable native browser controls so custom overlay controls take over
+            video.controls = false;
+            const playerContainer = this.stage.querySelector('.edupro-video-container') || this.stage;
+            this.stage.classList.add('ep-custom-player', 'is-paused');
+
+            const existingBar = this.stage.querySelector('#edupro-video-controls, .edupro-video-controls');
+            const savedPos = this.getSavedPosition();
+
+            if (existingBar) {
+                // Wire template-parts/lesson-player.php's built-in custom controls
+                const playBtn = existingBar.querySelector('[data-vc="play"]');
+                const seekWrap = existingBar.querySelector('[data-vc="seek"]');
+                const progressFill = existingBar.querySelector('[data-vc="progress-fill"]');
+                const timeEl = existingBar.querySelector('[data-vc="time"]');
+                const speedSelect = existingBar.querySelector('[data-vc="speed"]');
+                const muteBtn = existingBar.querySelector('[data-vc="mute"]');
+                const fsBtn = existingBar.querySelector('[data-vc="fullscreen"]');
+
+                video.addEventListener('loadedmetadata', () => {
+                    if (timeEl) timeEl.textContent = `0:00 / ${formatTime(video.duration)}`;
+                    if (savedPos > 5 && savedPos < video.duration - 5) {
+                        video.currentTime = savedPos;
+                        this.showResumeToast(savedPos);
+                    }
+                });
+
+                video.addEventListener('timeupdate', () => {
+                    const current = video.currentTime || 0;
+                    const duration = video.duration || 0;
+                    const pct = duration > 0 ? (current / duration) * 100 : 0;
+                    if (progressFill) progressFill.style.width = `${pct}%`;
+                    if (timeEl) timeEl.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+                    this.handlePlaybackProgress(current, duration);
+                });
+
+                video.addEventListener('play', () => {
+                    this.stage.classList.add('is-playing');
+                    this.stage.classList.remove('is-paused');
+                    if (playBtn) {
+                        playBtn.textContent = '⏸';
+                        playBtn.setAttribute('aria-label', 'Pause');
+                    }
+                });
+
+                video.addEventListener('pause', () => {
+                    this.stage.classList.remove('is-playing');
+                    this.stage.classList.add('is-paused');
+                    if (playBtn) {
+                        playBtn.textContent = '▶';
+                        playBtn.setAttribute('aria-label', 'Play');
+                    }
+                    this.savePosition(video.currentTime, true);
+                });
+
+                video.addEventListener('ended', () => {
+                    this.stage.classList.remove('is-playing');
+                    this.stage.classList.add('is-paused');
+                    this.clearSavedPosition();
+                    this.triggerAutoComplete();
+                });
+
+                video.addEventListener('volumechange', () => {
+                    const muted = video.muted || video.volume === 0;
+                    if (muteBtn) muteBtn.textContent = muted ? '🔇' : '🔊';
+                });
+
+                this.adapter = {
+                    play: () => video.play().catch(() => {}),
+                    pause: () => video.pause(),
+                    togglePlay: () => (video.paused ? video.play().catch(() => {}) : video.pause()),
+                    seek: (sec) => {
+                        if (Number.isFinite(video.duration)) {
+                            video.currentTime = Math.max(0, Math.min(video.duration, sec));
+                        }
+                    },
+                    skip: (delta) => {
+                        if (Number.isFinite(video.duration)) {
+                            video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + delta));
+                        }
+                    },
+                    getCurrentTime: () => video.currentTime || 0,
+                    getDuration: () => video.duration || 0,
+                    setVolume: (v) => {
+                        video.muted = v <= 0;
+                        video.volume = Math.max(0, Math.min(1, v));
+                    },
+                    getVolume: () => (video.muted ? 0 : video.volume),
+                    toggleMute: () => {
+                        video.muted = !video.muted;
+                    },
+                    setSpeed: (rate) => {
+                        video.playbackRate = rate;
+                        if (speedSelect) speedSelect.value = String(rate);
+                    },
+                    toggleFullscreen: () => toggleElementFullscreen(playerContainer),
+                };
+
+                video.addEventListener('click', () => this.adapter.togglePlay());
+                video.addEventListener('dblclick', () => this.adapter.toggleFullscreen());
+                if (playBtn) playBtn.addEventListener('click', () => this.adapter.togglePlay());
+                if (muteBtn) muteBtn.addEventListener('click', () => this.adapter.toggleMute());
+                if (fsBtn) fsBtn.addEventListener('click', () => this.adapter.toggleFullscreen());
+                if (speedSelect) {
+                    speedSelect.addEventListener('change', () => {
+                        const rate = parseFloat(speedSelect.value) || 1;
+                        video.playbackRate = rate;
+                    });
+                }
+                if (seekWrap) {
+                    seekWrap.addEventListener('click', (e) => {
+                        const rect = seekWrap.getBoundingClientRect();
+                        if (!rect.width || !Number.isFinite(video.duration)) return;
+                        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                        video.currentTime = pct * video.duration;
+                    });
+                }
+
+                window.addEventListener('beforeunload', () => {
+                    if (video.currentTime > 3) this.savePosition(video.currentTime, true);
+                });
+                return;
+            }
+
+            const controls = this.buildCustomControls();
+            playerContainer.appendChild(controls.bigPlay);
+            playerContainer.appendChild(controls.bar);
+
+            video.addEventListener('loadedmetadata', () => {
+                controls.durationEl.textContent = formatTime(video.duration);
+                if (savedPos > 5 && savedPos < video.duration - 5) {
+                    video.currentTime = savedPos;
+                    this.showResumeToast(savedPos);
+                }
+            });
+
+            video.addEventListener('timeupdate', () => {
+                const current = video.currentTime || 0;
+                const duration = video.duration || 0;
+                const pct = duration > 0 ? (current / duration) * 100 : 0;
+
+                controls.currentEl.textContent = formatTime(current);
+                controls.progressFill.style.width = `${pct}%`;
+                controls.progressThumb.style.left = `${pct}%`;
+                controls.progressRange.value = String(pct);
+
+                this.handlePlaybackProgress(current, duration);
+            });
+
+            video.addEventListener('progress', () => {
+                if (video.buffered.length > 0 && video.duration > 0) {
+                    const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                    controls.bufferedBar.style.width = `${Math.min(100, (bufferedEnd / video.duration) * 100)}%`;
+                }
+            });
+
+            video.addEventListener('play', () => {
+                this.stage.classList.add('is-playing');
+                this.stage.classList.remove('is-paused');
+                controls.playBtn.setAttribute('aria-label', 'Pause');
+                controls.playBtn.innerHTML = this.icons.pause;
+            });
+
+            video.addEventListener('pause', () => {
+                this.stage.classList.remove('is-playing');
+                this.stage.classList.add('is-paused');
+                controls.playBtn.setAttribute('aria-label', 'Play');
+                controls.playBtn.innerHTML = this.icons.play;
+                this.savePosition(video.currentTime, true);
+            });
+
+            video.addEventListener('ended', () => {
+                this.stage.classList.remove('is-playing');
+                this.stage.classList.add('is-paused');
+                this.clearSavedPosition();
+                this.triggerAutoComplete();
+            });
+
+            video.addEventListener('volumechange', () => {
+                const muted = video.muted || video.volume === 0;
+                controls.muteBtn.innerHTML = muted ? this.icons.muted : this.icons.volume;
+                controls.volumeSlider.value = muted ? '0' : String(Math.round(video.volume * 100));
+            });
+
+            // Unified adapter for keyboard shortcuts & external controls
+            this.adapter = {
+                play: () => video.play().catch(() => {}),
+                pause: () => video.pause(),
+                togglePlay: () => (video.paused ? video.play().catch(() => {}) : video.pause()),
+                seek: (sec) => {
+                    if (Number.isFinite(video.duration)) {
+                        video.currentTime = Math.max(0, Math.min(video.duration, sec));
+                    }
+                },
+                skip: (delta) => {
+                    if (Number.isFinite(video.duration)) {
+                        video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + delta));
+                    }
+                },
+                getCurrentTime: () => video.currentTime || 0,
+                getDuration: () => video.duration || 0,
+                setVolume: (v) => {
+                    video.muted = v <= 0;
+                    video.volume = Math.max(0, Math.min(1, v));
+                },
+                getVolume: () => (video.muted ? 0 : video.volume),
+                toggleMute: () => {
+                    video.muted = !video.muted;
+                },
+                setSpeed: (rate) => {
+                    video.playbackRate = rate;
+                    controls.speedBtn.textContent = `${rate}x`;
+                },
+                toggleFullscreen: () => toggleElementFullscreen(this.stage),
+            };
+
+            // Wire custom control events
+            controls.bigPlay.addEventListener('click', () => this.adapter.togglePlay());
+            video.addEventListener('click', () => this.adapter.togglePlay());
+            video.addEventListener('dblclick', () => this.adapter.toggleFullscreen());
+            controls.playBtn.addEventListener('click', () => this.adapter.togglePlay());
+            controls.rewindBtn.addEventListener('click', () => this.adapter.skip(-10));
+            controls.forwardBtn.addEventListener('click', () => this.adapter.skip(10));
+            controls.muteBtn.addEventListener('click', () => this.adapter.toggleMute());
+
+            controls.volumeSlider.addEventListener('input', (e) => {
+                const v = parseFloat(e.target.value) / 100;
+                this.adapter.setVolume(v);
+            });
+
+            controls.progressRange.addEventListener('input', (e) => {
+                const pct = parseFloat(e.target.value);
+                if (Number.isFinite(video.duration) && video.duration > 0) {
+                    video.currentTime = (pct / 100) * video.duration;
+                }
+            });
+
+            controls.speedBtn.addEventListener('click', () => {
+                this.cyclePlaybackSpeed();
+            });
+
+            controls.fsBtn.addEventListener('click', () => this.adapter.toggleFullscreen());
+
+            // Auto-hide controls on mouse idle while playing
+            const revealControls = () => {
+                this.stage.classList.remove('controls-hidden');
+                clearTimeout(this.idleTimer);
+                this.idleTimer = setTimeout(() => {
+                    if (!video.paused) {
+                        this.stage.classList.add('controls-hidden');
+                    }
+                }, 2800);
+            };
+            this.stage.addEventListener('mousemove', revealControls);
+            this.stage.addEventListener('touchstart', revealControls, { passive: true });
+            this.stage.addEventListener('mouseleave', () => {
+                if (!video.paused) this.stage.classList.add('controls-hidden');
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (video.currentTime > 3) this.savePosition(video.currentTime, true);
+            });
+        }
+
+        buildCustomControls() {
+            this.icons = {
+                play: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>',
+                pause: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
+                rewind: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>',
+                forward: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>',
+                volume: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+                muted: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>',
+                fullscreen: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+            };
+
+            const bigPlay = document.createElement('button');
+            bigPlay.type = 'button';
+            bigPlay.className = 'ep-big-play-btn';
+            bigPlay.setAttribute('aria-label', 'Play video');
+            bigPlay.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+
+            const bar = document.createElement('div');
+            bar.className = 'ep-video-controls';
+            bar.innerHTML = `
+                <div class="ep-progress-wrap">
+                    <div class="ep-progress-track">
+                        <div class="ep-progress-buffered"></div>
+                        <div class="ep-progress-fill"></div>
+                        <div class="ep-progress-thumb"></div>
+                    </div>
+                    <input type="range" class="ep-progress-range" min="0" max="100" step="0.1" value="0" aria-label="Seek video">
+                </div>
+                <div class="ep-controls-row">
+                    <div class="ep-controls-left">
+                        <button type="button" class="ep-ctrl-btn ep-btn-play" aria-label="Play">${this.icons.play}</button>
+                        <button type="button" class="ep-ctrl-btn ep-btn-rewind" title="Rewind 10s" aria-label="Rewind 10 seconds">${this.icons.rewind}</button>
+                        <button type="button" class="ep-ctrl-btn ep-btn-forward" title="Forward 10s" aria-label="Forward 10 seconds">${this.icons.forward}</button>
+                        <div class="ep-volume-wrap">
+                            <button type="button" class="ep-ctrl-btn ep-btn-mute" aria-label="Mute">${this.icons.volume}</button>
+                            <input type="range" class="ep-volume-slider" min="0" max="100" value="100" aria-label="Volume">
+                        </div>
+                        <span class="ep-time-display">
+                            <span class="ep-time-current">0:00</span> / <span class="ep-time-duration">0:00</span>
+                        </span>
+                    </div>
+                    <div class="ep-controls-right">
+                        <button type="button" class="ep-ctrl-btn ep-btn-speed" title="Playback speed" aria-label="Playback speed">1x</button>
+                        <button type="button" class="ep-ctrl-btn ep-btn-fullscreen" title="Fullscreen (F)" aria-label="Fullscreen">${this.icons.fullscreen}</button>
+                    </div>
+                </div>
+            `;
+
+            return {
+                bigPlay,
+                bar,
+                playBtn: bar.querySelector('.ep-btn-play'),
+                rewindBtn: bar.querySelector('.ep-btn-rewind'),
+                forwardBtn: bar.querySelector('.ep-btn-forward'),
+                muteBtn: bar.querySelector('.ep-btn-mute'),
+                volumeSlider: bar.querySelector('.ep-volume-slider'),
+                currentEl: bar.querySelector('.ep-time-current'),
+                durationEl: bar.querySelector('.ep-time-duration'),
+                speedBtn: bar.querySelector('.ep-btn-speed'),
+                fsBtn: bar.querySelector('.ep-btn-fullscreen'),
+                bufferedBar: bar.querySelector('.ep-progress-buffered'),
+                progressFill: bar.querySelector('.ep-progress-fill'),
+                progressThumb: bar.querySelector('.ep-progress-thumb'),
+                progressRange: bar.querySelector('.ep-progress-range'),
+            };
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2C. YouTube IFrame API Integration (window.onYouTubeIframeAPIReady)
+         * ------------------------------------------------------------------- */
+
+        initYouTubePlayer(videoId, existingIframe) {
+            if (!videoId) return;
+
+            let targetId = 'edupro-yt-player';
+            if (existingIframe) {
+                if (!existingIframe.id) existingIframe.id = targetId;
+                targetId = existingIframe.id;
+                // Ensure enablejsapi=1 is on iframe src
+                if (!existingIframe.src.includes('enablejsapi=1')) {
+                    const sep = existingIframe.src.includes('?') ? '&' : '?';
+                    existingIframe.src = `${existingIframe.src}${sep}enablejsapi=1&rel=0&modestbranding=1`;
+                }
+            } else {
+                const mount = document.createElement('div');
+                mount.id = targetId;
+                mount.className = 'ep-yt-mount';
+                this.stage.innerHTML = '';
+                this.stage.appendChild(mount);
+            }
+
+            const savedPos = this.getSavedPosition();
+            let ytPlayer = null;
+            let pollInterval = null;
+
+            const stopPolling = () => {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+            };
+
+            const startPolling = () => {
+                stopPolling();
+                pollInterval = setInterval(() => {
+                    if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+                    const current = ytPlayer.getCurrentTime();
+                    const duration = ytPlayer.getDuration();
+                    this.handlePlaybackProgress(current, duration);
+                }, 1000);
+            };
+
+            const createPlayer = () => {
+                if (!window.YT || !window.YT.Player) return;
+
+                const playerConfig = {
+                    height: '100%',
+                    width: '100%',
+                    playerVars: {
+                        rel: 0,
+                        modestbranding: 1,
+                        playsinline: 1,
+                        origin: window.location.origin,
+                    },
+                    events: {
+                        onReady: (ev) => {
+                            const p = ev.target;
+                            const dur = p.getDuration();
+                            if (savedPos > 5 && (!dur || savedPos < dur - 5)) {
+                                p.seekTo(savedPos, true);
+                                this.showResumeToast(savedPos);
+                            }
+                        },
+                        onStateChange: (ev) => {
+                            if (ev.data === window.YT.PlayerState.PLAYING) {
+                                startPolling();
+                            } else if (ev.data === window.YT.PlayerState.PAUSED) {
+                                stopPolling();
+                                this.savePosition(ytPlayer.getCurrentTime(), true);
+                            } else if (ev.data === window.YT.PlayerState.ENDED) {
+                                stopPolling();
+                                this.clearSavedPosition();
+                                this.triggerAutoComplete();
+                            }
+                        },
+                    },
+                };
+
+                if (!existingIframe) {
+                    playerConfig.videoId = videoId;
+                }
+
+                ytPlayer = new window.YT.Player(targetId, playerConfig);
+
+                this.adapter = {
+                    play: () => ytPlayer.playVideo && ytPlayer.playVideo(),
+                    pause: () => ytPlayer.pauseVideo && ytPlayer.pauseVideo(),
+                    togglePlay: () => {
+                        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+                        if (ytPlayer.getPlayerState() === window.YT.PlayerState.PLAYING) {
+                            ytPlayer.pauseVideo();
+                        } else {
+                            ytPlayer.playVideo();
+                        }
+                    },
+                    seek: (sec) => ytPlayer.seekTo && ytPlayer.seekTo(Math.max(0, sec), true),
+                    skip: (delta) => {
+                        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+                        const target = Math.max(0, Math.min(ytPlayer.getDuration() || 99999, ytPlayer.getCurrentTime() + delta));
+                        ytPlayer.seekTo(target, true);
+                    },
+                    getCurrentTime: () => (ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0),
+                    getDuration: () => (ytPlayer.getDuration ? ytPlayer.getDuration() : 0),
+                    setVolume: (v) => {
+                        if (!ytPlayer.setVolume) return;
+                        if (v <= 0) {
+                            ytPlayer.mute();
+                        } else {
+                            ytPlayer.unMute();
+                            ytPlayer.setVolume(Math.round(Math.min(1, v) * 100));
+                        }
+                    },
+                    getVolume: () => (ytPlayer.isMuted && ytPlayer.isMuted() ? 0 : (ytPlayer.getVolume ? ytPlayer.getVolume() / 100 : 1)),
+                    toggleMute: () => {
+                        if (!ytPlayer.isMuted) return;
+                        if (ytPlayer.isMuted()) ytPlayer.unMute();
+                        else ytPlayer.mute();
+                    },
+                    setSpeed: (rate) => ytPlayer.setPlaybackRate && ytPlayer.setPlaybackRate(rate),
+                    toggleFullscreen: () => toggleElementFullscreen(this.stage),
+                };
+
+                window.addEventListener('beforeunload', () => {
+                    if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                        const t = ytPlayer.getCurrentTime();
+                        if (t > 3) this.savePosition(t, true);
+                    }
+                });
+            };
+
+            if (window.YT && window.YT.Player) {
+                createPlayer();
+            } else {
+                // Chain existing window.onYouTubeIframeAPIReady safely
+                const prevCallback = window.onYouTubeIframeAPIReady;
+                window.onYouTubeIframeAPIReady = function () {
+                    if (typeof prevCallback === 'function') {
+                        prevCallback();
+                    }
+                    createPlayer();
+                };
+                loadScript('https://www.youtube.com/iframe_api', () => Boolean(window.YT && window.YT.Player)).catch(() => {});
+            }
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2D. Vimeo Player API Integration
+         * ------------------------------------------------------------------- */
+
+        initVimeoPlayer(vimeoId, existingIframe) {
+            if (!vimeoId && !existingIframe) return;
+
+            let iframe = existingIframe;
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.src = `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0`;
+                iframe.setAttribute('frameborder', '0');
+                iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+                iframe.setAttribute('allowfullscreen', '');
+                this.stage.innerHTML = '';
+                this.stage.appendChild(iframe);
+            }
+
+            const savedPos = this.getSavedPosition();
+
+            loadScript('https://player.vimeo.com/api/player.js', () => Boolean(window.Vimeo && window.Vimeo.Player))
+                .then(() => {
+                    const vimeoPlayer = new window.Vimeo.Player(iframe);
+                    let currentTime = 0;
+                    let duration = 0;
+                    let isPaused = true;
+                    let currentVolume = 1;
+
+                    vimeoPlayer.getDuration().then((d) => {
+                        duration = d;
+                        if (savedPos > 5 && savedPos < duration - 5) {
+                            vimeoPlayer.setCurrentTime(savedPos).catch(() => {});
+                            this.showResumeToast(savedPos);
+                        }
+                    }).catch(() => {});
+
+                    vimeoPlayer.on('play', () => {
+                        isPaused = false;
+                    });
+
+                    vimeoPlayer.on('pause', () => {
+                        isPaused = true;
+                        this.savePosition(currentTime, true);
+                    });
+
+                    vimeoPlayer.on('timeupdate', (data) => {
+                        currentTime = data.seconds || 0;
+                        duration = data.duration || duration;
+                        this.handlePlaybackProgress(currentTime, duration);
+                    });
+
+                    vimeoPlayer.on('ended', () => {
+                        isPaused = true;
+                        this.clearSavedPosition();
+                        this.triggerAutoComplete();
+                    });
+
+                    vimeoPlayer.on('volumechange', (data) => {
+                        currentVolume = data.volume;
+                    });
+
+                    this.adapter = {
+                        play: () => vimeoPlayer.play().catch(() => {}),
+                        pause: () => vimeoPlayer.pause().catch(() => {}),
+                        togglePlay: () => (isPaused ? vimeoPlayer.play().catch(() => {}) : vimeoPlayer.pause().catch(() => {})),
+                        seek: (sec) => vimeoPlayer.setCurrentTime(Math.max(0, sec)).catch(() => {}),
+                        skip: (delta) => {
+                            const target = Math.max(0, Math.min(duration || 99999, currentTime + delta));
+                            vimeoPlayer.setCurrentTime(target).catch(() => {});
+                        },
+                        getCurrentTime: () => currentTime,
+                        getDuration: () => duration,
+                        setVolume: (v) => vimeoPlayer.setVolume(Math.max(0, Math.min(1, v))).catch(() => {}),
+                        getVolume: () => currentVolume,
+                        toggleMute: () => {
+                            const next = currentVolume > 0 ? 0 : 1;
+                            vimeoPlayer.setVolume(next).catch(() => {});
+                        },
+                        setSpeed: (rate) => vimeoPlayer.setPlaybackRate(rate).catch(() => {}),
+                        toggleFullscreen: () => toggleElementFullscreen(this.stage),
+                    };
+
+                    window.addEventListener('beforeunload', () => {
+                        if (currentTime > 3) this.savePosition(currentTime, true);
+                    });
+                })
+                .catch(() => {
+                    // Fallback: iframe remains directly playable
+                });
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2E. Resume Position & 90% Auto-Complete
+         * ------------------------------------------------------------------- */
+
+        getSavedPosition() {
+            if (!this.lessonId) return 0;
+            const raw = storageGet(`${STORAGE_PREFIX}${this.lessonId}`);
+            const val = parseFloat(raw);
+            return Number.isFinite(val) ? val : 0;
+        }
+
+        savePosition(seconds, force = false) {
+            if (!this.lessonId || !Number.isFinite(seconds) || seconds < 2) return;
+            const now = Date.now();
+            if (!force && now - this.lastSavedAt < 3000) return;
+            this.lastSavedAt = now;
+            storageSet(`${STORAGE_PREFIX}${this.lessonId}`, Math.floor(seconds));
+        }
+
+        clearSavedPosition() {
+            if (!this.lessonId) return;
+            storageRemove(`${STORAGE_PREFIX}${this.lessonId}`);
+        }
+
+        showResumeToast(seconds) {
+            notify(`Resumed lesson from ${formatTime(seconds)}`, 'info');
+        }
+
+        handlePlaybackProgress(current, duration) {
+            if (!duration || duration <= 0) return;
+            this.savePosition(current, false);
+
+            const ratio = current / duration;
+            if (ratio >= COMPLETE_THRESHOLD && !this.autoMarked) {
+                this.triggerAutoComplete();
+            }
+        }
+
+        triggerAutoComplete() {
+            if (this.autoMarked || !this.lessonId) return;
+            this.autoMarked = true;
+
+            const completeBtn = this.root.querySelector('#edupro-mark-complete-btn, #edupro-mark-complete, .mark-complete-btn, [data-mark-complete]');
+            if (window.EduPro && typeof window.EduPro.markLessonComplete === 'function') {
+                window.EduPro.markLessonComplete(completeBtn, {
+                    lessonId: this.lessonId,
+                    courseId: this.courseId,
+                    nextUrl: this.nextUrl,
+                }).catch(() => {
+                    this.autoMarked = false;
+                });
+            }
+        }
+
+        cyclePlaybackSpeed(direction = 1) {
+            this.speedIndex = (this.speedIndex + direction + PLAYBACK_RATES.length) % PLAYBACK_RATES.length;
+            const rate = PLAYBACK_RATES[this.speedIndex];
+            if (this.adapter && this.adapter.setSpeed) {
+                this.adapter.setSpeed(rate);
+            }
+            notify(`Playback speed: ${rate}x`, 'info');
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2F. PDF Viewer with Controls
+         * ------------------------------------------------------------------- */
+
+        initPdfViewer() {
+            const pdfContainer = this.root.querySelector('.edupro-pdf-stage, .ep-pdf-viewer, .lesson-pdf-viewer, [data-pdf-url]');
+            if (!pdfContainer) return;
+
+            const pdfUrl = pdfContainer.dataset.pdfUrl || (pdfContainer.querySelector('iframe') && pdfContainer.querySelector('iframe').src);
+            if (!pdfUrl) return;
+
+            this.provider = this.provider === 'none' ? 'pdf' : this.provider;
+            let zoom = 100;
+
+            let toolbar = pdfContainer.querySelector('.edupro-pdf-toolbar, .ep-pdf-toolbar');
+            let iframe = pdfContainer.querySelector('iframe');
+
+            if (!toolbar) {
+                toolbar = document.createElement('div');
+                toolbar.className = 'ep-pdf-toolbar';
+                toolbar.innerHTML = `
+                    <div class="ep-pdf-toolbar__left">
+                        <span class="ep-pdf-label">PDF Document</span>
+                    </div>
+                    <div class="ep-pdf-toolbar__controls">
+                        <button type="button" class="ep-pdf-btn" data-pdf-zoom="out" title="Zoom out" aria-label="Zoom out">&minus;</button>
+                        <span class="ep-pdf-zoom-value">100%</span>
+                        <button type="button" class="ep-pdf-btn" data-pdf-zoom="in" title="Zoom in" aria-label="Zoom in">+</button>
+                        <button type="button" class="ep-pdf-btn" data-pdf-zoom="reset" title="Reset zoom" aria-label="Reset zoom">Fit</button>
+                        <button type="button" class="ep-pdf-btn" data-pdf-fullscreen title="Fullscreen" aria-label="Fullscreen">&#x26F6;</button>
+                        <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" class="ep-pdf-btn" title="Open in new tab">Open</a>
+                        <a href="${pdfUrl}" download class="ep-pdf-btn ep-pdf-btn--primary" title="Download PDF">Download</a>
+                    </div>
+                `;
+                pdfContainer.prepend(toolbar);
+            } else if (!toolbar.querySelector('[data-pdf-zoom]')) {
+                // Enhance existing .edupro-pdf-toolbar with zoom & fullscreen controls
+                const controlsGroup = document.createElement('div');
+                controlsGroup.className = 'ep-pdf-toolbar__controls';
+                controlsGroup.innerHTML = `
+                    <button type="button" class="ep-pdf-btn" data-pdf-zoom="out" title="Zoom out" aria-label="Zoom out">&minus;</button>
+                    <span class="ep-pdf-zoom-value">100%</span>
+                    <button type="button" class="ep-pdf-btn" data-pdf-zoom="in" title="Zoom in" aria-label="Zoom in">+</button>
+                    <button type="button" class="ep-pdf-btn" data-pdf-zoom="reset" title="Reset zoom" aria-label="Reset zoom">Fit</button>
+                    <button type="button" class="ep-pdf-btn" data-pdf-fullscreen title="Fullscreen" aria-label="Fullscreen">&#x26F6;</button>
+                `;
+                toolbar.appendChild(controlsGroup);
+            }
+
+            if (!iframe) {
+                const frameWrap = document.createElement('div');
+                frameWrap.className = 'ep-pdf-frame-wrap';
+                iframe = document.createElement('iframe');
+                iframe.className = 'ep-pdf-iframe';
+                iframe.src = `${pdfUrl}#toolbar=1&navpanes=0&zoom=100`;
+                iframe.title = 'Lesson PDF Viewer';
+                frameWrap.appendChild(iframe);
+                pdfContainer.appendChild(frameWrap);
+            }
+
+            const zoomDisplay = toolbar.querySelector('.ep-pdf-zoom-value');
+
+            const applyZoom = () => {
+                if (zoomDisplay) zoomDisplay.textContent = `${zoom}%`;
+                iframe.style.transform = zoom === 100 ? '' : `scale(${zoom / 100})`;
+                iframe.style.transformOrigin = 'top left';
+                iframe.style.width = zoom === 100 ? '100%' : `${(100 / zoom) * 100}%`;
+                iframe.style.height = zoom === 100 ? '100%' : `${(100 / zoom) * 100}%`;
+            };
+
+            toolbar.addEventListener('click', (e) => {
+                const zoomBtn = e.target.closest('[data-pdf-zoom]');
+                if (zoomBtn) {
+                    const action = zoomBtn.dataset.pdfZoom;
+                    if (action === 'in') zoom = Math.min(200, zoom + 15);
+                    else if (action === 'out') zoom = Math.max(60, zoom - 15);
+                    else zoom = 100;
+                    applyZoom();
+                    return;
+                }
+
+                if (e.target.closest('[data-pdf-fullscreen]')) {
+                    toggleElementFullscreen(pdfContainer);
+                }
+            });
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2G. Curriculum Sidebar: Active Highlight, Auto-Scroll & Toggle
+         * ------------------------------------------------------------------- */
+
+        initSidebar() {
+            const sidebar = this.root.querySelector('#edupro-player-sidebar, .edupro-player-sidebar, .lesson-sidebar, .ep-curriculum-sidebar, .player-sidebar');
+            if (!sidebar) return;
+
+            // Highlight active lesson & expand its containing section
+            let activeLesson = sidebar.querySelector('.edupro-player-lesson-item.is-active, .lesson-item.is-active, .curriculum-lesson.is-active, .lesson-nav-item.active, .is-current-lesson');
+            if (!activeLesson && this.lessonId) {
+                activeLesson = sidebar.querySelector(`[data-lesson-id="${this.lessonId}"]`);
+                if (activeLesson) activeLesson.classList.add('is-active', 'active');
+            }
+
+            if (activeLesson) {
+                const parentSection = activeLesson.closest('.edupro-curriculum-section, .curriculum-section, .sidebar-section, .accordion-item');
+                if (parentSection) {
+                    parentSection.classList.add('is-open', 'active');
+                    const body = parentSection.querySelector('.edupro-curriculum-section__body, .curriculum-section__body, .section-lessons, .accordion-body');
+                    if (body) body.style.maxHeight = 'none';
+                }
+
+                // Smooth scroll active lesson into center of sidebar viewport
+                requestAnimationFrame(() => {
+                    activeLesson.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                });
+            }
+
+            // Sidebar collapse / mobile drawer toggle
+            const toggleBtns = this.root.querySelectorAll('#edupro-player-sidebar-toggle, .ep-sidebar-toggle, .player-sidebar-toggle, [data-toggle-player-sidebar]');
+            toggleBtns.forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.innerWidth <= 992) {
+                        const isOpen = sidebar.classList.toggle('is-open');
+                        this.root.classList.toggle('sidebar-mobile-open', isOpen);
+                        btn.setAttribute('aria-expanded', String(isOpen));
+                    } else {
+                        const collapsed = this.root.classList.toggle('sidebar-collapsed');
+                        sidebar.classList.toggle('is-collapsed', collapsed);
+                        btn.setAttribute('aria-expanded', String(!collapsed));
+                    }
+                });
+            });
+
+            // Optional sidebar lesson filter input
+            const filterInput = sidebar.querySelector('.ep-sidebar-search, [data-lesson-filter]');
+            if (filterInput) {
+                filterInput.addEventListener('input', () => {
+                    const q = filterInput.value.trim().toLowerCase();
+                    sidebar.querySelectorAll('.edupro-player-lesson-item, .curriculum-lesson, .lesson-item, .lesson-nav-item').forEach((item) => {
+                        const text = item.textContent.toLowerCase();
+                        item.style.display = !q || text.includes(q) ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2H. Notes & Resources Right Panel
+         * ------------------------------------------------------------------- */
+
+        initNotesAndPanels() {
+            const rightPanel = this.root.querySelector('#edupro-player-right-panel, .edupro-player-panel');
+            const panelToggle = this.root.querySelector('#edupro-player-panel-toggle, [data-toggle-player-panel]');
+
+            if (panelToggle && rightPanel) {
+                panelToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.innerWidth <= 1100) {
+                        const open = rightPanel.classList.toggle('is-open');
+                        panelToggle.setAttribute('aria-expanded', String(open));
+                    } else {
+                        const collapsed = this.root.classList.toggle('panel-collapsed');
+                        rightPanel.classList.toggle('is-collapsed', collapsed);
+                        panelToggle.setAttribute('aria-expanded', String(!collapsed));
+                    }
+                });
+            }
+
+            // Right panel Notes / Resources tabs ([data-panel-tab] <-> [data-panel-content])
+            if (rightPanel) {
+                const panelTabs = Array.from(rightPanel.querySelectorAll('[data-panel-tab]'));
+                const panelBodies = Array.from(rightPanel.querySelectorAll('[data-panel-content]'));
+                panelTabs.forEach((tabBtn) => {
+                    tabBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const target = tabBtn.dataset.panelTab;
+                        panelTabs.forEach((t) => {
+                            const active = t === tabBtn;
+                            t.classList.toggle('is-active', active);
+                            t.setAttribute('aria-selected', String(active));
+                        });
+                        panelBodies.forEach((body) => {
+                            const match = body.dataset.panelContent === target;
+                            body.classList.toggle('is-active', match);
+                            body.hidden = !match;
+                        });
+                    });
+                });
+            }
+
+            // Notes textarea persistence + Clear button
+            const notesInput = this.root.querySelector('#edupro-lesson-notes, .edupro-notes-textarea, .lesson-notes-textarea, [data-lesson-notes]');
+            const statusEl = this.root.querySelector('#edupro-notes-status, .edupro-notes-status, .notes-save-status');
+            const clearBtn = this.root.querySelector('#edupro-notes-clear');
+
+            if (notesInput && this.lessonId) {
+                const savedNotes = storageGet(`${NOTES_PREFIX}${this.lessonId}`);
+                if (savedNotes !== null && !notesInput.value) {
+                    notesInput.value = savedNotes;
+                }
+
+                let saveTimer = null;
+
+                notesInput.addEventListener('input', () => {
+                    if (statusEl) statusEl.textContent = 'Saving...';
+                    clearTimeout(saveTimer);
+                    saveTimer = setTimeout(() => {
+                        storageSet(`${NOTES_PREFIX}${this.lessonId}`, notesInput.value);
+                        if (statusEl) statusEl.textContent = 'Saved locally';
+                    }, 500);
+                });
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        notesInput.value = '';
+                        storageRemove(`${NOTES_PREFIX}${this.lessonId}`);
+                        if (statusEl) statusEl.textContent = 'Notes cleared';
+                    });
+                }
+            }
+        }
+
+        /* ---------------------------------------------------------------------
+         * 2I. Keyboard Shortcuts (Space, F, Left/Right ±5s, Up/Down, M, </> )
+         * ------------------------------------------------------------------- */
+
+        initKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if (!this.adapter) return;
+
+                // Do not hijack keys when typing in form fields
+                const tag = (e.target && e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target && e.target.isContentEditable)) {
+                    return;
+                }
+                if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+                switch (e.key) {
+                    case ' ':
+                    case 'k':
+                    case 'K':
+                        e.preventDefault();
+                        this.adapter.togglePlay();
+                        break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault();
+                        this.adapter.toggleFullscreen();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.adapter.skip(5);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.adapter.skip(-5);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.adapter.setVolume(Math.min(1, (this.adapter.getVolume() || 0) + 0.1));
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.adapter.setVolume(Math.max(0, (this.adapter.getVolume() || 0) - 0.1));
+                        break;
+                    case 'm':
+                    case 'M':
+                        e.preventDefault();
+                        this.adapter.toggleMute();
+                        break;
+                    case '>':
+                        e.preventDefault();
+                        this.cyclePlaybackSpeed(1);
+                        break;
+                    case '<':
+                        e.preventDefault();
+                        this.cyclePlaybackSpeed(-1);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+    }
+
+    /* =========================================================================
+     * 3. BOOTSTRAP
+     * ========================================================================= */
+
+    function initCoursePlayers() {
+        const roots = document.querySelectorAll('#edupro-lesson-player, .edupro-player-shell, .edupro-lesson-player, .lesson-player-layout, [data-edupro-player]');
+        if (!roots.length) return;
+
+        const instances = [];
+        roots.forEach((root) => {
+            if (root.dataset.playerInitialized) return;
+            root.dataset.playerInitialized = '1';
+            instances.push(new EduProCoursePlayer(root));
+        });
+
+        window.EduProPlayer = {
+            instances,
+            Class: EduProCoursePlayer,
+        };
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCoursePlayers);
+    } else {
+        initCoursePlayers();
+    }
+})(window, document, window.jQuery);

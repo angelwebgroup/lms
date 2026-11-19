@@ -1,0 +1,2157 @@
+/**
+ * EduPro LMS Theme — Student Dashboard Stylesheet
+ *
+ * Covers:
+ *  1. Dashboard Layout (Sidebar + Main Content + Welcome Banner + KPI Cards)
+ *  2. Course Progress Cards
+ *  3. Circular Progress Rings (SVG & Canvas)
+ *  4. Order History Table & Status Badges
+ *  5. Profile & Settings Forms (Avatar Upload + Toggle Switches)
+ *  6. Achievement Badges & Gamification Strip
+ *  7. Certificates Grid
+ *  8. Mobile Dashboard & Sticky Bottom Navigation
+ *
+ * @package EduPro
+ * @version 1.0.0
+ */
+
+:root {
+    --db-primary: var(--edupro-primary, #e31b23);
+    --db-primary-dark: #c0151c;
+    --db-primary-soft: rgba(227, 27, 35, 0.09);
+    --db-secondary: #1a1a2e;
+    --db-accent: #f4a261;
+    --db-success: #2ecc71;
+    --db-warning: #f39c12;
+    --db-danger: #e74c3c;
+    --db-info: #3498db;
+    --db-text-dark: #1a1a2e;
+    --db-text-medium: #4a4a6a;
+    --db-text-light: #8888aa;
+    --db-bg: #f8f9ff;
+    --db-white: #ffffff;
+    --db-border: #e8e8f0;
+    --db-radius: 12px;
+    --db-shadow: 0 4px 20px rgba(26, 26, 46, 0.06);
+    --db-shadow-hover: 0 12px 30px rgba(26, 26, 46, 0.11);
+    --db-transition: all 0.25s ease;
+}
+
+/* ============================================================================
+ * 1. DASHBOARD LAYOUT (Sidebar + Main)
+ * ========================================================================= */
+
+.edupro-dashboard,
+.student-dashboard {
+    background: var(--db-bg);
+    min-height: calc(100vh - 80px);
+    padding: 32px 0 64px;
+}
+
+.dashboard-layout,
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    box-shadow: var(--db-shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 96px;
+}
+
+.dashboard-user-card {
+    padding: 24px 20px;
+    background: linear-gradient(135deg, var(--db-secondary) 0%, #262646 100%);
+    color: var(--db-white);
+    text-align: center;
+}
+
+.dashboard-user-card__avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    border: 3px solid var(--db-primary);
+    object-fit: cover;
+    display: block;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.dashboard-user-card__name {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--db-white);
+    margin: 0 0 4px;
+}
+
+.dashboard-user-card__email {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.72);
+    margin: 0;
+    word-break: break-word;
+}
+
+.dashboard-user-card__role {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 3px 12px;
+    border-radius: 50px;
+    background: rgba(227, 27, 35, 0.24);
+    color: #ffadb0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.dashboard-nav {
+    list-style: none;
+    margin: 0;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dashboard-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    color: var(--db-text-medium);
+    text-decoration: none;
+    font-size: 0.93rem;
+    font-weight: 600;
+    transition: var(--db-transition);
+    border: 0;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dashboard-nav-link svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+    color: var(--db-text-light);
+    transition: color 0.2s ease;
+}
+
+.dashboard-nav-link:hover {
+    background: var(--db-bg);
+    color: var(--db-text-dark);
+}
+
+.dashboard-nav-link:hover svg {
+    color: var(--db-primary);
+}
+
+.dashboard-nav-link.is-active,
+.dashboard-nav-link.active {
+    background: var(--db-primary-soft);
+    color: var(--db-primary);
+}
+
+.dashboard-nav-link.is-active svg,
+.dashboard-nav-link.active svg {
+    color: var(--db-primary);
+}
+
+.dashboard-nav-link--logout {
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--db-border);
+    border-radius: 0 0 8px 8px;
+    color: var(--db-danger);
+}
+
+.dashboard-nav-link--logout svg {
+    color: var(--db-danger);
+}
+
+.dashboard-nav-badge {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 50px;
+    background: var(--db-bg);
+    color: var(--db-text-medium);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.dashboard-nav-link.is-active .dashboard-nav-badge {
+    background: var(--db-primary);
+    color: var(--db-white);
+}
+
+/* Main Area */
+.dashboard-main {
+    min-width: 0;
+}
+
+.dashboard-tab-panel,
+.dashboard-panel {
+    display: none;
+    animation: dbPanelFade 0.25s ease;
+}
+
+.dashboard-tab-panel.is-active,
+.dashboard-tab-panel.active,
+.dashboard-panel.is-active,
+.dashboard-panel.active {
+    display: block;
+}
+
+@keyframes dbPanelFade {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.dashboard-section-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    margin: 0;
+}
+
+.dashboard-section-subtitle {
+    font-size: 0.9rem;
+    color: var(--db-text-light);
+    margin: 4px 0 0;
+}
+
+/* KPI Summary Stats */
+.dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.dashboard-stat-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: var(--db-shadow);
+    transition: var(--db-transition);
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--db-shadow-hover);
+}
+
+.dashboard-stat-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--db-primary-soft);
+    color: var(--db-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dashboard-stat-card__icon--green {
+    background: rgba(46, 204, 113, 0.12);
+    color: var(--db-success);
+}
+
+.dashboard-stat-card__icon--amber {
+    background: rgba(243, 156, 18, 0.14);
+    color: var(--db-warning);
+}
+
+.dashboard-stat-card__icon--blue {
+    background: rgba(52, 152, 219, 0.12);
+    color: var(--db-info);
+}
+
+.dashboard-stat-card__value {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--db-text-dark);
+    line-height: 1.1;
+}
+
+.dashboard-stat-card__label {
+    font-size: 0.8rem;
+    color: var(--db-text-light);
+    margin-top: 3px;
+}
+
+/* ============================================================================
+ * 2. COURSE PROGRESS CARDS
+ * ========================================================================= */
+
+.dashboard-courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 22px;
+}
+
+.dashboard-course-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    overflow: hidden;
+    box-shadow: var(--db-shadow);
+    display: flex;
+    flex-direction: column;
+    transition: var(--db-transition);
+}
+
+.dashboard-course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--db-shadow-hover);
+}
+
+.dashboard-course-card__thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--db-secondary);
+    overflow: hidden;
+}
+
+.dashboard-course-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.dashboard-course-card:hover .dashboard-course-card__thumb img {
+    transform: scale(1.05);
+}
+
+.dashboard-course-card__status {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(26, 26, 46, 0.82);
+    color: var(--db-white);
+    backdrop-filter: blur(4px);
+}
+
+.dashboard-course-card__status--completed {
+    background: var(--db-success);
+    color: var(--db-white);
+}
+
+.dashboard-course-card__body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.dashboard-course-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.dashboard-course-card__title {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.38;
+    margin: 0 0 6px;
+    color: var(--db-text-dark);
+}
+
+.dashboard-course-card__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.dashboard-course-card__title a:hover {
+    color: var(--db-primary);
+}
+
+.dashboard-course-card__meta {
+    font-size: 0.82rem;
+    color: var(--db-text-light);
+}
+
+.dashboard-course-card__progress-row {
+    margin-bottom: 16px;
+}
+
+.dashboard-course-card__progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--db-text-medium);
+    margin-bottom: 6px;
+}
+
+.dashboard-progress-bar {
+    width: 100%;
+    height: 7px;
+    background: var(--db-border);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.dashboard-progress-bar__fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--db-primary), #ff5960);
+    transition: width 0.5s ease;
+}
+
+.dashboard-course-card.is-completed .dashboard-progress-bar__fill {
+    background: var(--db-success);
+}
+
+.dashboard-course-card__actions {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-course-card__actions .btn,
+.dashboard-course-card__actions a {
+    flex: 1;
+    text-align: center;
+}
+
+/* ============================================================================
+ * 3. CIRCULAR PROGRESS RINGS
+ * ========================================================================= */
+
+.circular-progress,
+.dashboard-ring {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.circular-progress--sm {
+    width: 48px;
+    height: 48px;
+}
+
+.circular-progress--lg {
+    width: 96px;
+    height: 96px;
+}
+
+.circular-progress svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circular-progress .ring-bg {
+    fill: none;
+    stroke: var(--db-border);
+    stroke-width: 6;
+}
+
+.circular-progress .ring-progress {
+    fill: none;
+    stroke: var(--db-primary);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.85s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+}
+
+.circular-progress[data-progress="100"] .ring-progress,
+.circular-progress.is-complete .ring-progress {
+    stroke: var(--db-success);
+}
+
+.circular-progress .ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.circular-progress--lg .ring-label {
+    font-size: 1.1rem;
+}
+
+/* ============================================================================
+ * 4. ORDER HISTORY TABLE
+ * ========================================================================= */
+
+.dashboard-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    box-shadow: var(--db-shadow);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.orders-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.orders-table,
+.edupro-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.orders-table thead th,
+.edupro-orders-table thead th {
+    text-align: left;
+    padding: 13px 16px;
+    background: var(--db-bg);
+    color: var(--db-text-medium);
+    font-family: "Poppins", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--db-border);
+    white-space: nowrap;
+}
+
+.orders-table tbody td,
+.edupro-orders-table tbody td {
+    padding: 15px 16px;
+    border-bottom: 1px solid var(--db-border);
+    color: var(--db-text-dark);
+    vertical-align: middle;
+}
+
+.orders-table tbody tr:last-child td,
+.edupro-orders-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.orders-table tbody tr:hover,
+.edupro-orders-table tbody tr:hover {
+    background: #fafbff;
+}
+
+.order-id-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--db-secondary);
+    background: var(--db-bg);
+    padding: 3px 8px;
+    border-radius: 5px;
+}
+
+.order-amount {
+    font-weight: 700;
+    color: var(--db-text-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.order-gateway-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    background: var(--db-bg);
+    color: var(--db-text-medium);
+    text-transform: capitalize;
+}
+
+.order-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.order-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.order-status--completed {
+    background: rgba(46, 204, 113, 0.14);
+    color: #1e9e54;
+}
+
+.order-status--pending {
+    background: rgba(243, 156, 18, 0.15);
+    color: #b7750b;
+}
+
+.order-status--failed {
+    background: rgba(231, 76, 60, 0.14);
+    color: #c0392b;
+}
+
+.order-status--refunded {
+    background: rgba(52, 152, 219, 0.14);
+    color: #2176ae;
+}
+
+/* ============================================================================
+ * 5. PROFILE & SETTINGS FORMS
+ * ========================================================================= */
+
+.profile-avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 22px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--db-border);
+}
+
+.profile-avatar-preview {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--db-primary);
+    flex-shrink: 0;
+}
+
+.profile-avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 22px;
+}
+
+.profile-form-grid .form-group--full {
+    grid-column: 1 / -1;
+}
+
+.edupro-profile-form .form-group label,
+.dashboard-card .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--db-text-dark);
+    margin-bottom: 6px;
+}
+
+.edupro-profile-form input[type="text"],
+.edupro-profile-form input[type="email"],
+.edupro-profile-form input[type="password"],
+.edupro-profile-form input[type="tel"],
+.edupro-profile-form select,
+.edupro-profile-form textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--db-border);
+    border-radius: 8px;
+    background: var(--db-white);
+    color: var(--db-text-dark);
+    font-size: 0.93rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edupro-profile-form input:focus,
+.edupro-profile-form select:focus,
+.edupro-profile-form textarea:focus {
+    outline: none;
+    border-color: var(--db-primary);
+    box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.12);
+}
+
+.edupro-profile-form input.is-invalid,
+.edupro-profile-form textarea.is-invalid {
+    border-color: var(--db-danger);
+}
+
+.edupro-field-error {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--db-danger);
+}
+
+/* Toggle Switches for Dashboard Settings */
+.settings-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--db-border);
+}
+
+.settings-toggle-row:last-child {
+    border-bottom: 0;
+}
+
+.settings-toggle-info h4 {
+    margin: 0 0 3px;
+    font-size: 0.95rem;
+    color: var(--db-text-dark);
+}
+
+.settings-toggle-info p {
+    margin: 0;
+    font-size: 0.83rem;
+    color: var(--db-text-light);
+}
+
+.edupro-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.edupro-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.edupro-switch__slider {
+    position: absolute;
+    inset: 0;
+    background: #d5d7e4;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.edupro-switch__slider::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--db-white);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    transition: transform 0.25s ease;
+}
+
+.edupro-switch input:checked + .edupro-switch__slider {
+    background: var(--db-primary);
+}
+
+.edupro-switch input:checked + .edupro-switch__slider::before {
+    transform: translateX(22px);
+}
+
+/* ============================================================================
+ * 6. ACHIEVEMENT BADGES
+ * ========================================================================= */
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 18px;
+}
+
+.achievement-badge {
+    position: relative;
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    padding: 22px 16px;
+    text-align: center;
+    box-shadow: var(--db-shadow);
+    transition: var(--db-transition);
+}
+
+.achievement-badge:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--db-shadow-hover);
+}
+
+.achievement-badge__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    background: var(--db-primary-soft);
+    color: var(--db-primary);
+    border: 3px solid transparent;
+}
+
+.achievement-badge--gold .achievement-badge__icon {
+    background: linear-gradient(135deg, #fff5d6, #fde19a);
+    color: #b7791f;
+    border-color: #f5b942;
+}
+
+.achievement-badge--silver .achievement-badge__icon {
+    background: linear-gradient(135deg, #f4f6fb, #dfe4f0);
+    color: #53617a;
+    border-color: #b4bfd4;
+}
+
+.achievement-badge--bronze .achievement-badge__icon {
+    background: linear-gradient(135deg, #fcece3, #f3cfb8);
+    color: #9c5221;
+    border-color: #d68b59;
+}
+
+.achievement-badge--locked {
+    opacity: 0.56;
+    filter: grayscale(0.85);
+}
+
+.achievement-badge__title {
+    font-family: "Poppins", sans-serif;
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    margin: 0 0 4px;
+}
+
+.achievement-badge__desc {
+    font-size: 0.8rem;
+    color: var(--db-text-light);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.achievement-badge__date {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 2px 9px;
+    border-radius: 50px;
+    background: rgba(46, 204, 113, 0.13);
+    color: #1e9e54;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+/* ============================================================================
+ * 7. CERTIFICATES LIST
+ * ========================================================================= */
+
+.certificates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.certificate-item-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-top: 4px solid var(--db-primary);
+    border-radius: var(--db-radius);
+    padding: 22px;
+    box-shadow: var(--db-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.certificate-item-card__title {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--db-text-dark);
+}
+
+.certificate-item-card__meta {
+    font-size: 0.82rem;
+    color: var(--db-text-light);
+}
+
+/* ============================================================================
+ * 8. MOBILE DASHBOARD (Bottom Navigation Bar)
+ * ========================================================================= */
+
+.dashboard-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 1100px) {
+    .dashboard-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .edupro-dashboard,
+    .student-dashboard {
+        padding: 20px 0 92px;
+    }
+
+    .dashboard-layout,
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .dashboard-sidebar {
+        position: static;
+    }
+
+    .dashboard-sidebar .dashboard-nav {
+        display: none;
+    }
+
+    /* Sticky Bottom Navigation for Mobile */
+    .dashboard-bottom-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 950;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        background: var(--db-white);
+        border-top: 1px solid var(--db-border);
+        box-shadow: 0 -6px 24px rgba(26, 26, 46, 0.09);
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .dashboard-bottom-nav__item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        min-height: 48px;
+        padding: 6px 4px;
+        border: 0;
+        background: transparent;
+        color: var(--db-text-light);
+        text-decoration: none;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .dashboard-bottom-nav__item svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dashboard-bottom-nav__item.is-active,
+    .dashboard-bottom-nav__item.active {
+        color: var(--db-primary);
+    }
+
+    .dashboard-bottom-nav__item.is-active::before,
+    .dashboard-bottom-nav__item.active::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+        left: 22%;
+        right: 22%;
+        height: 3px;
+        border-radius: 0 0 4px 4px;
+        background: var(--db-primary);
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar-upload {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .dashboard-card {
+        padding: 18px 16px;
+    }
+
+    .orders-table thead {
+        display: none;
+    }
+
+    .orders-table,
+    .orders-table tbody,
+    .orders-table tr,
+    .orders-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .orders-table tr {
+        border: 1px solid var(--db-border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 12px;
+        background: var(--db-white);
+    }
+
+    .orders-table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--db-border);
+    }
+
+    .orders-table tbody td:last-child {
+        border-bottom: 0;
+    }
+
+    .orders-table tbody td::before {
+        content: attr(data-label);
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--db-text-light);
+    }
+}
+
+
+/* ============================================================================
+ * 9. TEMPLATE-DASHBOARD.PHP FULL EDUPRO-* CLASS COVERAGE
+ *    Matches all 81 classes in templates/template-dashboard.php
+ * ========================================================================= */
+
+.edupro-dashboard-page-wrap {
+    background: var(--db-bg);
+    min-height: calc(100vh - 80px);
+    padding: 36px 0 72px;
+}
+
+.edupro-dashboard-page-wrap .edupro-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.edupro-dashboard-layout {
+    display: grid;
+    grid-template-columns: 276px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+
+/* Sidebar & User Card */
+.edupro-dashboard-sidebar {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    box-shadow: var(--db-shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 96px;
+}
+
+.edupro-dashboard-user-card {
+    padding: 26px 20px 22px;
+    background: linear-gradient(135deg, var(--db-secondary) 0%, #272748 100%);
+    color: var(--db-white);
+    text-align: center;
+}
+
+.edupro-dashboard-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--db-primary);
+    margin: 0 auto 12px;
+    display: block;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.edupro-dashboard-username {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.06rem;
+    font-weight: 700;
+    color: var(--db-white);
+    margin: 0 0 4px;
+    line-height: 1.3;
+}
+
+.edupro-dashboard-email {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.72);
+    margin: 0;
+    word-break: break-word;
+}
+
+.edupro-dashboard-role-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 3px 12px;
+    border-radius: 50px;
+    background: rgba(227, 27, 35, 0.25);
+    color: #ffb2b5;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* Sidebar Nav */
+.edupro-dashboard-nav {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.edupro-dash-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--db-text-medium);
+    font-family: "Inter", sans-serif;
+    font-size: 0.93rem;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--db-transition);
+}
+
+.edupro-dash-nav-item svg {
+    flex-shrink: 0;
+    color: var(--db-text-light);
+    transition: color 0.2s ease;
+}
+
+.edupro-dash-nav-item:hover {
+    background: var(--db-bg);
+    color: var(--db-text-dark);
+}
+
+.edupro-dash-nav-item:hover svg {
+    color: var(--db-primary);
+}
+
+.edupro-dash-nav-item.is-active {
+    background: var(--db-primary-soft);
+    color: var(--db-primary);
+}
+
+.edupro-dash-nav-item.is-active svg {
+    color: var(--db-primary);
+}
+
+.edupro-dash-count {
+    margin-left: auto;
+    padding: 2px 9px;
+    border-radius: 50px;
+    background: var(--db-bg);
+    color: var(--db-text-medium);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.edupro-dash-nav-item.is-active .edupro-dash-count {
+    background: var(--db-primary);
+    color: var(--db-white);
+}
+
+.edupro-dash-nav-logout {
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--db-border);
+    border-radius: 0 0 8px 8px;
+    color: var(--db-danger);
+}
+
+.edupro-dash-nav-logout svg {
+    color: var(--db-danger);
+}
+
+.edupro-dash-nav-logout:hover {
+    background: rgba(231, 76, 60, 0.08);
+    color: #c0392b;
+}
+
+/* Main Content & KPI Row */
+.edupro-dashboard-main {
+    min-width: 0;
+}
+
+.edupro-dash-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.edupro-dash-kpi-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    padding: 20px 22px;
+    box-shadow: var(--db-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 4px solid var(--db-primary);
+    transition: var(--db-transition);
+}
+
+.edupro-dash-kpi-card:nth-child(2) {
+    border-left-color: var(--db-warning);
+}
+
+.edupro-dash-kpi-card:nth-child(3) {
+    border-left-color: var(--db-success);
+}
+
+.edupro-dash-kpi-card:nth-child(4) {
+    border-left-color: var(--db-secondary);
+}
+
+.edupro-dash-kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--db-shadow-hover);
+}
+
+.edupro-kpi-value {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--db-text-dark);
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.edupro-kpi-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--db-text-light);
+}
+
+/* Dashboard Tab Panels (Hidden unless .is-active) */
+.edupro-dash-panel {
+    display: none;
+    animation: dbPanelFade 0.25s ease;
+}
+
+.edupro-dash-panel.is-active {
+    display: block;
+}
+
+.edupro-dash-panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.edupro-dash-panel-header h1 {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    margin: 0 0 4px;
+}
+
+.edupro-dash-panel-header p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--db-text-light);
+}
+
+/* Filter Pills */
+.edupro-course-filter-pills {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.edupro-pill-btn {
+    padding: 7px 16px;
+    border-radius: 50px;
+    border: 1.5px solid var(--db-border);
+    background: var(--db-white);
+    color: var(--db-text-medium);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--db-transition);
+}
+
+.edupro-pill-btn:hover {
+    border-color: var(--db-primary);
+    color: var(--db-primary);
+}
+
+.edupro-pill-btn.is-active {
+    background: var(--db-primary);
+    border-color: var(--db-primary);
+    color: var(--db-white);
+}
+
+/* Empty State */
+.edupro-dash-empty {
+    background: var(--db-white);
+    border: 1.5px dashed var(--db-border);
+    border-radius: var(--db-radius);
+    padding: 48px 28px;
+    text-align: center;
+}
+
+.edupro-dash-empty h3 {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.2rem;
+    color: var(--db-text-dark);
+    margin: 0 0 8px;
+}
+
+.edupro-dash-empty p {
+    color: var(--db-text-light);
+    max-width: 460px;
+    margin: 0 auto 20px;
+    font-size: 0.93rem;
+}
+
+/* Enrolled Courses Grid & Cards */
+.edupro-dash-courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 22px;
+}
+
+.edupro-dash-course-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    overflow: hidden;
+    box-shadow: var(--db-shadow);
+    display: flex;
+    flex-direction: column;
+    transition: var(--db-transition);
+}
+
+.edupro-dash-course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--db-shadow-hover);
+}
+
+.edupro-dash-course-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--db-secondary);
+    overflow: hidden;
+}
+
+.edupro-dash-course-thumb a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.edupro-dash-course-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.edupro-dash-course-card:hover .edupro-dash-course-thumb img {
+    transform: scale(1.05);
+}
+
+.edupro-dash-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--db-secondary), #2f2f58);
+    color: var(--db-white);
+    font-family: "Poppins", sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+}
+
+.edupro-dash-badge-complete {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    background: var(--db-success);
+    color: var(--db-white);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.edupro-dash-course-body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.edupro-dash-course-cat {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 3px 10px;
+    border-radius: 50px;
+    background: var(--db-primary-soft);
+    color: var(--db-primary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.edupro-dash-course-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.38;
+    margin: 0 0 4px;
+    color: var(--db-text-dark);
+}
+
+.edupro-dash-course-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.edupro-dash-course-title a:hover {
+    color: var(--db-primary);
+}
+
+.edupro-dash-course-instructor {
+    font-size: 0.83rem;
+    color: var(--db-text-light);
+    margin: 0 0 14px;
+}
+
+/* Circular Progress Ring Inside Enrolled Course Card */
+.edupro-dash-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--db-bg);
+    margin-bottom: 16px;
+}
+
+.edupro-progress-ring-wrap {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edupro-progress-ring-wrap .edupro-progress-ring {
+    width: 58px;
+    height: 58px;
+    display: block;
+    transform: none;
+}
+
+.edupro-progress-ring__bg {
+    stroke: var(--db-border);
+}
+
+.edupro-progress-ring__fill {
+    transition: stroke-dashoffset 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.edupro-progress-ring__text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.edupro-dash-progress-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.edupro-dash-progress-meta strong {
+    font-size: 0.88rem;
+    color: var(--db-text-dark);
+}
+
+.edupro-dash-progress-meta span {
+    font-size: 0.78rem;
+    color: var(--db-text-light);
+}
+
+.edupro-dash-course-actions {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.edupro-dash-course-actions .edupro-btn {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Dashboard Buttons (ensures standalone consistency on template-dashboard.php) */
+.edupro-dashboard-page-wrap .edupro-btn,
+#edupro-cert-modal .edupro-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--db-transition);
+}
+
+.edupro-dashboard-page-wrap .edupro-btn-primary,
+#edupro-cert-modal .edupro-btn-primary {
+    background: var(--db-primary);
+    border-color: var(--db-primary);
+    color: var(--db-white);
+}
+
+.edupro-dashboard-page-wrap .edupro-btn-primary:hover,
+#edupro-cert-modal .edupro-btn-primary:hover {
+    background: var(--db-primary-dark);
+    border-color: var(--db-primary-dark);
+}
+
+.edupro-dashboard-page-wrap .edupro-btn-outline {
+    background: transparent;
+    border-color: var(--db-border);
+    color: var(--db-text-dark);
+}
+
+.edupro-dashboard-page-wrap .edupro-btn-outline:hover {
+    border-color: var(--db-primary);
+    color: var(--db-primary);
+    background: var(--db-primary-soft);
+}
+
+.edupro-dashboard-page-wrap .edupro-btn-sm {
+    padding: 8px 14px;
+    font-size: 0.84rem;
+}
+
+.edupro-open-cert-btn {
+    white-space: nowrap;
+}
+
+/* Profile & Settings Card Form */
+.edupro-dash-card-form {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    padding: 28px;
+    box-shadow: var(--db-shadow);
+}
+
+.edupro-avatar-upload-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 22px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--db-border);
+}
+
+.edupro-avatar-preview {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--db-primary);
+    flex-shrink: 0;
+}
+
+.edupro-avatar-upload-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.edupro-field-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--db-text-light);
+}
+
+.edupro-form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+}
+
+.edupro-form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 20px;
+}
+
+.edupro-dash-card-form .edupro-form-group {
+    margin-bottom: 18px;
+}
+
+.edupro-dash-card-form .edupro-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--db-text-dark);
+    margin-bottom: 6px;
+}
+
+.edupro-dash-card-form input[type="text"],
+.edupro-dash-card-form input[type="email"],
+.edupro-dash-card-form input[type="tel"],
+.edupro-dash-card-form input[type="password"],
+.edupro-dash-card-form select,
+.edupro-dash-card-form textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--db-border);
+    border-radius: 8px;
+    background: var(--db-white);
+    color: var(--db-text-dark);
+    font-size: 0.93rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edupro-dash-card-form input:focus,
+.edupro-dash-card-form select:focus,
+.edupro-dash-card-form textarea:focus {
+    outline: none;
+    border-color: var(--db-primary);
+    box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.12);
+}
+
+.edupro-dash-divider {
+    border: 0;
+    border-top: 1px solid var(--db-border);
+    margin: 22px 0;
+}
+
+.edupro-dash-subhead {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    margin: 0 0 16px;
+}
+
+.edupro-settings-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edupro-dash-card-form .edupro-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--db-border);
+    border-radius: 8px;
+    background: var(--db-bg);
+    font-size: 0.91rem;
+    color: var(--db-text-dark);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.edupro-dash-card-form .edupro-checkbox-label:hover {
+    border-color: rgba(227, 27, 35, 0.35);
+}
+
+.edupro-dash-card-form .edupro-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--db-primary);
+    flex-shrink: 0;
+}
+
+/* Dashboard Alerts */
+.edupro-dashboard-page-wrap .edupro-alert {
+    padding: 13px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+}
+
+.edupro-dashboard-page-wrap .edupro-alert-success {
+    background: rgba(46, 204, 113, 0.12);
+    border-color: rgba(46, 204, 113, 0.35);
+    color: #167942;
+}
+
+.edupro-dashboard-page-wrap .edupro-alert-error {
+    background: rgba(231, 76, 60, 0.11);
+    border-color: rgba(231, 76, 60, 0.35);
+    color: #b52b1d;
+}
+
+.edupro-dashboard-page-wrap .edupro-alert-info {
+    background: rgba(52, 152, 219, 0.11);
+    border-color: rgba(52, 152, 219, 0.35);
+    color: #1d6fa5;
+}
+
+/* Certificates Grid & Cards */
+.edupro-certificates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.edupro-certificate-card {
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-top: 4px solid var(--db-primary);
+    border-radius: var(--db-radius);
+    padding: 22px;
+    box-shadow: var(--db-shadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    transition: var(--db-transition);
+}
+
+.edupro-certificate-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--db-shadow-hover);
+}
+
+.edupro-certificate-card__ribbon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: var(--db-primary-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.edupro-certificate-card__info {
+    flex: 1;
+    min-width: 180px;
+}
+
+.edupro-certificate-card__info h3 {
+    font-family: "Poppins", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-text-dark);
+    margin: 0 0 6px;
+}
+
+.edupro-cert-meta {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--db-text-light);
+}
+
+.edupro-cert-meta code {
+    font-size: 0.78rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--db-bg);
+    color: var(--db-secondary);
+}
+
+/* Order History Table Wrapper & Status Pills */
+.edupro-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    box-shadow: var(--db-shadow);
+    -webkit-overflow-scrolling: touch;
+}
+
+.edupro-order-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    background: var(--db-bg);
+    color: var(--db-text-medium);
+}
+
+.edupro-order-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.edupro-order-status--completed {
+    background: rgba(46, 204, 113, 0.14);
+    color: #1e9e54;
+}
+
+.edupro-order-status--pending {
+    background: rgba(243, 156, 18, 0.15);
+    color: #b7750b;
+}
+
+.edupro-order-status--failed {
+    background: rgba(231, 76, 60, 0.14);
+    color: #c0392b;
+}
+
+.edupro-order-status--refunded {
+    background: rgba(52, 152, 219, 0.14);
+    color: #2176ae;
+}
+
+/* Certificate Printable Preview Modal (#edupro-cert-modal) */
+#edupro-cert-modal,
+.edupro-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(18, 18, 35, 0.76);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.edupro-modal-dialog {
+    position: relative;
+    background: var(--db-white);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 780px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+}
+
+.edupro-cert-dialog {
+    max-width: 860px;
+}
+
+.edupro-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--db-bg);
+    color: var(--db-text-dark);
+    font-size: 1.5rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--db-transition);
+}
+
+.edupro-modal-close:hover {
+    background: var(--db-primary);
+    color: var(--db-white);
+}
+
+.edupro-certificate-sheet {
+    background: #fffdf9;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.edupro-cert-border {
+    border: 10px double var(--db-primary);
+    padding: 44px 48px;
+    text-align: center;
+    background:
+        radial-gradient(circle at top left, rgba(227, 27, 35, 0.05), transparent 42%),
+        radial-gradient(circle at bottom right, rgba(244, 162, 97, 0.09), transparent 45%);
+}
+
+.edupro-cert-academy {
+    font-family: "Poppins", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--db-primary);
+    margin: 0 0 8px;
+}
+
+.edupro-cert-heading {
+    font-family: "Poppins", sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    color: var(--db-secondary);
+    margin: 0 0 18px;
+}
+
+.edupro-cert-presented {
+    font-size: 0.95rem;
+    color: var(--db-text-medium);
+    margin: 6px 0;
+}
+
+.edupro-cert-recipient {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-style: italic;
+    font-size: clamp(1.65rem, 3.2vw, 2.4rem);
+    font-weight: 700;
+    color: var(--db-secondary);
+    display: inline-block;
+    border-bottom: 2px solid #d4b06a;
+    padding: 0 28px 8px;
+    margin: 10px 0 14px;
+}
+
+.edupro-cert-course {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--db-primary);
+    margin: 8px 0 28px;
+}
+
+.edupro-cert-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-top: 1px solid var(--db-border);
+    padding-top: 18px;
+    text-align: left;
+}
+
+.edupro-cert-meta-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--db-text-light);
+    margin-bottom: 3px;
+}
+
+.edupro-cert-modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsive Overrides for template-dashboard.php */
+@media (max-width: 1100px) {
+    .edupro-dash-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .edupro-form-grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .edupro-dashboard-page-wrap {
+        padding: 22px 0 96px;
+    }
+
+    .edupro-dashboard-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .edupro-dashboard-sidebar {
+        position: static;
+    }
+
+    /* Convert sidebar nav into fixed mobile bottom navigation bar */
+    .edupro-dashboard-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 950;
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 2px;
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+        background: var(--db-white);
+        border-top: 1px solid var(--db-border);
+        box-shadow: 0 -6px 24px rgba(26, 26, 46, 0.1);
+    }
+
+    .edupro-dash-nav-item {
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        min-height: 48px;
+        padding: 6px 4px;
+        font-size: 0.68rem;
+        text-align: center;
+        border-radius: 6px;
+    }
+
+    .edupro-dash-nav-item .edupro-dash-count {
+        display: none;
+    }
+
+    .edupro-dash-nav-logout {
+        margin-top: 0;
+        padding-top: 6px;
+        border-top: 0;
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 640px) {
+    .edupro-dash-kpi-grid,
+    .edupro-form-grid-2,
+    .edupro-form-grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-dash-card-form {
+        padding: 20px 16px;
+    }
+
+    .edupro-avatar-upload-box {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .edupro-avatar-upload-controls {
+        align-items: center;
+    }
+
+    .edupro-cert-border {
+        padding: 24px 18px;
+        border-width: 6px;
+    }
+
+    .edupro-cert-footer-row {
+        flex-direction: column;
+        text-align: center;
+    }
+}

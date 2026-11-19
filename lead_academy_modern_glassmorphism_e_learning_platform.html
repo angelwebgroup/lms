@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Academy | Interactive Glassmorphism Learning Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 for clean scalable icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        crimson: {
+                            50: '#fff1f4',
+                            100: '#ffe4ea',
+                            500: '#e11d48',
+                            600: '#be123c',
+                            700: '#9f1239',
+                            900: '#4c0519',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 7s ease-in-out 2s infinite',
+                        'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Core Glassmorphism Design System & Ambient Canvas */
+        body {
+            background-color: #fdf6f8;
+            color: #1e1b24;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Mesh Gradient Blobs */
+        .ambient-blob {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(85px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        /* Standard Light Frosted Glass Card */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.58);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 
+                0 10px 30px -5px rgba(190, 18, 60, 0.06),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .glass-panel-hover:hover {
+            background: rgba(255, 255, 255, 0.78);
+            border-color: rgba(255, 255, 255, 1);
+            transform: translateY(-5px);
+            box-shadow: 
+                0 20px 40px -10px rgba(190, 18, 60, 0.14),
+                inset 0 1px 0 0 rgba(255, 255, 255, 1);
+        }
+
+        /* Sticky Glass Header */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.05);
+        }
+
+        /* Dark Luxury Glass (Black Friday, Gift Card, Footer) */
+        .glass-dark {
+            background: rgba(18, 14, 24, 0.84);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 20px 45px -10px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+        }
+
+        /* Crimson Accent Glass */
+        .glass-crimson {
+            background: linear-gradient(135deg, rgba(190, 18, 60, 0.92), rgba(136, 19, 55, 0.95));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 12px 28px -6px rgba(190, 18, 60, 0.45),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+        }
+
+        /* Gradient Typography */
+        .text-gradient-crimson {
+            background: linear-gradient(135deg, #be123c 0%, #e11d48 50%, #9333ea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #fef3c7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom 3D Luxury Gift Card Shine */
+        .gift-card-3d {
+            background: linear-gradient(135deg, #18131e 0%, #09070c 55%, #2a1220 100%);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.45),
+                inset 0 1px 1px rgba(255, 255, 255, 0.25);
+            transform: perspective(1000px) rotateY(-8deg) rotateX(4deg);
+            transition: transform 0.5s ease;
+        }
+        .gift-card-3d:hover {
+            transform: perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1.02);
+        }
+
+        /* Hide scrollbar for clean horizontal scroll on mobile if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-crimson-500 selection:text-white relative">
+
+    <!-- Toast Notification Container (Replaces alert()) -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- =========================================================
+         1. TOP GLASSMORPHIC STICKY NAVIGATION BAR
+    ========================================================== -->
+    <header class="glass-header sticky top-0 z-40 w-full transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-4">
+                
+                <!-- Brand Logo -->
+                <a href="#" class="flex items-center gap-3 group shrink-0">
+                    <div class="w-10 h-10 rounded-xl glass-crimson flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-extrabold text-lg tracking-tight text-slate-900 leading-none">
+                            LEAD <span class="text-crimson-600">ACADEMY</span>
+                        </span>
+                        <span class="text-[10px] font-medium tracking-widest uppercase text-slate-500 mt-0.5">
+                            Accredited Learning
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-700">
+                    <a href="#categories" class="flex items-center gap-1.5 hover:text-crimson-600 transition-colors py-2">
+                        <span>Courses</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] opacity-70"></i>
+                    </a>
+                    <a href="#membership" class="hover:text-crimson-600 transition-colors py-2">About Us</a>
+                    <a href="#reviews" class="hover:text-crimson-600 transition-colors py-2">Reviews</a>
+                    <a href="#gift-card" class="hover:text-crimson-600 transition-colors py-2">Gift Cards</a>
+                </nav>
+
+                <!-- Prominent CTA + Search + Profile + Cart -->
+                <div class="flex items-center gap-2.5 sm:gap-3.5">
+                    <a href="#membership" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-full glass-crimson text-white text-xs sm:text-sm font-semibold hover:brightness-110 transition-all">
+                        <i class="fa-solid fa-crown text-amber-300 text-xs"></i>
+                        <span>Get Full Access</span>
+                    </a>
+
+                    <!-- Header Compact Search -->
+                    <div class="hidden xl:flex items-center glass-panel rounded-full px-3.5 py-1.5 w-52 focus-within:w-64 focus-within:ring-2 focus-within:ring-crimson-500/30 transition-all">
+                        <input type="text" id="navSearchInput" placeholder="Search courses..." class="bg-transparent border-none outline-none text-xs text-slate-800 placeholder-slate-400 w-full">
+                        <button onclick="handleSearch('navSearchInput')" class="text-slate-500 hover:text-crimson-600 pl-2">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- User Profile Icon -->
+                    <button onclick="showToast('Student Portal: Sign in to access your accredited courses.')" aria-label="User Profile" class="w-10 h-10 rounded-full glass-panel glass-panel-hover flex items-center justify-center text-slate-700 hover:text-crimson-600">
+                        <i class="fa-regular fa-user text-sm"></i>
+                    </button>
+
+                    <!-- Shopping Cart Badge -->
+                    <button onclick="showToast('Your learning cart currently has ' + cartCount + ' item(s).')" aria-label="Shopping Cart" class="relative w-10 h-10 rounded-full glass-panel glass-panel-hover flex items-center justify-center text-slate-700 hover:text-crimson-600">
+                        <i class="fa-solid fa-bag-shopping text-sm"></i>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-crimson-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm border border-white">
+                            0
+                        </span>
+                    </button>
+
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobile-menu-btn" aria-label="Open Menu" class="lg:hidden w-10 h-10 rounded-full glass-panel flex items-center justify-center text-slate-800">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Slide-Down Drawer -->
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-white/60 bg-white/85 backdrop-blur-2xl px-4 pt-3 pb-5 space-y-3">
+            <div class="flex items-center glass-panel rounded-full px-4 py-2">
+                <input type="text" id="mobileSearchInput" placeholder="Search 1000+ accredited courses..." class="bg-transparent border-none outline-none text-sm text-slate-800 w-full">
+                <button onclick="handleSearch('mobileSearchInput')" class="text-crimson-600 pl-2"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-sm font-semibold text-slate-700 pt-1">
+                <a href="#categories" class="p-2.5 rounded-xl hover:bg-white/60">Course Categories</a>
+                <a href="#popular-courses" class="p-2.5 rounded-xl hover:bg-white/60">Popular Courses</a>
+                <a href="#reviews" class="p-2.5 rounded-xl hover:bg-white/60">Student Reviews</a>
+                <a href="#gift-card" class="p-2.5 rounded-xl hover:bg-white/60">Order Gift Card</a>
+            </div>
+            <a href="#membership" class="block text-center w-full py-3 rounded-full glass-crimson text-white font-semibold text-sm">
+                Get Full Access For £99
+            </a>
+        </div>
+    </header>
+
+    <!-- =========================================================
+         2. BLACK FRIDAY PROMO ANNOUNCEMENT BANNER
+    ========================================================== -->
+    <div class="relative z-30 bg-gradient-to-r from-[#170912] via-[#380b1e] to-[#170912] text-white border-b border-white/10 overflow-hidden">
+        <!-- Subtle decorative shimmer -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(225,29,72,0.28),transparent_70%)] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs sm:text-sm relative z-10">
+            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-crimson-600/90 border border-crimson-400/40 font-display font-bold uppercase tracking-wider text-[11px] shadow-sm">
+                <i class="fa-solid fa-bolt text-amber-300"></i> Black Friday Sale
+            </span>
+            <p class="font-medium text-rose-100 text-center">
+                Up to <span class="font-extrabold text-amber-300 underline decoration-amber-400/50">80% Off</span> All Accredited CPD & QLS Endorsed Courses
+            </p>
+            <div class="hidden md:flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-mono text-amber-200">
+                <i class="fa-regular fa-clock"></i>
+                <span id="promo-countdown">Ends in 14h : 38m : 52s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         3. HERO SECTION WITH MESH GRADIENT & FROSTED GLASS
+    ========================================================== -->
+    <section class="relative pt-10 pb-16 lg:pt-16 lg:pb-24 overflow-hidden">
+        <!-- Ambient Glowing Orbs Behind Frosted Glass -->
+        <div class="ambient-blob w-[420px] h-[420px] bg-rose-300/70 -top-16 -left-24 animate-pulse-slow"></div>
+        <div class="ambient-blob w-[480px] h-[480px] bg-fuchsia-300/50 top-10 right-[-100px]"></div>
+        <div class="ambient-blob w-[340px] h-[340px] bg-amber-200/60 bottom-0 left-1/3"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+                
+                <!-- Left Column: Headline, Frosted Search & 3 Feature Badges -->
+                <div class="lg:col-span-7 space-y-7">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel text-xs font-semibold text-crimson-700">
+                        <span class="w-2 h-2 rounded-full bg-crimson-600 animate-ping"></span>
+                        <span>UK's Leading Online Learning & CPD Provider</span>
+                    </div>
+
+                    <h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-[56px] text-slate-900 leading-[1.12] tracking-tight">
+                        An Interactive <br class="hidden sm:inline">
+                        Platform For <span class="text-gradient-crimson">Learning</span>
+                    </h1>
+
+                    <p class="text-slate-600 text-base sm:text-lg max-w-xl leading-relaxed">
+                        Advance your career from anywhere in the world with industry-recognized certifications, expert tutor mentorship, and flexible self-paced study.
+                    </p>
+
+                    <!-- Frosted Glass Search Bar -->
+                    <div class="glass-panel p-2 rounded-2xl sm:rounded-full max-w-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shadow-lg">
+                        <div class="flex items-center gap-3 px-4 py-2.5 flex-1">
+                            <i class="fa-solid fa-magnifying-glass text-crimson-600"></i>
+                            <input type="text" id="heroSearchInput" placeholder="What do you want to learn today? (e.g., Nursing, Leadership)" class="bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 w-full">
+                        </div>
+                        <button onclick="handleSearch('heroSearchInput')" class="px-7 py-3.5 rounded-xl sm:rounded-full glass-crimson text-white font-semibold text-sm hover:brightness-110 transition-all shrink-0 cursor-pointer">
+                            Search Courses
+                        </button>
+                    </div>
+
+                    <!-- 3 Glass Feature Badges -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 max-w-2xl">
+                        <div class="glass-panel p-4 rounded-2xl flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-crimson-100/80 text-crimson-600 flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fa-solid fa-laptop-file text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-sm text-slate-900">1000+ Online Courses</h3>
+                                <p class="text-xs text-slate-500 mt-0.5 leading-snug">Explore diverse accredited career paths</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-4 rounded-2xl flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-purple-100/80 text-purple-600 flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fa-solid fa-infinity text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-sm text-slate-900">Lifetime Access</h3>
+                                <p class="text-xs text-slate-500 mt-0.5 leading-snug">Learn on your schedule, 24/7 anywhere</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-4 rounded-2xl flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fa-solid fa-award text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-sm text-slate-900">Accredited Certificates</h3>
+                                <p class="text-xs text-slate-500 mt-0.5 leading-snug">CPD & QLS endorsed qualifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Modern Framed Hero Visual + Floating Glass Badges -->
+                <div class="lg:col-span-5 relative flex justify-center">
+                    <!-- Decorative Glass Frame -->
+                    <div class="relative w-full max-w-[430px]">
+                        <div class="glass-panel p-3.5 rounded-[34px] shadow-2xl relative z-10">
+                            <div class="relative rounded-[26px] overflow-hidden aspect-[4/4.4] bg-gradient-to-br from-rose-200 via-pink-100 to-purple-200">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" 
+                                    alt="Happy learner holding study resources" 
+                                    onerror="this.src='https://placehold.co/600x660/ffe4ea/be123c?text=Interactive+Learning'"
+                                    class="w-full h-full object-cover object-center"
+                                >
+                                <!-- Subtle bottom gradient overlay -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-transparent"></div>
+
+                                <!-- Bottom Glass Learner Pill inside frame -->
+                                <div class="absolute bottom-4 left-4 right-4 glass-panel !bg-white/80 p-3 rounded-2xl flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="flex -space-x-2">
+                                            <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Student">
+                                            <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Student">
+                                            <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Student">
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900">120,000+ Active Learners</p>
+                                            <div class="flex items-center text-[10px] text-amber-500">
+                                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                                <span class="text-slate-600 font-semibold ml-1">4.9/5 Rating</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating Dark Glass Black Friday 80% Off Badge -->
+                        <div class="animate-float absolute -top-5 -right-3 sm:-right-6 z-20 glass-dark px-5 py-3.5 rounded-2xl text-center border border-amber-400/40 shadow-2xl">
+                            <span class="block text-[10px] font-bold uppercase tracking-widest text-rose-300">Black Friday</span>
+                            <span class="block font-display font-extrabold text-2xl text-gradient-gold leading-tight">80% OFF</span>
+                            <span class="block text-[10px] text-slate-300">Sitewide Deal</span>
+                        </div>
+
+                        <!-- Floating Glass Accredited Pill on Left -->
+                        <div class="animate-float-delayed hidden sm:flex items-center gap-2.5 absolute top-1/3 -left-8 z-20 glass-panel !bg-white/85 px-4 py-2.5 rounded-2xl shadow-xl">
+                            <div class="w-8 h-8 rounded-lg bg-crimson-600 text-white flex items-center justify-center">
+                                <i class="fa-solid fa-certificate text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-900">CPD Certified</p>
+                                <p class="text-[10px] text-slate-500">Instant PDF & Hardcopy</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         4. TRUST STRIP (UNIVERSITIES & ACCREDITATION PARTNERS)
+    ========================================================== -->
+    <section class="relative z-10 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center font-display font-bold text-sm sm:text-base text-slate-700 mb-7">
+                Trusted by <span class="text-crimson-600">300+ Leading Universities</span> and Companies Globally
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- Partner 1: Pearson -->
+                <div class="glass-panel glass-panel-hover h-20 rounded-2xl flex items-center justify-center px-5">
+                    <div class="flex items-center gap-2 text-slate-700">
+                        <span class="w-7 h-7 rounded-full bg-sky-600 text-white font-display font-extrabold text-sm flex items-center justify-center">P</span>
+                        <span class="font-display font-bold text-lg tracking-tight text-slate-800">Pearson</span>
+                    </div>
+                </div>
+
+                <!-- Partner 2: Edexcel -->
+                <div class="glass-panel glass-panel-hover h-20 rounded-2xl flex items-center justify-center px-5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-display font-extrabold text-lg tracking-tight text-slate-800">edexcel</span>
+                        <span class="grid grid-cols-2 gap-0.5 w-3.5 h-3.5">
+                            <span class="bg-sky-500 rounded-[1px]"></span>
+                            <span class="bg-emerald-500 rounded-[1px]"></span>
+                            <span class="bg-amber-500 rounded-[1px]"></span>
+                            <span class="bg-crimson-500 rounded-[1px]"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Partner 3: Quality Licence Scheme -->
+                <div class="glass-panel glass-panel-hover h-20 rounded-2xl flex items-center justify-center px-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-crimson-600 text-xl"></i>
+                        <div class="leading-none">
+                            <span class="block font-display font-extrabold text-[11px] uppercase tracking-wider text-slate-900">Quality Licence</span>
+                            <span class="block font-display font-bold text-[10px] uppercase tracking-widest text-crimson-600 mt-0.5">Scheme Endorsed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Partner 4: RoSPA -->
+                <div class="glass-panel glass-panel-hover h-20 rounded-2xl flex items-center justify-center px-5">
+                    <div class="px-3 py-1 rounded-lg bg-blue-900 text-white font-display font-extrabold text-sm tracking-wider">
+                        RoSPA <span class="font-normal text-[10px] text-blue-200 block -mt-1">Member</span>
+                    </div>
+                </div>
+
+                <!-- Partner 5: CPD Certified -->
+                <div class="col-span-2 sm:col-span-1 glass-panel glass-panel-hover h-20 rounded-2xl flex items-center justify-center px-5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full border-2 border-purple-700 flex items-center justify-center font-display font-extrabold text-xs text-purple-800">
+                            CPD
+                        </div>
+                        <div class="leading-tight">
+                            <span class="block font-display font-bold text-xs text-slate-900">The CPD</span>
+                            <span class="block text-[10px] text-slate-500">Certification Service</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         5. COURSE CATEGORY SECTION (9 GLASSMORPHISM CARDS)
+    ========================================================== -->
+    <section id="categories" class="relative py-16 lg:py-20 overflow-hidden">
+        <!-- Soft Rose Mesh Backdrop -->
+        <div class="absolute inset-0 bg-gradient-to-b from-rose-100/60 via-pink-100/50 to-transparent pointer-events-none"></div>
+        <div class="ambient-blob w-[450px] h-[450px] bg-pink-300/40 top-10 left-1/4"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-crimson-600">Explore Disciplines</span>
+                <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 mt-1">Course Category</h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-2">Choose from 9 specialized career faculties designed with industry leaders.</p>
+            </div>
+
+            <!-- 3x3 Responsive Category Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                <!-- Category 1 -->
+                <button onclick="filterByCategory('Health & Social Care')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-rose-100 text-crimson-600 flex items-center justify-center text-lg group-hover:bg-crimson-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-crimson-600 transition-colors">Health & Social Care</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">185+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-crimson-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 2 -->
+                <button onclick="filterByCategory('Teaching & Education')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-purple-600 transition-colors">Teaching & Education</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">140+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 3 -->
+                <button onclick="filterByCategory('Business & Management')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg group-hover:bg-amber-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-amber-600 transition-colors">Business & Management</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">210+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 4 -->
+                <button onclick="filterByCategory('Accounting & Finance')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-emerald-600 transition-colors">Accounting & Finance</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">95+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 5 -->
+                <button onclick="filterByCategory('Office & Admin')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-lg group-hover:bg-sky-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-sky-600 transition-colors">Office & Admin</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">115+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 6 -->
+                <button onclick="filterByCategory('Personal Development')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-lg group-hover:bg-pink-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-pink-600 transition-colors">Personal Development</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">130+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-pink-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 7 -->
+                <button onclick="filterByCategory('Beauty & Therapy')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center text-lg group-hover:bg-fuchsia-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-spa"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-fuchsia-600 transition-colors">Beauty & Therapy</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">88+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-fuchsia-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 8 -->
+                <button onclick="filterByCategory('IT & Software')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-indigo-600 transition-colors">IT & Software</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">160+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+
+                <!-- Category 9 -->
+                <button onclick="filterByCategory('Animal Care')" class="glass-panel glass-panel-hover p-4 sm:p-5 rounded-2xl flex items-center gap-4 text-left group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg group-hover:bg-orange-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="fa-solid fa-paw"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-orange-600 transition-colors">Animal Care</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">72+ Accredited Courses</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all"></i>
+                </button>
+            </div>
+
+            <!-- View All Categories Pill Button -->
+            <div class="text-center mt-10">
+                <a href="#popular-courses" class="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full glass-crimson text-white font-semibold text-sm hover:brightness-110 transition-all">
+                    <span>View All Categories</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         6. MOST POPULAR COURSES (3x3 GLASS CARD GRID)
+    ========================================================== -->
+    <section id="popular-courses" class="relative py-16 lg:py-24">
+        <div class="ambient-blob w-[420px] h-[420px] bg-purple-200/50 top-1/4 -right-24"></div>
+        <div class="ambient-blob w-[380px] h-[380px] bg-rose-200/50 bottom-10 -left-20"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-crimson-600">Top Enrolled Programs</span>
+                <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 mt-1">Most Popular Courses</h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-2">
+                    Join thousands of professionals upgrading their qualifications with our highest-rated online courses.
+                </p>
+            </div>
+
+            <!-- Dynamic Course Grid Container (Populated via JS for interactivity) -->
+            <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards injected cleanly on load -->
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         7. ALL-ACCESS MEMBERSHIP BANNER (£99 + GLASS TABLET UI)
+    ========================================================== -->
+    <section id="membership" class="relative py-16 lg:py-24 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="glass-panel rounded-[36px] p-7 sm:p-12 lg:p-16 relative overflow-hidden border border-white">
+                <!-- Ambient glow inside container -->
+                <div class="ambient-blob w-96 h-96 bg-rose-300/50 -top-20 -right-20"></div>
+                <div class="ambient-blob w-80 h-80 bg-indigo-200/50 -bottom-20 -left-20"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
+                    
+                    <!-- Left Side: Title, Checkmarked Benefits & CTA -->
+                    <div class="lg:col-span-6 space-y-6">
+                        <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-crimson-100/90 text-crimson-700 text-xs font-bold">
+                            <i class="fa-solid fa-sparkles"></i> Unlimited Learning Pass
+                        </span>
+
+                        <h2 class="font-display font-extrabold text-3xl sm:text-4xl lg:text-[42px] text-slate-900 leading-tight">
+                            Get Full Access To The <br class="hidden sm:inline">
+                            Course Library For <span class="text-crimson-600">£99</span>
+                        </h2>
+
+                        <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                            Unlock unrestricted entry to our entire accredited curriculum for a full year—one single payment with zero hidden fees.
+                        </p>
+
+                        <!-- Benefits Checklist -->
+                        <ul class="space-y-3.5 pt-1">
+                            <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                                <span class="w-6 h-6 rounded-full bg-crimson-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <span>1 Year Full Unlimited Access</span>
+                            </li>
+                            <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                                <span class="w-6 h-6 rounded-full bg-crimson-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <span>Over 1000+ Accredited Courses Included</span>
+                            </li>
+                            <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                                <span class="w-6 h-6 rounded-full bg-crimson-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <span>Free Digital Certificate on Every Course</span>
+                            </li>
+                            <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                                <span class="w-6 h-6 rounded-full bg-crimson-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <span>Free Official Student ID Card</span>
+                            </li>
+                            <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                                <span class="w-6 h-6 rounded-full bg-crimson-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <span>24/7 Dedicated Tutor Support</span>
+                            </li>
+                        </ul>
+
+                        <div class="pt-3 flex flex-wrap items-center gap-4">
+                            <button onclick="addToCart('All-Access Annual Membership Pass', 99)" class="px-8 py-4 rounded-full glass-crimson text-white font-semibold text-sm sm:text-base hover:brightness-110 transition-all cursor-pointer flex items-center gap-2.5">
+                                <span>Claim £99 Pass Now</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                            <span class="text-xs text-slate-500 font-medium">
+                                <i class="fa-solid fa-shield-check text-emerald-600 mr-1"></i> 14-Day Money-Back Guarantee
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Sleek CSS-Crafted Glass Tablet/Device UI Mockup -->
+                    <div class="lg:col-span-6 flex justify-center relative">
+                        <!-- Floating Notification Bell Badge -->
+                        <div class="animate-float absolute -top-4 right-2 sm:right-8 z-20 w-12 h-12 rounded-2xl glass-crimson text-white flex items-center justify-center text-lg shadow-xl rotate-12">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+
+                        <!-- Floating Envelope/Certificate Badge -->
+                        <div class="animate-float-delayed absolute bottom-8 -left-2 sm:left-4 z-20 glass-panel !bg-white/90 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-600 flex items-center justify-center">
+                                <i class="fa-solid fa-id-card"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-900">Student ID Included</p>
+                                <p class="text-[10px] text-slate-500">Save up to 50% on brands</p>
+                            </div>
+                        </div>
+
+                        <!-- Tablet Bezel -->
+                        <div class="w-full max-w-[380px] rounded-[36px] bg-slate-900 p-3.5 shadow-2xl border-4 border-slate-800 relative">
+                            <!-- Camera Dot -->
+                            <div class="w-2 h-2 rounded-full bg-slate-700 mx-auto mb-2.5"></div>
+
+                            <!-- Screen Glass Content -->
+                            <div class="rounded-[24px] bg-gradient-to-br from-rose-50 via-white to-purple-50 p-5 overflow-hidden relative">
+                                <!-- Top Mini App Bar -->
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-display font-extrabold text-xs text-slate-900">LEAD <span class="text-crimson-600">PASS</span></span>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">VIP ACTIVE</span>
+                                </div>
+
+                                <!-- Hero Card inside Tablet -->
+                                <div class="glass-panel !bg-white/85 rounded-2xl p-4 flex items-center justify-between gap-3 mb-4 shadow-sm">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Annual Pass</span>
+                                        <div class="font-display font-extrabold text-3xl text-crimson-600 leading-none my-1">£99</div>
+                                        <span class="inline-block px-3 py-1 rounded-full bg-crimson-600 text-white text-[10px] font-semibold mt-1">
+                                            All 1000+ Courses
+                                        </span>
+                                    </div>
+                                    <img 
+                                        src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=240&q=80" 
+                                        alt="Student smiling" 
+                                        class="w-24 h-24 rounded-2xl object-cover border-2 border-white shadow"
+                                    >
+                                </div>
+
+                                <!-- Mini Interactive Course Modules inside Mockup -->
+                                <div class="space-y-2.5">
+                                    <div class="glass-panel !bg-white/75 p-3 rounded-xl flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-lg bg-crimson-100 text-crimson-600 flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-play text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="h-2.5 w-28 bg-slate-800 rounded-full"></div>
+                                            <div class="h-2 w-20 bg-slate-300 rounded-full mt-1.5"></div>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-emerald-600">Unlocked</span>
+                                    </div>
+
+                                    <div class="glass-panel !bg-white/75 p-3 rounded-xl flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-play text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="h-2.5 w-32 bg-slate-800 rounded-full"></div>
+                                            <div class="h-2 w-16 bg-slate-300 rounded-full mt-1.5"></div>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-emerald-600">Unlocked</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         8. VALUABLE FEEDBACK FROM STUDENT (GOOGLE + 3 REVIEWS)
+    ========================================================== -->
+    <section id="reviews" class="relative py-16 lg:py-20">
+        <div class="ambient-blob w-[400px] h-[400px] bg-amber-200/40 top-10 right-1/4"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-crimson-600">Verified Learner Stories</span>
+                <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 mt-1">Valuable Feedback From Student</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+                
+                <!-- Google Reviews Summary Glass Card -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col items-center justify-center text-center border-2 border-white shadow-lg">
+                    <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-3">
+                        <span class="font-display font-extrabold text-2xl bg-gradient-to-r from-blue-500 via-red-500 to-amber-500 bg-clip-text text-transparent">G</span>
+                    </div>
+                    <h3 class="font-display font-bold text-lg text-slate-900">Google Reviews</h3>
+                    <div class="flex items-center gap-1 text-emerald-500 text-lg my-2">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <span class="font-display font-extrabold text-3xl text-slate-900">4.9</span>
+                        <span class="text-xs text-slate-500 font-medium">/ 5.0</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Based on <strong class="text-slate-800">15,826</strong> verified reviews</p>
+                    <span class="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
+                        <i class="fa-solid fa-circle-check"></i> Verified Excellence
+                    </span>
+                </div>
+
+                <!-- Student Review 1 -->
+                <div class="glass-panel glass-panel-hover rounded-3xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-1 text-emerald-500 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Verified</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900 mb-2">"Superb learning platform!"</h4>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            The interactive modules made studying around my full-time job effortless. Received my CPD certificate immediately after passing my assessment.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-5 mt-5 border-t border-slate-200/60">
+                        <div class="flex items-center gap-2.5">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" alt="Amelia Clark" class="w-9 h-9 rounded-full object-cover">
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Amelia Clark</p>
+                                <p class="text-[10px] text-slate-500">Healthcare Assistant</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-bold text-xs text-blue-600">G</span>
+                    </div>
+                </div>
+
+                <!-- Student Review 2 -->
+                <div class="glass-panel glass-panel-hover rounded-3xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-1 text-emerald-500 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Verified</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900 mb-2">"Helped me land a promotion"</h4>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            I completed the Leadership & Management diploma through the £99 All-Access pass. Incredible value and responsive tutor guidance throughout.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-5 mt-5 border-t border-slate-200/60">
+                        <div class="flex items-center gap-2.5">
+                            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Marcus Vance" class="w-9 h-9 rounded-full object-cover">
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Marcus Vance</p>
+                                <p class="text-[10px] text-slate-500">Operations Lead</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-bold text-xs text-blue-600">G</span>
+                    </div>
+                </div>
+
+                <!-- Student Review 3 -->
+                <div class="glass-panel glass-panel-hover rounded-3xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-1 text-emerald-500 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Verified</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900 mb-2">"Clear, structured & engaging"</h4>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            The lessons are broken down into digestible videos and practical toolkits. Easily the cleanest online learning experience I have used.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-5 mt-5 border-t border-slate-200/60">
+                        <div class="flex items-center gap-2.5">
+                            <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=100&q=80" alt="Sophia Patel" class="w-9 h-9 rounded-full object-cover">
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Sophia Patel</p>
+                                <p class="text-[10px] text-slate-500">SEN Teaching Specialist</p>
+                            </div>
+                        </div>
+                        <span class="font-display font-bold text-xs text-blue-600">G</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         9. GIFT CARD PROMO SECTION (3D LUXURY BLACK & GOLD CARD)
+    ========================================================== -->
+    <section id="gift-card" class="relative py-16 lg:py-24 overflow-hidden">
+        <div class="ambient-blob w-[420px] h-[420px] bg-rose-300/40 top-1/2 -left-24"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <span class="text-xs font-bold uppercase tracking-widest text-crimson-600">Share Knowledge</span>
+                <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 mt-1">Order Gift Card for Your Loved Ones Today</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                
+                <!-- Left Side: Custom CSS 3D Luxury Black-and-Gold Glass Gift Card -->
+                <div class="lg:col-span-6 flex justify-center">
+                    <div class="relative w-full max-w-[440px]">
+                        <!-- Soft Pink Accent Backing Frame -->
+                        <div class="absolute -inset-4 rounded-[34px] bg-gradient-to-tr from-rose-200/80 via-amber-100/60 to-purple-200/70 blur-sm -rotate-3"></div>
+
+                        <!-- 3D Black & Gold Glass Gift Card -->
+                        <div class="gift-card-3d relative rounded-[28px] p-7 sm:p-8 text-white aspect-[1.6/1] flex flex-col justify-between overflow-hidden">
+                            <!-- Gold Shimmer Orb inside card -->
+                            <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-amber-400/20 blur-2xl pointer-events-none"></div>
+                            <div class="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-crimson-500/25 blur-2xl pointer-events-none"></div>
+
+                            <!-- Card Top Row -->
+                            <div class="flex items-center justify-between relative z-10">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-300 to-amber-600 text-slate-950 flex items-center justify-center font-bold">
+                                        <i class="fa-solid fa-graduation-cap text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-display font-extrabold text-sm tracking-wider text-amber-200 block leading-none">LEAD ACADEMY</span>
+                                        <span class="text-[9px] uppercase tracking-[0.2em] text-slate-400">VIP Education Voucher</span>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-wifi rotate-90 text-amber-300/60 text-sm"></i>
+                            </div>
+
+                            <!-- Card Center Title -->
+                            <div class="my-auto relative z-10">
+                                <p class="text-[11px] uppercase tracking-[0.25em] text-amber-300/80 font-semibold">Official Gift Pass</p>
+                                <h3 class="font-display font-extrabold text-2xl sm:text-3xl text-gradient-gold tracking-tight mt-0.5">
+                                    GIFT OF LEARNING
+                                </h3>
+                            </div>
+
+                            <!-- Card Bottom Row -->
+                            <div class="flex items-end justify-between relative z-10 border-t border-white/10 pt-3">
+                                <div>
+                                    <span class="block text-[9px] uppercase tracking-widest text-slate-400">Redeemable On</span>
+                                    <span class="text-xs font-semibold text-slate-200">1000+ Accredited Courses</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block text-[9px] uppercase tracking-widest text-slate-400">Value From</span>
+                                    <span class="font-display font-extrabold text-lg text-amber-300">£25 – £150</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Description, Benefits & CTA -->
+                <div class="lg:col-span-6 space-y-6">
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Empower friends, family, or colleagues to unlock a new passion or career milestone. An accredited Lead Academy Gift Card gives them instant access to over 1,000 professional courses.
+                    </p>
+
+                    <ul class="space-y-3.5">
+                        <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                            <span class="w-6 h-6 rounded-full bg-rose-100 text-crimson-600 flex items-center justify-center text-xs shrink-0">
+                                <i class="fa-solid fa-check"></i>
+                            </span>
+                            <span>12-Month Flexible Validity Period</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                            <span class="w-6 h-6 rounded-full bg-rose-100 text-crimson-600 flex items-center justify-center text-xs shrink-0">
+                                <i class="fa-solid fa-check"></i>
+                            </span>
+                            <span>Instant Digital Delivery or Luxury Printed Card</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                            <span class="w-6 h-6 rounded-full bg-rose-100 text-crimson-600 flex items-center justify-center text-xs shrink-0">
+                                <i class="fa-solid fa-check"></i>
+                            </span>
+                            <span>Applicable Across All 1000+ Courses</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800">
+                            <span class="w-6 h-6 rounded-full bg-rose-100 text-crimson-600 flex items-center justify-center text-xs shrink-0">
+                                <i class="fa-solid fa-check"></i>
+                            </span>
+                            <span>Includes Custom Gift Message Personalization</span>
+                        </li>
+                    </ul>
+
+                    <div class="pt-2">
+                        <button onclick="addToCart('Lead Academy VIP Gift Card (£50)', 50)" class="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full glass-crimson text-white font-semibold text-sm hover:brightness-110 transition-all cursor-pointer">
+                            <span>Order Gift Card</span>
+                            <i class="fa-solid fa-gift text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         10. SUCCESS STORIES SECTION (SPLIT + GLASS VIDEO PREVIEW)
+    ========================================================== -->
+    <section class="relative py-16 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="glass-panel rounded-[32px] p-7 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+                
+                <!-- Left Side: Inspiring Narrative -->
+                <div class="lg:col-span-6 space-y-5">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100/80 text-purple-700 text-xs font-bold">
+                        <i class="fa-solid fa-quote-left"></i> Alumni Spotlight
+                    </span>
+                    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900">Success Stories</h2>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Lead Academy learners are transforming their careers across healthcare, education, business, and creative industries worldwide. Hear directly from our graduates about how flexible online accreditation opened new doors.
+                    </p>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        From career switchers to working parents, our supportive learning community ensures you never study alone.
+                    </p>
+                    <div class="pt-2 flex items-center gap-6">
+                        <div>
+                            <span class="block font-display font-extrabold text-2xl text-crimson-600">96%</span>
+                            <span class="text-xs text-slate-500">Career Advancement Rate</span>
+                        </div>
+                        <div class="h-8 w-px bg-slate-300"></div>
+                        <div>
+                            <span class="block font-display font-extrabold text-2xl text-slate-900">140+</span>
+                            <span class="text-xs text-slate-500">Countries Represented</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Glass Video-Player Preview Card ('SUCCESS STORY - Olivia Szulc') -->
+                <div class="lg:col-span-6">
+                    <div onclick="openVideoModal()" class="group relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white cursor-pointer aspect-video bg-slate-900">
+                        <!-- Background Split Graphic & Portrait -->
+                        <img 
+                            src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=900&q=80" 
+                            alt="Olivia Szulc Success Story" 
+                            class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-90"
+                        >
+                        <!-- Left Dark Glass Diagonal Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-r from-[#170b18]/95 via-[#170b18]/70 to-transparent flex flex-col justify-between p-6 sm:p-8">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-md bg-crimson-600 text-white flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </span>
+                                <span class="font-display font-bold text-xs tracking-wider text-white/90 uppercase">Lead Academy</span>
+                            </div>
+
+                            <div>
+                                <span class="inline-block px-2.5 py-0.5 rounded bg-crimson-600 text-white text-[10px] font-bold uppercase tracking-widest mb-2">
+                                    Graduate Interview
+                                </span>
+                                <h3 class="font-display font-extrabold text-2xl sm:text-3xl text-white leading-none">
+                                    SUCCESS <br><span class="text-rose-400">STORY</span>
+                                </h3>
+                                <p class="font-display font-bold text-xs sm:text-sm tracking-widest uppercase text-amber-300 mt-2">
+                                    OLIVIA SZULC
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Center Play Button Overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-full glass-crimson text-white flex items-center justify-center text-xl shadow-2xl group-hover:scale-110 transition-transform ring-8 ring-white/20">
+                                <i class="fa-solid fa-play ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         11. DEEP OBSIDIAN GLASSMORPHIC FOOTER
+    ========================================================== -->
+    <footer class="relative bg-[#0c0910] text-slate-300 pt-16 pb-10 border-t border-white/10 overflow-hidden">
+        <!-- Ambient Footer Glows -->
+        <div class="ambient-blob w-96 h-96 bg-crimson-900/40 -top-24 left-10"></div>
+        <div class="ambient-blob w-96 h-96 bg-purple-900/30 bottom-0 right-10"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-white/10">
+                
+                <!-- Col 1: Brand Info, Social Links & Disability Confident Badge -->
+                <div class="lg:col-span-4 space-y-5">
+                    <a href="#" class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl glass-crimson flex items-center justify-center text-white">
+                            <i class="fa-solid fa-graduation-cap text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="font-display font-extrabold text-lg text-white tracking-tight block leading-none">
+                                LEAD <span class="text-rose-500">ACADEMY</span>
+                            </span>
+                            <span class="text-[10px] uppercase tracking-widest text-slate-400">Accredited Learning</span>
+                        </div>
+                    </a>
+
+                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        Lead Academy is a premier UK-based online learning provider offering CPD accredited and QLS endorsed courses to learners worldwide.
+                    </p>
+
+                    <!-- Social Media Icons -->
+                    <div class="flex items-center gap-2.5">
+                        <a href="#footer" aria-label="Facebook" class="w-9 h-9 rounded-lg bg-crimson-600/90 hover:bg-crimson-500 text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="#footer" aria-label="Twitter" class="w-9 h-9 rounded-lg bg-crimson-600/90 hover:bg-crimson-500 text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                        <a href="#footer" aria-label="LinkedIn" class="w-9 h-9 rounded-lg bg-crimson-600/90 hover:bg-crimson-500 text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-brands fa-linkedin-in"></i>
+                        </a>
+                        <a href="#footer" aria-label="Instagram" class="w-9 h-9 rounded-lg bg-crimson-600/90 hover:bg-crimson-500 text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="#footer" aria-label="YouTube" class="w-9 h-9 rounded-lg bg-crimson-600/90 hover:bg-crimson-500 text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                    </div>
+
+                    <!-- Disability Confident Employer Glass Badge -->
+                    <div class="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 border border-white/15">
+                        <div class="w-8 h-8 rounded-lg bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300">
+                            <i class="fa-solid fa-universal-access text-base"></i>
+                        </div>
+                        <div>
+                            <span class="block font-display font-bold text-xs text-white leading-tight">disability confident</span>
+                            <span class="block text-[10px] uppercase tracking-wider text-purple-300">Employer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Popular Courses -->
+                <div class="lg:col-span-3 space-y-3">
+                    <h4 class="font-display font-bold text-sm uppercase tracking-wider text-white">Popular Courses</h4>
+                    <ul class="space-y-2.5 text-xs sm:text-sm text-slate-400">
+                        <li><a href="#popular-courses" class="hover:text-rose-400 transition-colors">Phlebotomy Training</a></li>
+                        <li><a href="#popular-courses" class="hover:text-rose-400 transition-colors">Adult Care & Safeguarding</a></li>
+                        <li><a href="#popular-courses" class="hover:text-rose-400 transition-colors">SEN Teaching Assistant</a></li>
+                        <li><a href="#popular-courses" class="hover:text-rose-400 transition-colors">Project Management Diploma</a></li>
+                        <li><a href="#popular-courses" class="hover:text-rose-400 transition-colors">Accounting & Bookkeeping</a></li>
+                        <li><a href="#popular-courses" class="hover:text-rose-400 transition-colors">Mental Health First Aid</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Useful Links -->
+                <div class="lg:col-span-2 space-y-3">
+                    <h4 class="font-display font-bold text-sm uppercase tracking-wider text-white">Useful Links</h4>
+                    <ul class="space-y-2.5 text-xs sm:text-sm text-slate-400">
+                        <li><a href="#membership" class="hover:text-rose-400 transition-colors">About Us</a></li>
+                        <li><a href="#membership" class="hover:text-rose-400 transition-colors">All-Access Pass</a></li>
+                        <li><a href="#gift-card" class="hover:text-rose-400 transition-colors">Gift Cards</a></li>
+                        <li><a href="#reviews" class="hover:text-rose-400 transition-colors">Student Reviews</a></li>
+                        <li><a href="#footer" onclick="showToast('Certificate Verification Tool Ready.')" class="hover:text-rose-400 transition-colors">Verify Certificate</a></li>
+                        <li><a href="#footer" class="hover:text-rose-400 transition-colors">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Payment Methods & Security -->
+                <div class="lg:col-span-3 space-y-4">
+                    <h4 class="font-display font-bold text-sm uppercase tracking-wider text-white">Payment Methods</h4>
+                    <p class="text-xs text-slate-400">256-bit SSL encrypted secure checkout.</p>
+
+                    <!-- Payment Badges Grid -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center font-display font-extrabold italic text-sky-400 text-xs">
+                            PayPal
+                        </div>
+                        <div class="h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center font-display font-extrabold text-white text-xs">
+                            VISA
+                        </div>
+                        <div class="h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center gap-1">
+                            <span class="w-3.5 h-3.5 rounded-full bg-red-500/90"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-amber-400/90 -ml-2"></span>
+                        </div>
+                        <div class="h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center font-display font-bold text-blue-300 text-[11px]">
+                            AMEX
+                        </div>
+                        <div class="h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center font-display font-bold text-white text-[11px]">
+                            <i class="fa-brands fa-apple mr-1"></i>Pay
+                        </div>
+                        <div class="h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center font-display font-bold text-white text-[11px]">
+                            <i class="fa-brands fa-google mr-1"></i>Pay
+                        </div>
+                    </div>
+
+                    <!-- GDPR Compliant Pill -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-950/60 border border-blue-500/30 text-[11px] text-blue-200">
+                        <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                        <span>GDPR Compliant & UK Registered</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright Line -->
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <p>© 2026 Lead Academy. All Rights Reserved.</p>
+                <p>Designed with Modern Glassmorphism Aesthetics.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =========================================================
+         VIDEO STORY MODAL (Interactive Preview for Olivia Szulc)
+    ========================================================== -->
+    <div id="video-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+        <div class="glass-dark max-w-2xl w-full rounded-3xl p-6 sm:p-8 relative text-white border border-white/20">
+            <button onclick="closeVideoModal()" aria-label="Close Modal" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-crimson-600 flex items-center justify-center text-white transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <span class="text-xs font-bold uppercase tracking-widest text-rose-400">Alumni Success Story</span>
+            <h3 class="font-display font-extrabold text-2xl mt-1">Olivia Szulc — Clinical Healthcare Graduate</h3>
+            <div class="mt-4 rounded-2xl bg-slate-900/90 border border-white/10 p-6 space-y-4">
+                <div class="flex items-center gap-4">
+                    <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=150&q=80" alt="Olivia" class="w-16 h-16 rounded-2xl object-cover border border-rose-400/50">
+                    <div>
+                        <p class="font-semibold text-base text-white">"Lead Academy gave me the confidence and accredited credentials to transition into clinical care within 3 months."</p>
+                        <p class="text-xs text-slate-400 mt-1">Completed: Phlebotomy & Venepuncture Accredited Diploma</p>
+                    </div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 text-xs text-slate-300 leading-relaxed">
+                    Olivia studied evenings alongside her previous retail role, completed her practical assessment, and secured a full-time NHS clinic position immediately after graduation.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         JAVASCRIPT FOR INTERACTIVITY, COURSE DATA & TOASTS
+    ========================================================== -->
+    <script>
+        // 1. Course Catalog Data (9 Most Popular Courses)
+        const popularCourses = [
+            {
+                id: 1,
+                category: "Health & Social Care",
+                title: "Phlebotomy Training & Venepuncture Diploma",
+                rating: "4.9",
+                students: "12,480",
+                price: 29,
+                originalPrice: 149,
+                image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80",
+                badge: "Bestseller"
+            },
+            {
+                id: 2,
+                category: "Health & Social Care",
+                title: "Level 3 Diploma in Adult Care & Safeguarding",
+                rating: "4.9",
+                students: "9,320",
+                price: 25,
+                originalPrice: 129,
+                image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=600&q=80",
+                badge: "CPD Accredited"
+            },
+            {
+                id: 3,
+                category: "Beauty & Therapy",
+                title: "Advanced Aesthetic Skin & Facial Therapy",
+                rating: "4.8",
+                students: "6,840",
+                price: 24,
+                originalPrice: 119,
+                image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80",
+                badge: "Popular"
+            },
+            {
+                id: 4,
+                category: "Teaching & Education",
+                title: "SEN Teaching Assistant & Child Psychology",
+                rating: "4.9",
+                students: "15,110",
+                price: 22,
+                originalPrice: 110,
+                image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80",
+                badge: "Top Rated"
+            },
+            {
+                id: 5,
+                category: "Health & Social Care",
+                title: "Mental Health First Aid & Wellbeing Practitioner",
+                rating: "4.9",
+                students: "11,290",
+                price: 25,
+                originalPrice: 125,
+                image: "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=600&q=80",
+                badge: "QLS Endorsed"
+            },
+            {
+                id: 6,
+                category: "Business & Management",
+                title: "Executive Leadership & People Management",
+                rating: "4.8",
+                students: "8,750",
+                price: 29,
+                originalPrice: 149,
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80",
+                badge: "Bestseller"
+            },
+            {
+                id: 7,
+                category: "Accounting & Finance",
+                title: "Sage 50 Accounting & Payroll Management",
+                rating: "4.9",
+                students: "7,430",
+                price: 27,
+                originalPrice: 135,
+                image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80",
+                badge: "Career Ready"
+            },
+            {
+                id: 8,
+                category: "IT & Software",
+                title: "Microsoft Excel Masterclass: Beginner to Pro",
+                rating: "4.9",
+                students: "18,600",
+                price: 19,
+                originalPrice: 99,
+                image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80",
+                badge: "80% Off"
+            },
+            {
+                id: 9,
+                category: "Animal Care",
+                title: "Veterinary Nursing Assistant & Pet First Aid",
+                rating: "4.9",
+                students: "6,190",
+                price: 24,
+                originalPrice: 120,
+                image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=600&q=80",
+                badge: "CPD Accredited"
+            }
+        ];
+
+        let cartCount = 0;
+
+        // 2. Render Courses Grid
+        function renderCourses(courseList) {
+            const grid = document.getElementById('courses-grid');
+            if (!grid) return;
+
+            if (courseList.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full glass-panel p-10 rounded-3xl text-center">
+                        <p class="font-display font-bold text-lg text-slate-800">No matching courses found.</p>
+                        <button onclick="renderCourses(popularCourses)" class="mt-4 px-6 py-2.5 rounded-full glass-crimson text-white text-xs font-semibold">Reset Filter</button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = courseList.map(course => `
+                <article class="glass-panel glass-panel-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                    <div>
+                        <!-- Thumbnail Header -->
+                        <div class="relative h-48 overflow-hidden bg-rose-100">
+                            <img 
+                                src="${course.image}" 
+                                alt="${course.title}" 
+                                onerror="this.src='https://placehold.co/600x400/ffe4ea/be123c?text=Accredited+Course'"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            >
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
+                            <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full glass-dark text-white text-[10px] font-bold tracking-wide">
+                                ${course.badge}
+                            </span>
+                            <span class="absolute bottom-3 left-3.5 px-2.5 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-crimson-700 text-[11px] font-bold">
+                                ${course.category}
+                            </span>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="p-5 pb-3">
+                            <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 group-hover:text-crimson-600 transition-colors line-clamp-2 leading-snug">
+                                ${course.title}
+                            </h3>
+
+                            <!-- Ratings & Student Count -->
+                            <div class="flex items-center justify-between mt-3 text-xs">
+                                <div class="flex items-center gap-1 text-amber-500">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <span class="text-slate-700 font-bold ml-1">${course.rating}</span>
+                                </div>
+                                <span class="text-slate-500 font-medium">
+                                    <i class="fa-solid fa-users text-slate-400 mr-1"></i>${course.students} Students
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing & Enroll Footer -->
+                    <div class="px-5 pb-5 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-display font-extrabold text-xl text-crimson-600">£${course.price}</span>
+                            <span class="text-xs text-slate-400 line-through">£${course.originalPrice}</span>
+                        </div>
+                        <button onclick="addToCart('${course.title.replace(/'/g, "\\'")}', ${course.price})" class="px-4 py-2 rounded-full bg-slate-900 hover:bg-crimson-600 text-white text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5">
+                            <span>Enroll Now</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // 3. Filter by Category
+        function filterByCategory(categoryName) {
+            const filtered = popularCourses.filter(c => c.category === categoryName);
+            renderCourses(filtered.length ? filtered : popularCourses);
+            document.getElementById('popular-courses').scrollIntoView({ behavior: 'smooth' });
+            showToast(`Showing courses in "${categoryName}"`);
+        }
+
+        // 4. Search Handler
+        function handleSearch(inputId) {
+            const query = document.getElementById(inputId).value.trim().toLowerCase();
+            if (!query) {
+                renderCourses(popularCourses);
+                showToast('Showing all popular courses.');
+                return;
+            }
+            const results = popularCourses.filter(c => 
+                c.title.toLowerCase().includes(query) || 
+                c.category.toLowerCase().includes(query)
+            );
+            renderCourses(results);
+            document.getElementById('popular-courses').scrollIntoView({ behavior: 'smooth' });
+            showToast(`Found ${results.length} course(s) for "${query}"`);
+        }
+
+        // 5. Add to Cart & Custom Toast Notification (No alert())
+        function addToCart(itemName, price) {
+            cartCount++;
+            document.getElementById('cart-badge').textContent = cartCount;
+            showToast(`Added "${itemName}" (£${price}) to your cart!`);
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto glass-dark text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs sm:text-sm max-w-sm border border-white/20 transform translate-y-2 opacity-0 transition-all duration-300';
+            toast.innerHTML = `
+                <span class="w-7 h-7 rounded-full bg-crimson-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-check text-xs"></i>
+                </span>
+                <span class="font-medium leading-snug">${message}</span>
+            `;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+
+        // 6. Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // 7. Video Modal Controls
+        function openVideoModal() {
+            const modal = document.getElementById('video-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // 8. Live Black Friday Countdown Timer
+        let totalSeconds = 14 * 3600 + 38 * 60 + 52;
+        setInterval(() => {
+            if (totalSeconds > 0) totalSeconds--;
+            const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const s = String(totalSeconds % 60).padStart(2, '0');
+            const el = document.getElementById('promo-countdown');
+            if (el) el.textContent = `Ends in ${h}h : ${m}m : ${s}s`;
+        }, 1000);
+
+        // Initialize Course Grid on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCourses(popularCourses);
+        });
+    </script>
+</body>
+</html>
