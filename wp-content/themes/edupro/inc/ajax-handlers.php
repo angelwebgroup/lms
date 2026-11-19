@@ -563,7 +563,7 @@ function edupro_ajax_mark_lesson_complete() {
 
 		// Issue certificate timestamp & unique code when course hits 100%.
 		if ( $progress >= 100 && ! get_user_meta( $user_id, '_edupro_certificate_' . $course_id . '_code', true ) ) {
-			$cert_code = 'EDUPRO-' . strtoupper( substr( md5( $user_id . '-' . $course_id . '-' . wp_salt() ), 0, 10 ) );
+			$cert_code = 'CERT-' . strtoupper( substr( md5( $user_id . '-' . $course_id . '-' . wp_salt() ), 0, 10 ) );
 			update_user_meta( $user_id, '_edupro_certificate_' . $course_id . '_code', $cert_code );
 			update_user_meta( $user_id, '_edupro_certificate_' . $course_id . '_date', current_time( 'mysql' ) );
 		}

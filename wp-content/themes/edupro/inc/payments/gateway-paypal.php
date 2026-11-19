@@ -643,7 +643,7 @@ class EduPro_Gateway_PayPal extends EduPro_Payment_Gateway {
                 'value'         => number_format( $refund_amount, 2, '.', '' ),
                 'currency_code' => strtoupper( (string) $order->currency ),
             ),
-            'note_to_payer' => substr( sanitize_text_field( $reason !== '' ? $reason : 'Course refund from EduPro LMS' ), 0, 255 ),
+            'note_to_payer' => substr( sanitize_text_field( $reason !== '' ? $reason : 'Course refund from ' . ( get_bloginfo( 'name' ) ?: 'Academy' ) ), 0, 255 ),
         );
 
         $response = wp_remote_post(

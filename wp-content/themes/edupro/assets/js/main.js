@@ -3057,7 +3057,7 @@
                         key: data.key_id || checkoutWrap.dataset.razorpayKey || '',
                         amount: data.amount_paise || data.amount,
                         currency: data.currency || currency,
-                        name: data.site_name || checkoutWrap.dataset.siteName || document.title || 'EduPro LMS',
+                        name: data.site_name || checkoutWrap.dataset.siteName || document.title || 'Online Academy',
                         description: data.course_title || checkoutWrap.dataset.courseTitle || 'Course Enrollment',
                         order_id: data.razorpay_order_id,
                         prefill: {

@@ -117,7 +117,7 @@ foreach ( $enrolled_ids as $cid ) {
 	$cert_code = get_user_meta( $user_id, '_edupro_certificate_' . $cid . '_code', true );
 	$cert_date = get_user_meta( $user_id, '_edupro_certificate_' . $cid . '_date', true );
 	if ( $progress >= 100 && ! $cert_code ) {
-		$cert_code = 'EDUPRO-' . strtoupper( substr( md5( $user_id . '-' . $cid . '-' . wp_salt() ), 0, 10 ) );
+		$cert_code = 'CERT-' . strtoupper( substr( md5( $user_id . '-' . $cid . '-' . wp_salt() ), 0, 10 ) );
 		$cert_date = current_time( 'mysql' );
 		update_user_meta( $user_id, '_edupro_certificate_' . $cid . '_code', $cert_code );
 		update_user_meta( $user_id, '_edupro_certificate_' . $cid . '_date', $cert_date );

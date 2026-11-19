@@ -157,21 +157,6 @@ $checkout_url  = $checkout_page
         <?php if ( $level_label ) : ?>
             <span class="course-card__level"><?php echo esc_html( $level_label ); ?></span>
         <?php endif; ?>
-
-        <!-- Hover Quick-View Overlay -->
-        <div class="course-card__hover-overlay">
-            <?php if ( $is_enrolled ) : ?>
-                <a href="<?php echo esc_url( $course_url ); ?>" class="course-card__overlay-pill course-card__overlay-pill--primary">
-                    <span><?php esc_html_e( 'Continue Learning', 'edupro' ); ?></span>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-            <?php else : ?>
-                <a href="<?php echo esc_url( $course_url ); ?>" class="course-card__overlay-pill">
-                    <span><?php esc_html_e( 'View Course', 'edupro' ); ?></span>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-            <?php endif; ?>
-        </div>
     </div>
 
     <!-- Card Body -->
@@ -202,7 +187,7 @@ $checkout_url  = $checkout_page
         <!-- Instructor -->
         <div class="course-card__instructor">
             <?php echo get_avatar( $author_id, 24, '', $author_name, array( 'class' => 'course-card__instructor-avatar' ) ); ?>
-            <span><?php echo esc_html( $author_name ?: __( 'EduPro Instructor', 'edupro' ) ); ?></span>
+            <span><?php echo esc_html( $author_name ?: __( 'Course Instructor', 'edupro' ) ); ?></span>
         </div>
 
         <!-- Rating & Students / Lessons Row -->

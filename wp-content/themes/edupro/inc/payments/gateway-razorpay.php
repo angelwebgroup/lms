@@ -115,7 +115,7 @@ class EduPro_Gateway_Razorpay extends EduPro_Payment_Gateway {
                 'order_id'  => $order->order_id,
                 'course_id' => (string) absint( $course->ID ),
                 'user_id'   => (string) absint( $user->ID ),
-                'source'    => 'EduPro LMS',
+                'source'    => get_bloginfo( 'name' ) ?: 'Academy LMS',
             ),
         );
 

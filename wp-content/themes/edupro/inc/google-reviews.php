@@ -68,7 +68,7 @@ function edupro_get_default_manual_reviews() {
 			'rating' => 5,
 			'date'   => date_i18n( 'M j, Y', strtotime( '-5 days' ) ),
 			'photo'  => '',
-			'text'   => 'EduPro completely transformed my career. The structured curriculum, hands-on projects, and crystal-clear explanations helped me land a senior developer role within two months of completing the course.',
+			'text'   => 'This academy completely transformed my career. The structured curriculum, hands-on projects, and crystal-clear explanations helped me land a senior developer role within two months of completing the course.',
 		),
 		array(
 			'name'   => 'Priya Nair',
@@ -82,7 +82,7 @@ function edupro_get_default_manual_reviews() {
 			'rating' => 5,
 			'date'   => date_i18n( 'M j, Y', strtotime( '-3 weeks' ) ),
 			'photo'  => '',
-			'text'   => 'Worth every single rupee. The instructors genuinely care about student outcomes and break down complex topics into easy-to-follow steps. Highly recommend EduPro to anyone upskilling.',
+			'text'   => 'Worth every single penny. The instructors genuinely care about student outcomes and break down complex topics into easy-to-follow steps. Highly recommend these courses to anyone upskilling.',
 		),
 		array(
 			'name'   => 'Sneha Patel',
@@ -677,7 +677,7 @@ class EduPro_Reviews_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'edupro_reviews_widget',
-			__( 'EduPro: Google Reviews', 'edupro' ),
+			__( 'Google Reviews', 'edupro' ),
 			array(
 				'description' => __( 'Display Google Reviews or manually added student testimonials in your sidebar.', 'edupro' ),
 				'classname'   => 'widget_edupro_reviews',
@@ -885,7 +885,7 @@ function edupro_render_google_reviews_admin_page() {
 	<div class="wrap edupro-reviews-admin">
 		<div class="edupro-reviews-admin-head">
 			<div>
-				<h1><?php esc_html_e( 'EduPro — Google Reviews Settings', 'edupro' ); ?></h1>
+				<h1><?php esc_html_e( 'Google Reviews Settings', 'edupro' ); ?></h1>
 				<p class="description">
 					<?php esc_html_e( 'Display authentic Google Reviews via the Google Places API, or manage custom student reviews manually. Embed anywhere using', 'edupro' ); ?>
 					<code>[edupro_reviews count="6"]</code>
@@ -1151,7 +1151,7 @@ function edupro_render_google_reviews_admin_page() {
 				</div>
 				<div class="edupro-guide-modal__body">
 					<p style="margin-top:0;">
-						<?php esc_html_e( 'Follow these 5 simple steps to automatically sync real reviews from your Google Business Profile. EduPro caches results for 12 hours, so API usage stays well within Google’s free monthly credit.', 'edupro' ); ?>
+						<?php esc_html_e( 'Follow these 5 simple steps to automatically sync real reviews from your Google Business Profile. Results are cached for 12 hours, so API usage stays well within Google’s free monthly credit.', 'edupro' ); ?>
 					</p>
 
 					<div class="edupro-guide-step">

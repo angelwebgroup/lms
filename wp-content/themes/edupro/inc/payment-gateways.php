@@ -2177,7 +2177,7 @@ function edupro_payment_settings_page() {
     }
     ?>
     <div class="wrap edupro-payment-settings">
-        <h1><?php esc_html_e( 'EduPro Payment Gateways & Multi-Currency Settings', 'edupro' ); ?></h1>
+        <h1><?php esc_html_e( 'Payment Gateways & Multi-Currency Settings', 'edupro' ); ?></h1>
 
         <style>
             .edupro-payment-settings .nav-tab-wrapper { margin-bottom: 20px; }
@@ -2732,7 +2732,7 @@ function edupro_add_payment_dashboard_widget() {
     if ( current_user_can( 'manage_options' ) ) {
         wp_add_dashboard_widget(
             'edupro_payment_stats',
-            __( 'EduPro – Payment Overview', 'edupro' ),
+            __( 'LMS – Payment Overview', 'edupro' ),
             'edupro_payment_dashboard_widget'
         );
     }
@@ -2741,7 +2741,7 @@ add_action( 'wp_dashboard_setup', 'edupro_add_payment_dashboard_widget' );
 
 function edupro_register_orders_page() {
     add_menu_page(
-        __( 'EduPro Orders & Reconciliation', 'edupro' ),
+        __( 'Course Orders & Reconciliation', 'edupro' ),
         __( 'Orders', 'edupro' ),
         'manage_options',
         'edupro-orders',
@@ -2876,7 +2876,7 @@ function edupro_orders_admin_page() {
     );
     ?>
     <div class="wrap">
-        <h1 class="wp-heading-inline"><?php esc_html_e( 'EduPro Orders & Reconciliation', 'edupro' ); ?></h1>
+        <h1 class="wp-heading-inline"><?php esc_html_e( 'Course Orders & Reconciliation', 'edupro' ); ?></h1>
 
         <form method="post" style="display:inline-block; margin-left:12px;">
             <?php wp_nonce_field( 'edupro_order_admin_action', 'edupro_order_action_nonce' ); ?>

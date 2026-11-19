@@ -75,7 +75,7 @@ $nonce    = wp_create_nonce( 'edupro_nonce' );
 			<?php else : ?>
 				<div class="edupro-auth-header">
 					<h1 class="edupro-auth-title"><?php esc_html_e( 'Create Your Student Account', 'edupro' ); ?></h1>
-					<p class="edupro-auth-subtitle"><?php esc_html_e( 'Join thousands of learners advancing their careers with EduPro', 'edupro' ); ?></p>
+					<p class="edupro-auth-subtitle"><?php echo esc_html( sprintf( __( 'Join thousands of learners advancing their careers with %s', 'edupro' ), get_bloginfo( 'name' ) ?: __( 'our academy', 'edupro' ) ) ); ?></p>
 				</div>
 
 				<!-- Email Verification Info Notice -->

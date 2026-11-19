@@ -73,7 +73,7 @@ function edupro_demo_activation_admin_notice() {
 	?>
 	<div class="notice notice-success is-dismissible" style="border-left-color:#e31b23;padding:14px 18px;">
 		<p style="margin:0 0 8px;font-size:14px;">
-			<strong><?php esc_html_e( 'Welcome to EduPro LMS!', 'edupro' ); ?></strong>
+			<strong><?php esc_html_e( 'Welcome to LMS Pro!', 'edupro' ); ?></strong>
 			<?php esc_html_e( 'Your complete LMS website (Home, Courses, Lessons, Instructors, Student Portal, Checkout, Menus & Reviews) has been automatically installed.', 'edupro' ); ?>
 		</p>
 		<p style="margin:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
@@ -84,7 +84,7 @@ function edupro_demo_activation_admin_notice() {
 				<?php esc_html_e( 'Browse Courses', 'edupro' ); ?>
 			</a>
 			<a href="<?php echo esc_url( $setup_url ); ?>" class="button">
-				<?php esc_html_e( 'EduPro Setup Manager', 'edupro' ); ?>
+				<?php esc_html_e( 'LMS Setup Manager', 'edupro' ); ?>
 			</a>
 			<a href="<?php echo esc_url( $dismiss_url ); ?>" style="margin-left:6px;color:#646970;text-decoration:none;">
 				<?php esc_html_e( 'Dismiss', 'edupro' ); ?>
@@ -191,6 +191,10 @@ function edupro_demo_reset_and_reimport() {
 
 	// 2. Delete previously created demo nav menus so they are recreated cleanly without duplicate links.
 	$demo_menu_names = array(
+		'Primary Navigation Menu',
+		'Footer Categories Menu',
+		'Footer Quick Links Menu',
+		'Footer Support Menu',
 		'EduPro Primary Menu',
 		'EduPro Footer Categories',
 		'EduPro Footer Quick Links',
@@ -228,8 +232,8 @@ function edupro_demo_create_pages( $force = false ) {
 
 	$about_content = '<div class="edupro-page-content">'
 		. '<h2>' . esc_html__( 'Empowering Careers Through Accredited Online Learning', 'edupro' ) . '</h2>'
-		. '<p>' . esc_html__( 'EduPro is a modern online learning academy dedicated to helping learners, healthcare professionals, educators, and technology specialists gain practical, career-ready qualifications at their own pace.', 'edupro' ) . '</p>'
-		. '<h3>' . esc_html__( 'Why Thousands of Students Trust EduPro', 'edupro' ) . '</h3>'
+		. '<p>' . esc_html__( 'We are a modern online learning academy dedicated to helping learners, healthcare professionals, educators, and technology specialists gain practical, career-ready qualifications at their own pace.', 'edupro' ) . '</p>'
+		. '<h3>' . esc_html__( 'Why Thousands of Students Trust Our Academy', 'edupro' ) . '</h3>'
 		. '<ul>'
 		. '<li><strong>' . esc_html__( 'Industry-Aligned Curriculum:', 'edupro' ) . '</strong> ' . esc_html__( 'Every course is designed by practicing assessors, clinicians, and senior engineers to match real workplace standards.', 'edupro' ) . '</li>'
 		. '<li><strong>' . esc_html__( '100% Flexible Self-Paced Study:', 'edupro' ) . '</strong> ' . esc_html__( 'Access HD video lessons, structured study guides, and assessments anytime from desktop, tablet, or mobile.', 'edupro' ) . '</li>'
@@ -249,7 +253,7 @@ function edupro_demo_create_pages( $force = false ) {
 		. '<p><strong>' . esc_html__( 'How quickly do I get course access after enrolling?', 'edupro' ) . '</strong><br>'
 		. esc_html__( 'Access is granted immediately after payment verification (or instantly for free courses). Simply visit your Student Dashboard to begin learning.', 'edupro' ) . '</p>'
 		. '<p><strong>' . esc_html__( 'Are certificates included with every course?', 'edupro' ) . '</strong><br>'
-		. esc_html__( 'Yes! Once you complete 100% of lessons in any eligible course, your verified EduPro Certificate of Completion becomes available right inside your dashboard.', 'edupro' ) . '</p>'
+		. esc_html__( 'Yes! Once you complete 100% of lessons in any eligible course, your verified Certificate of Completion becomes available right inside your dashboard.', 'edupro' ) . '</p>'
 		. '</div>';
 
 	$pages_config = array(
@@ -682,8 +686,6 @@ function edupro_demo_build_course_svg( $title, $category_label, $level, $color_s
 		. $title_tspans
 		. '<rect x="64" y="394" width="320" height="40" rx="20" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.22"/>'
 		. '<text x="86" y="419" fill="#ffffff" font-family="Inter, -apple-system, sans-serif" font-size="15" font-weight="600">' . $level_esc . '</text>'
-		. '<rect x="618" y="396" width="118" height="36" rx="8" fill="' . edupro_demo_xml_esc( $accent ) . '"/>'
-		. '<text x="677" y="420" text-anchor="middle" fill="#ffffff" font-family="Poppins, sans-serif" font-size="15" font-weight="700">EduPro</text>'
 		. '</svg>';
 }
 
@@ -1548,7 +1550,7 @@ function edupro_demo_create_courses_and_lessons( $force = false ) {
 		update_post_meta( $course_id, '_edupro_course_intro_video', esc_url_raw( $course['intro_video'] ) );
 		update_post_meta( $course_id, '_edupro_curriculum', wp_json_encode( $course['curriculum'] ) );
 		update_post_meta( $course_id, '_edupro_is_bestseller', $course['bestseller'] );
-		update_post_meta( $course_id, '_edupro_meta_title', $course['title'] . ' | EduPro' );
+		update_post_meta( $course_id, '_edupro_meta_title', $course['title'] . ' | ' . ( get_bloginfo( 'name' ) ?: 'Online Academy' ) );
 		update_post_meta( $course_id, '_edupro_meta_description', wp_trim_words( $course['excerpt'], 24, '…' ) );
 		update_post_meta( $course_id, '_edupro_demo_item', '1' );
 
@@ -1648,7 +1650,7 @@ function edupro_demo_seed_google_reviews( $force = false ) {
 			'rating' => 5,
 			'date'   => date_i18n( 'M j, Y', strtotime( '-4 days' ) ),
 			'photo'  => '',
-			'text'   => 'EduPro completely transformed my career trajectory. The Full-Stack Web Development Masterclass was structured, hands-on, and helped me land a senior engineering offer within six weeks of graduating.',
+			'text'   => 'This academy completely transformed my career trajectory. The Full-Stack Web Development Masterclass was structured, hands-on, and helped me land a senior engineering offer within six weeks of graduating.',
 		),
 		array(
 			'name'   => 'Priya Nair',
@@ -1848,7 +1850,7 @@ function edupro_demo_get_v13_site_settings_defaults() {
 		'giftcard_enabled'         => '1',
 		'giftcard_eyebrow'         => __( 'SHARE KNOWLEDGE', 'edupro' ),
 		'giftcard_heading'         => __( 'Order Gift Card for Your Loved Ones Today', 'edupro' ),
-		'giftcard_desc'            => __( 'Give the gift of lifelong learning. Redeemable across every accredited course and professional certification on EduPro.', 'edupro' ),
+		'giftcard_desc'            => __( 'Give the gift of lifelong learning. Redeemable across every accredited course and professional certification on our platform.', 'edupro' ),
 		'giftcard_bullets'         => "Valid across all 500+ accredited online courses\nInstant digital delivery with personalized note\nNo expiration fees — flexible redemption anytime\nAvailable in both UK (£ GBP) & India (₹ INR)",
 		'giftcard_value_label'     => '£25 – £150',
 		'giftcard_cta_text'        => __( 'Order Gift Card', 'edupro' ),
@@ -1878,9 +1880,9 @@ function edupro_demo_seed_site_settings() {
 		return;
 	}
 
-	$site_name   = get_bloginfo( 'name' ) ?: 'EduPro LMS';
+	$site_name   = get_bloginfo( 'name' ) ?: 'Online Academy';
 	$tagline     = get_bloginfo( 'description' ) ?: __( 'Accredited Online Courses & Career Qualifications', 'edupro' );
-	$admin_email = get_option( 'admin_email', 'support@eduproacademy.com' );
+	$admin_email = get_option( 'admin_email', 'support@example.com' );
 	$courses_url = get_post_type_archive_link( 'lms_course' ) ?: home_url( '/courses/' );
 
 	$defaults = array_merge(
@@ -1902,13 +1904,13 @@ function edupro_demo_seed_site_settings() {
 			'phone_primary'             => '+44 20 7946 0192',
 			'phone_secondary'           => '+91 80 4568 2100',
 			'whatsapp_number'           => '+447700900123',
-			'whatsapp_message'          => __( 'Hi! I would like to enquire about EduPro courses and enrolment.', 'edupro' ),
+			'whatsapp_message'          => __( 'Hi! I would like to enquire about your courses and enrolment.', 'edupro' ),
 			'whatsapp_floating_enabled' => '1',
 			'email_support'             => $admin_email,
 			'email_sales'               => $admin_email,
 			'business_hours'            => __( 'Mon – Sat: 9:00 AM – 7:00 PM (UK & India Support)', 'edupro' ),
-			'address_primary'           => __( 'EduPro Learning Hub, 42 MG Road, Bengaluru, Karnataka 560001, India', 'edupro' ),
-			'address_secondary'         => __( 'EduPro Academy UK, 128 City Road, London EC1V 2NX, United Kingdom', 'edupro' ),
+			'address_primary'           => __( 'Learning Hub, 42 MG Road, Bengaluru, Karnataka 560001, India', 'edupro' ),
+			'address_secondary'         => __( 'Academy UK, 128 City Road, London EC1V 2NX, United Kingdom', 'edupro' ),
 
 			// Tab 3 — Google Maps
 			'map_embed'                 => 'London, UK',
@@ -2097,10 +2099,10 @@ function edupro_demo_seed_default_gateway_if_empty() {
 
 	// Starter India bank & UPI details (populated only when blank).
 	if ( '' === get_option( 'edupro_bank_name', '' ) ) {
-		update_option( 'edupro_bank_name', 'EduPro Academy India Bank (Update in Settings → Payment Gateways)' );
+		update_option( 'edupro_bank_name', 'India Bank Account (Update in Settings → Payment Gateways)' );
 	}
 	if ( '' === get_option( 'edupro_bank_account_name', '' ) ) {
-		update_option( 'edupro_bank_account_name', 'EduPro Learning Academy Pvt. Ltd.' );
+		update_option( 'edupro_bank_account_name', ( get_bloginfo( 'name' ) ?: 'Online Academy' ) . ' Pvt. Ltd.' );
 	}
 	if ( '' === get_option( 'edupro_bank_account_number', '' ) ) {
 		update_option( 'edupro_bank_account_number', '00001234567890' );
@@ -2114,7 +2116,7 @@ function edupro_demo_seed_default_gateway_if_empty() {
 
 	// Starter UK Faster Payments / IBAN details (populated only when blank).
 	if ( '' === get_option( 'edupro_bank_uk_account_name', '' ) ) {
-		update_option( 'edupro_bank_uk_account_name', 'EduPro Academy UK Ltd.' );
+		update_option( 'edupro_bank_uk_account_name', ( get_bloginfo( 'name' ) ?: 'Online Academy' ) . ' UK Ltd.' );
 	}
 	if ( '' === get_option( 'edupro_bank_uk_sort_code', '' ) ) {
 		update_option( 'edupro_bank_uk_sort_code', '20-00-00' );
@@ -2225,7 +2227,7 @@ function edupro_demo_create_menus( $force = false, $page_ids = array() ) {
 
 	// 1. Primary Menu
 	if ( empty( $locations['primary'] ) || $force ) {
-		$menu_name = 'EduPro Primary Menu';
+		$menu_name = 'Primary Navigation Menu';
 		$menu_obj  = wp_get_nav_menu_object( $menu_name );
 		if ( ! $menu_obj ) {
 			$menu_id = wp_create_nav_menu( $menu_name );
@@ -2329,7 +2331,7 @@ function edupro_demo_create_menus( $force = false, $page_ids = array() ) {
 
 	// 2. Footer-1 Menu (Top Course Categories)
 	if ( empty( $locations['footer-1'] ) || $force ) {
-		$menu_name = 'EduPro Footer Categories';
+		$menu_name = 'Footer Categories Menu';
 		$menu_obj  = wp_get_nav_menu_object( $menu_name );
 		if ( ! $menu_obj ) {
 			$menu_id = wp_create_nav_menu( $menu_name );
@@ -2360,7 +2362,7 @@ function edupro_demo_create_menus( $force = false, $page_ids = array() ) {
 
 	// 3. Footer-2 Menu (Quick Links)
 	if ( empty( $locations['footer-2'] ) || $force ) {
-		$menu_name = 'EduPro Footer Quick Links';
+		$menu_name = 'Footer Quick Links Menu';
 		$menu_obj  = wp_get_nav_menu_object( $menu_name );
 		if ( ! $menu_obj ) {
 			$menu_id = wp_create_nav_menu( $menu_name );
@@ -2436,7 +2438,7 @@ function edupro_demo_create_menus( $force = false, $page_ids = array() ) {
 
 	// 4. Footer-3 Menu (Support & Info)
 	if ( empty( $locations['footer-3'] ) || $force ) {
-		$menu_name = 'EduPro Footer Support';
+		$menu_name = 'Footer Support Menu';
 		$menu_obj  = wp_get_nav_menu_object( $menu_name );
 		if ( ! $menu_obj ) {
 			$menu_id = wp_create_nav_menu( $menu_name );
@@ -2519,8 +2521,8 @@ function edupro_demo_create_menus( $force = false, $page_ids = array() ) {
  */
 function edupro_demo_register_admin_page() {
 	add_theme_page(
-		__( 'EduPro Setup', 'edupro' ),
-		__( 'EduPro Setup', 'edupro' ),
+		__( 'LMS Setup', 'edupro' ),
+		__( 'LMS Setup', 'edupro' ),
 		'manage_options',
 		'edupro-demo-setup',
 		'edupro_demo_render_admin_page'
@@ -2555,7 +2557,7 @@ function edupro_demo_handle_admin_actions() {
 			'setup_done',
 			sprintf(
 				/* translators: 1: courses count, 2: lessons count, 3: pages count */
-				__( 'EduPro setup complete! Verified %1$d courses, %2$d lessons, %3$d essential pages, menus, reviews, and flushed permalinks.', 'edupro' ),
+				__( 'Website setup complete! Verified %1$d courses, %2$d lessons, %3$d essential pages, menus, reviews, and flushed permalinks.', 'edupro' ),
 				absint( $summary['courses'] ),
 				absint( $summary['lessons'] ),
 				absint( $summary['pages'] )
@@ -2718,7 +2720,7 @@ function edupro_demo_render_admin_page() {
 
 		<div class="edupro-setup-hero">
 			<div>
-				<h1><?php esc_html_e( 'EduPro LMS — One-Click Website Setup', 'edupro' ); ?></h1>
+				<h1><?php esc_html_e( 'LMS — One-Click Website Setup', 'edupro' ); ?></h1>
 				<p><?php esc_html_e( 'Install or refresh your complete LMS demo website including pages, 8 vocational & tech courses, self-paced lessons, instructors, Google reviews, and menus.', 'edupro' ); ?></p>
 			</div>
 			<div>
@@ -2749,7 +2751,7 @@ function edupro_demo_render_admin_page() {
 						'<strong>' . esc_html( $setup_done ) . '</strong>'
 					);
 				} else {
-					esc_html_e( 'Click the button below to automatically build the complete EduPro LMS website in one click.', 'edupro' );
+					esc_html_e( 'Click the button below to automatically build the complete LMS website in one click.', 'edupro' );
 				}
 				?>
 			</p>
@@ -2818,3 +2820,77 @@ function edupro_demo_render_admin_page() {
 	</div>
 	<?php
 }
+
+/**
+ * One-time white-label watermark cleanup for existing installations upgrading to v1.4.2.
+ *
+ * Strips the legacy SVG pill watermark from generated demo course thumbnails and
+ * removes legacy brand mentions from previously seeded options & manual reviews.
+ */
+function edupro_demo_cleanup_watermarks_v142() {
+	if ( get_option( 'edupro_v142_whitelabel_cleaned' ) ) {
+		return;
+	}
+	update_option( 'edupro_v142_whitelabel_cleaned', '1', false );
+
+	$site_name = get_bloginfo( 'name' ) ?: 'Online Academy';
+
+	// 1. Strip legacy SVG pill watermark from existing generated demo course covers.
+	$upload_dir = wp_upload_dir();
+	if ( ! empty( $upload_dir['basedir'] ) ) {
+		$demo_dir = trailingslashit( $upload_dir['basedir'] ) . 'edupro-demo/';
+		if ( is_dir( $demo_dir ) ) {
+			$svgs = glob( $demo_dir . '*.svg' );
+			if ( is_array( $svgs ) ) {
+				foreach ( $svgs as $svg_file ) {
+					if ( ! is_readable( $svg_file ) || ! is_writable( $svg_file ) ) {
+						continue;
+					}
+					$svg = file_get_contents( $svg_file );
+					if ( false !== $svg && false !== stripos( $svg, '>EduPro<' ) ) {
+						$cleaned = preg_replace(
+							'#<rect x="618" y="396"[^>]*/>\s*<text x="677" y="420"[^>]*>EduPro</text>#i',
+							'',
+							$svg
+						);
+						if ( is_string( $cleaned ) && $cleaned !== $svg ) {
+							file_put_contents( $svg_file, $cleaned );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// 2. Scrub legacy brand mentions from previously seeded site settings.
+	$settings = get_option( 'edupro_site_settings', array() );
+	if ( is_array( $settings ) && ! empty( $settings ) ) {
+		$changed = false;
+		foreach ( array( 'whatsapp_message', 'address_primary', 'address_secondary', 'giftcard_desc', 'footer_about' ) as $key ) {
+			if ( ! empty( $settings[ $key ] ) && is_string( $settings[ $key ] ) && false !== stripos( $settings[ $key ], 'EduPro' ) ) {
+				$settings[ $key ] = str_ireplace( array( 'EduPro Learning Hub, ', 'EduPro Academy UK, ', 'EduPro ', 'EduPro' ), array( 'Learning Hub, ', 'Academy UK, ', '', $site_name ), $settings[ $key ] );
+				$changed          = true;
+			}
+		}
+		if ( $changed ) {
+			update_option( 'edupro_site_settings', $settings );
+		}
+	}
+
+	// 3. Scrub legacy brand mentions from previously seeded manual reviews.
+	$reviews = get_option( 'edupro_manual_reviews', array() );
+	if ( is_array( $reviews ) && ! empty( $reviews ) ) {
+		$rev_changed = false;
+		foreach ( $reviews as &$rev ) {
+			if ( ! empty( $rev['text'] ) && false !== stripos( $rev['text'], 'EduPro' ) ) {
+				$rev['text'] = str_ireplace( 'EduPro', $site_name, $rev['text'] );
+				$rev_changed = true;
+			}
+		}
+		unset( $rev );
+		if ( $rev_changed ) {
+			update_option( 'edupro_manual_reviews', $reviews );
+		}
+	}
+}
+add_action( 'admin_init', 'edupro_demo_cleanup_watermarks_v142', 20 );

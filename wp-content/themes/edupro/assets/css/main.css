@@ -13050,8 +13050,39 @@ body {
 }
 
 /* ============================================================================
- * 25. COURSE CARD LAYOUT PERFECTION (v1.4.1)
+ * 25. COURSE CARD LAYOUT PERFECTION & WIDE CONTAINER (v1.4.2)
  * ========================================================================== */
+
+:root {
+    --container-max: 1340px;
+}
+
+.edupro-course-hero__inner,
+.edupro-course-layout,
+.single-course-layout {
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 2.5rem;
+}
+
+.edupro-course-hero__content,
+.course-hero__content {
+    width: 100%;
+    max-width: 100% !important;
+    padding-right: 12px;
+}
+
+@media (max-width: 1024px) {
+    .edupro-course-hero__inner,
+    .edupro-course-layout,
+    .single-course-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-course-hero__content,
+    .course-hero__content {
+        padding-right: 0;
+    }
+}
 
 .course-card {
     display: flex;

@@ -85,8 +85,9 @@
 
 .edupro-course-hero__content,
 .course-hero__content {
-    max-width: 65%;
-    padding-right: 32px;
+    width: 100%;
+    max-width: 100%;
+    padding-right: 16px;
 }
 
 .edupro-course-hero .edupro-breadcrumb,

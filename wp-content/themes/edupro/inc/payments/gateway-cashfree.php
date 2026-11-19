@@ -187,7 +187,7 @@ class EduPro_Gateway_Cashfree extends EduPro_Payment_Gateway {
                 'return_url' => $return_url,
                 'notify_url' => $this->get_webhook_url(),
             ),
-            'order_note'       => substr( sprintf( 'EduPro Course #%d: %s', absint( $course->ID ), wp_strip_all_tags( $course->post_title ) ), 0, 200 ),
+            'order_note'       => substr( sprintf( '%s Course #%d: %s', get_bloginfo( 'name' ) ?: 'Academy', absint( $course->ID ), wp_strip_all_tags( $course->post_title ) ), 0, 200 ),
             'order_tags'       => array(
                 'course_id' => (string) absint( $course->ID ),
                 'user_id'   => (string) absint( $user->ID ),
@@ -531,7 +531,7 @@ class EduPro_Gateway_Cashfree extends EduPro_Payment_Gateway {
         $payload = array(
             'refund_amount' => $refund_amount,
             'refund_id'     => $merchant_refund_id,
-            'refund_note'   => substr( sanitize_text_field( $reason !== '' ? $reason : 'Admin refund via EduPro LMS' ), 0, 100 ),
+            'refund_note'   => substr( sanitize_text_field( $reason !== '' ? $reason : 'Admin refund via ' . ( get_bloginfo( 'name' ) ?: 'Academy' ) ), 0, 100 ),
         );
 
         $response = wp_remote_post(

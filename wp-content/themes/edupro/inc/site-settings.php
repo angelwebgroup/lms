@@ -89,7 +89,7 @@ function edupro_get_site_settings_defaults() {
 
     return array(
         // Tab 1: Brand & Identity
-        'site_name'                    => $wp_name ? $wp_name : 'EduPro LMS',
+        'site_name'                    => $wp_name ? $wp_name : 'Online Academy',
         'site_tagline'                 => $wp_description ? $wp_description : __( 'Accredited Online Courses & Certifications', 'edupro' ),
         'header_logo_id'               => $custom_logo_id,
         'header_logo_url'              => $custom_logo_url,
@@ -762,7 +762,7 @@ function edupro_render_site_settings_page() {
             <div class="edupro-ws-header__title">
                 <h1>
                     <span class="dashicons dashicons-admin-site-alt3"></span>
-                    <?php esc_html_e( 'EduPro Website Settings', 'edupro' ); ?>
+                    <?php esc_html_e( 'Website Settings', 'edupro' ); ?>
                 </h1>
                 <p><?php esc_html_e( 'Configure your entire website branding, contact details, WhatsApp button, Google Map, social links, and footer without touching code.', 'edupro' ); ?></p>
             </div>
@@ -813,7 +813,7 @@ function edupro_render_site_settings_page() {
                         <tr>
                             <th scope="row"><label for="edupro_site_name"><?php esc_html_e( 'Website Name', 'edupro' ); ?></label></th>
                             <td>
-                                <input type="text" id="edupro_site_name" name="edupro_site_settings[site_name]" value="<?php echo esc_attr( $settings['site_name'] ); ?>" class="regular-text" placeholder="EduPro Academy" />
+                                <input type="text" id="edupro_site_name" name="edupro_site_settings[site_name]" value="<?php echo esc_attr( $settings['site_name'] ); ?>" class="regular-text" placeholder="Your Academy Name" />
                                 <p class="description"><?php esc_html_e( 'Synced with WordPress Site Title (blogname).', 'edupro' ); ?></p>
                             </td>
                         </tr>

@@ -536,7 +536,7 @@ $giftcard_cta_url     = $edupro_setting( 'giftcard_cta_url', $courses_url );
     <!-- =====================================================================
          7. ANIMATED STATS COUNTER SECTION
          ===================================================================== -->
-    <section class="edupro-stats-section" aria-label="<?php esc_attr_e( 'EduPro Platform Statistics', 'edupro' ); ?>">
+    <section class="edupro-stats-section" aria-label="<?php esc_attr_e( 'Platform Statistics', 'edupro' ); ?>">
         <div class="edupro-container container">
             <div class="edupro-stats-grid">
                 <div class="edupro-stat-box edupro-stat-card animate-on-scroll">
@@ -590,7 +590,7 @@ $giftcard_cta_url     = $edupro_setting( 'giftcard_cta_url', $courses_url );
     <section class="edupro-section edupro-why-section">
         <div class="edupro-container container">
             <div class="edupro-section-header edupro-section-header--center">
-                <span class="edupro-section-eyebrow"><?php esc_html_e( 'The EduPro Advantage', 'edupro' ); ?></span>
+                <span class="edupro-section-eyebrow"><?php esc_html_e( 'Our Advantage', 'edupro' ); ?></span>
                 <h2 class="edupro-section-title"><?php esc_html_e( 'Why Learners Worldwide Choose Us', 'edupro' ); ?></h2>
                 <p class="edupro-section-subtitle">
                     <?php esc_html_e( 'Everything you need to gain real-world skills, earn recognized credentials, and stand out to employers.', 'edupro' ); ?>

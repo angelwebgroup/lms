@@ -362,7 +362,7 @@ function edupro_student_register_handler() {
 
     wp_send_json_success(
         array(
-            'message'      => __( 'Account created! Welcome to EduPro. Redirecting…', 'edupro' ),
+            'message'      => sprintf( __( 'Account created! Welcome to %s. Redirecting…', 'edupro' ), get_bloginfo( 'name' ) ?: __( 'our academy', 'edupro' ) ),
             'redirect_url' => $redirect_url,
             'user_id'      => $user_id,
         )
@@ -478,7 +478,7 @@ function edupro_forgot_password_handler() {
     $subject   = sprintf( __( '[%s] Password Reset Request', 'edupro' ), $blog_name );
 
     $message  = sprintf( __( 'Hi %s,', 'edupro' ), $user->display_name ) . "\n\n";
-    $message .= __( 'You requested a password reset for your EduPro account.', 'edupro' ) . "\n\n";
+    $message .= sprintf( __( 'You requested a password reset for your %s account.', 'edupro' ), get_bloginfo( 'name' ) ?: __( 'academy', 'edupro' ) ) . "\n\n";
     $message .= __( 'Click the link below to reset your password:', 'edupro' ) . "\n\n";
     $message .= $reset_url . "\n\n";
     $message .= __( 'This link will expire in 24 hours.', 'edupro' ) . "\n\n";

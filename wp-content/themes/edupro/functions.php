@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 // 0. Constants
 // ---------------------------------------------------------------------------
-define( 'EDUPRO_VERSION',   '1.4.1' );
+define( 'EDUPRO_VERSION',   '1.4.2' );
 define( 'EDUPRO_DIR',       get_template_directory() );
 define( 'EDUPRO_URI',       get_template_directory_uri() );
 define( 'EDUPRO_INC',       EDUPRO_DIR . '/inc/' );
@@ -315,7 +315,7 @@ add_action( 'customize_register', function( $wp_customize ) {
 
     // ---- EduPro Panel ----
     $wp_customize->add_panel( 'edupro_panel', [
-        'title'    => __( 'EduPro Settings', 'edupro' ),
+        'title'    => __( 'Theme Settings', 'edupro' ),
         'priority' => 160,
     ] );
 
@@ -352,7 +352,7 @@ add_action( 'customize_register', function( $wp_customize ) {
     ] );
 
     $wp_customize->add_setting( 'edupro_footer_copyright', [
-        'default'           => sprintf( '&copy; %d EduPro. All rights reserved.', date( 'Y' ) ),
+        'default'           => sprintf( '&copy; %d %s. All rights reserved.', date( 'Y' ), get_bloginfo( 'name' ) ?: 'Academy' ),
         'sanitize_callback' => 'wp_kses_post',
     ] );
     $wp_customize->add_control( 'edupro_footer_copyright', [

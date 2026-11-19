@@ -626,7 +626,7 @@ function edupro_render_coupons_admin_page() {
 	<div class="wrap edupro-coupons-wrap">
 		<h1 style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
 			<span class="dashicons dashicons-tickets-alt" style="color:#e31b23;font-size:28px;width:28px;height:28px;"></span>
-			<?php esc_html_e( 'EduPro Coupons & Discounts', 'edupro' ); ?>
+			<?php esc_html_e( 'Coupons & Discounts', 'edupro' ); ?>
 		</h1>
 
 		<?php if ( $notice ) : ?>

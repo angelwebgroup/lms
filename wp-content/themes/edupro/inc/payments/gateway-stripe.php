@@ -121,7 +121,7 @@ class EduPro_Gateway_Stripe extends EduPro_Payment_Gateway {
             'amount'                             => $amount_minor,
             'currency'                           => $currency,
             'automatic_payment_methods[enabled]' => 'true',
-            'description'                        => substr( sprintf( 'EduPro Course: %s (%s)', wp_strip_all_tags( $course->post_title ), $order->order_id ), 0, 250 ),
+            'description'                        => substr( sprintf( '%s Course: %s (%s)', get_bloginfo( 'name' ) ?: 'Academy', wp_strip_all_tags( $course->post_title ), $order->order_id ), 0, 250 ),
             'metadata[order_id]'                 => $order->order_id,
             'metadata[course_id]'                => (string) absint( $course->ID ),
             'metadata[user_id]'                  => (string) absint( $user->ID ),
