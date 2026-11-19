@@ -68,6 +68,15 @@ function edupro_register_meta_boxes() {
     );
 
     add_meta_box(
+        'edupro_course_page_extras',
+        __( 'Course Page Extras, Gallery & FAQs', 'edupro' ),
+        'edupro_render_course_page_extras_metabox',
+        'lms_course',
+        'normal',
+        'default'
+    );
+
+    add_meta_box(
         'edupro_seo',
         __( 'SEO & Social Sharing', 'edupro' ),
         'edupro_render_seo_metabox',
@@ -103,6 +112,7 @@ function edupro_metabox_admin_styles() {
         #edupro_course_pricing.postbox,
         #edupro_course_details.postbox,
         #edupro_curriculum.postbox,
+        #edupro_course_page_extras.postbox,
         #edupro_seo.postbox,
         #edupro_lesson_details.postbox {
             border: 1px solid #e5e7eb;
@@ -116,6 +126,7 @@ function edupro_metabox_admin_styles() {
         #edupro_course_pricing .postbox-header,
         #edupro_course_details .postbox-header,
         #edupro_curriculum .postbox-header,
+        #edupro_course_page_extras .postbox-header,
         #edupro_seo .postbox-header,
         #edupro_lesson_details .postbox-header {
             background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
@@ -125,6 +136,7 @@ function edupro_metabox_admin_styles() {
         #edupro_course_pricing .postbox-header h2,
         #edupro_course_details .postbox-header h2,
         #edupro_curriculum .postbox-header h2,
+        #edupro_course_page_extras .postbox-header h2,
         #edupro_seo .postbox-header h2,
         #edupro_lesson_details .postbox-header h2 {
             font-size: 14px;
@@ -135,6 +147,7 @@ function edupro_metabox_admin_styles() {
         #edupro_course_pricing .inside,
         #edupro_course_details .inside,
         #edupro_curriculum .inside,
+        #edupro_course_page_extras .inside,
         #edupro_seo .inside,
         #edupro_lesson_details .inside {
             padding: 18px 20px 20px;
@@ -718,6 +731,105 @@ function edupro_metabox_admin_styles() {
             color: #d97706;
             flex-shrink: 0;
             margin-top: 1px;
+        }
+
+        /* ---- Course Page Extras: Key Facts Grid, Gallery & FAQs ---- */
+        .edupro-facts-2col {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px 16px;
+            margin-bottom: 6px;
+        }
+        @media (max-width: 782px) {
+            .edupro-facts-2col { grid-template-columns: 1fr; }
+        }
+        .edupro-gallery-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 12px 0 6px;
+            padding: 0;
+            list-style: none;
+        }
+        .edupro-gallery-thumb {
+            position: relative;
+            width: 108px;
+            height: 82px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1.5px solid #e5e7eb;
+            background: #f3f4f6;
+            cursor: grab;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+        .edupro-gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .edupro-gallery-thumb-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(17, 24, 39, 0.78);
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            transition: background 0.15s;
+        }
+        .edupro-gallery-thumb-remove:hover { background: #e31b23; }
+        .edupro-gallery-thumb-remove .dashicons {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+            line-height: 14px;
+        }
+        .edupro-gallery-empty {
+            padding: 14px;
+            border: 1.5px dashed #d1d5db;
+            border-radius: 8px;
+            background: #f9fafb;
+            font-size: 12.5px;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+        .edupro-faq-list {
+            list-style: none;
+            margin: 0 0 12px;
+            padding: 0;
+        }
+        .edupro-faq-row {
+            border: 1.5px solid #e5e7eb;
+            border-left: 3px solid #e31b23;
+            border-radius: 8px;
+            background: #fafafa;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .edupro-faq-row-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .edupro-faq-row-head .edupro-faq-q { flex: 1; font-weight: 600; }
+        .edupro-faq-row-body { padding-left: 26px; }
+        .edupro-faq-row-body textarea { min-height: 68px; }
+        .edupro-faq-placeholder {
+            border: 2px dashed #fca5a5;
+            background: #fef2f2;
+            border-radius: 8px;
+            height: 96px;
+            margin-bottom: 10px;
         }
     </style>
     <?php
@@ -2028,6 +2140,435 @@ function edupro_render_seo_metabox( $post ) {
 }
 
 /* =========================================================================
+   7b. META BOX: COURSE PAGE EXTRAS, GALLERY & FAQS (edupro_course_page_extras)
+   ========================================================================= */
+
+function edupro_render_course_page_extras_metabox( $post ) {
+    wp_nonce_field( 'edupro_save_course_extras', 'edupro_course_extras_nonce' );
+
+    $awarding_body       = get_post_meta( $post->ID, '_edupro_awarding_body', true );
+    $study_method        = get_post_meta( $post->ID, '_edupro_study_method', true );
+    $assessment_method   = get_post_meta( $post->ID, '_edupro_assessment_method', true );
+    $tutor_support       = get_post_meta( $post->ID, '_edupro_tutor_support', true );
+    $gallery_csv         = get_post_meta( $post->ID, '_edupro_course_gallery', true );
+    $testimonial_video   = get_post_meta( $post->ID, '_edupro_testimonial_video', true );
+    $testimonial_caption = get_post_meta( $post->ID, '_edupro_testimonial_caption', true );
+    $faqs_raw            = get_post_meta( $post->ID, '_edupro_course_faqs', true );
+
+    // Parse gallery attachment IDs
+    $gallery_ids = array();
+    if ( ! empty( $gallery_csv ) ) {
+        $parts = is_array( $gallery_csv ) ? $gallery_csv : explode( ',', (string) $gallery_csv );
+        $gallery_ids = array_values( array_unique( array_filter( array_map( 'absint', $parts ) ) ) );
+    }
+    $gallery_csv_clean = implode( ',', $gallery_ids );
+
+    // Parse FAQs JSON
+    $faqs = array();
+    if ( ! empty( $faqs_raw ) ) {
+        $decoded_faqs = is_array( $faqs_raw ) ? $faqs_raw : json_decode( (string) $faqs_raw, true );
+        if ( is_array( $decoded_faqs ) ) {
+            foreach ( $decoded_faqs as $item ) {
+                if ( is_array( $item ) && ( isset( $item['q'] ) || isset( $item['a'] ) ) ) {
+                    $faqs[] = array(
+                        'q' => isset( $item['q'] ) ? (string) $item['q'] : '',
+                        'a' => isset( $item['a'] ) ? (string) $item['a'] : '',
+                    );
+                }
+            }
+        }
+    }
+    ?>
+    <div class="edupro-mb">
+
+        <!-- 1. Key Course Facts (2-col grid) -->
+        <div class="edupro-section-heading">
+            <span><?php esc_html_e( 'Key Course Facts & Accreditation', 'edupro' ); ?></span>
+        </div>
+
+        <div class="edupro-facts-2col">
+            <div>
+                <label class="edupro-mb-label" for="_edupro_awarding_body">
+                    <span><?php esc_html_e( 'Awarding Body / Accreditation', 'edupro' ); ?></span>
+                </label>
+                <input type="text" id="_edupro_awarding_body" name="_edupro_awarding_body"
+                       value="<?php echo esc_attr( $awarding_body ); ?>"
+                       placeholder="<?php esc_attr_e( 'e.g. CPD Accredited & QLS Endorsed', 'edupro' ); ?>">
+                <p class="edupro-hint"><?php esc_html_e( 'Leave blank to use default Awarding Body from Website Settings.', 'edupro' ); ?></p>
+            </div>
+
+            <div>
+                <label class="edupro-mb-label" for="_edupro_study_method">
+                    <span><?php esc_html_e( 'Study Method', 'edupro' ); ?></span>
+                </label>
+                <input type="text" id="_edupro_study_method" name="_edupro_study_method"
+                       value="<?php echo esc_attr( $study_method ); ?>"
+                       placeholder="<?php esc_attr_e( 'e.g. 100% Online / Self-Paced', 'edupro' ); ?>">
+                <p class="edupro-hint"><?php esc_html_e( 'How students attend or study this course.', 'edupro' ); ?></p>
+            </div>
+
+            <div>
+                <label class="edupro-mb-label" for="_edupro_assessment_method">
+                    <span><?php esc_html_e( 'Assessment Method', 'edupro' ); ?></span>
+                </label>
+                <input type="text" id="_edupro_assessment_method" name="_edupro_assessment_method"
+                       value="<?php echo esc_attr( $assessment_method ); ?>"
+                       placeholder="<?php esc_attr_e( 'e.g. Online MCQ & Practical', 'edupro' ); ?>">
+                <p class="edupro-hint"><?php esc_html_e( 'Exam, assignment, or quiz assessment format.', 'edupro' ); ?></p>
+            </div>
+
+            <div>
+                <label class="edupro-mb-label" for="_edupro_tutor_support">
+                    <span><?php esc_html_e( 'Tutor Support', 'edupro' ); ?></span>
+                </label>
+                <input type="text" id="_edupro_tutor_support" name="_edupro_tutor_support"
+                       value="<?php echo esc_attr( $tutor_support ); ?>"
+                       placeholder="<?php esc_attr_e( 'e.g. 24/7 Dedicated Tutor Support', 'edupro' ); ?>">
+                <p class="edupro-hint"><?php esc_html_e( 'Support availability shown in the Course Key Facts grid.', 'edupro' ); ?></p>
+            </div>
+        </div>
+
+        <hr class="edupro-divider">
+
+        <!-- 2. Course Gallery Images -->
+        <div class="edupro-section-heading">
+            <span><?php esc_html_e( 'Course Gallery Images', 'edupro' ); ?></span>
+            <span id="edupro-gallery-count-badge" class="edupro-badge">
+                <?php echo (int) count( $gallery_ids ); ?> <?php esc_html_e( 'Images', 'edupro' ); ?>
+            </span>
+        </div>
+
+        <input type="hidden" id="_edupro_course_gallery" name="_edupro_course_gallery" value="<?php echo esc_attr( $gallery_csv_clean ); ?>">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="edupro-btn edupro-btn-primary" id="edupro-gallery-add-btn">
+                <span class="dashicons dashicons-images-alt2"></span>
+                <?php esc_html_e( 'Add Gallery Images', 'edupro' ); ?>
+            </button>
+            <button type="button" class="edupro-btn edupro-btn-danger" id="edupro-gallery-clear-btn" style="<?php echo ! empty( $gallery_ids ) ? '' : 'display:none;'; ?>">
+                <span class="dashicons dashicons-trash"></span>
+                <?php esc_html_e( 'Clear Gallery', 'edupro' ); ?>
+            </button>
+        </div>
+        <p class="edupro-hint"><?php esc_html_e( 'Select multiple images from the Media Library (e.g. classroom, certificate sample, projects). Drag thumbnails to reorder.', 'edupro' ); ?></p>
+
+        <ul class="edupro-gallery-grid" id="edupro-gallery-list" style="<?php echo ! empty( $gallery_ids ) ? '' : 'display:none;'; ?>">
+            <?php foreach ( $gallery_ids as $att_id ) :
+                $thumb_url = wp_get_attachment_image_url( $att_id, 'thumbnail' );
+                if ( ! $thumb_url ) {
+                    $thumb_url = wp_get_attachment_image_url( $att_id, 'medium' );
+                }
+                if ( ! $thumb_url ) {
+                    continue;
+                }
+            ?>
+            <li class="edupro-gallery-thumb" data-id="<?php echo (int) $att_id; ?>">
+                <img src="<?php echo esc_url( $thumb_url ); ?>" alt="">
+                <button type="button" class="edupro-gallery-thumb-remove" title="<?php esc_attr_e( 'Remove image', 'edupro' ); ?>">
+                    <span class="dashicons dashicons-no-alt"></span>
+                </button>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+        <div class="edupro-gallery-empty" id="edupro-gallery-empty" style="<?php echo empty( $gallery_ids ) ? '' : 'display:none;'; ?>">
+            <?php esc_html_e( 'No gallery images selected yet. Click "Add Gallery Images" to pick course highlights or certificate previews.', 'edupro' ); ?>
+        </div>
+
+        <hr class="edupro-divider">
+
+        <!-- 3. Student Testimonial Video -->
+        <div class="edupro-section-heading">
+            <span><?php esc_html_e( 'Student Testimonial Video (Sidebar Highlight)', 'edupro' ); ?></span>
+        </div>
+
+        <div class="edupro-mb-row">
+            <div class="edupro-mb-col" style="flex:2 1 320px;">
+                <label class="edupro-mb-label" for="_edupro_testimonial_video">
+                    <span><?php esc_html_e( 'Testimonial Video URL', 'edupro' ); ?></span>
+                </label>
+                <div class="edupro-url-with-upload">
+                    <input type="url" id="_edupro_testimonial_video" name="_edupro_testimonial_video"
+                           value="<?php echo esc_attr( $testimonial_video ); ?>"
+                           placeholder="https://www.youtube.com/watch?v=... or MP4 URL">
+                    <button type="button" class="edupro-btn edupro-btn-ghost" id="edupro-testimonial-video-upload">
+                        <span class="dashicons dashicons-video-alt3"></span>
+                        <?php esc_html_e( 'Media Library', 'edupro' ); ?>
+                    </button>
+                </div>
+                <p class="edupro-hint"><?php esc_html_e( 'Optional graduate review video displayed on the Single Course page sidebar.', 'edupro' ); ?></p>
+            </div>
+
+            <div class="edupro-mb-col" style="flex:1 1 220px;">
+                <label class="edupro-mb-label" for="_edupro_testimonial_caption">
+                    <span><?php esc_html_e( 'Testimonial Caption / Label', 'edupro' ); ?></span>
+                </label>
+                <input type="text" id="_edupro_testimonial_caption" name="_edupro_testimonial_caption"
+                       value="<?php echo esc_attr( $testimonial_caption ); ?>"
+                       placeholder="<?php esc_attr_e( 'e.g. Watch Sarah\'s Graduate Story', 'edupro' ); ?>">
+                <p class="edupro-hint"><?php esc_html_e( 'Short label displayed beneath the testimonial video.', 'edupro' ); ?></p>
+            </div>
+        </div>
+
+        <div id="edupro-testimonial-video-preview" style="<?php echo ! empty( $testimonial_video ) ? '' : 'display:none;'; ?>margin-bottom:6px;">
+            <?php if ( ! empty( $testimonial_video ) ) : ?>
+                <?php echo edupro_build_video_embed( $testimonial_video ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
+        </div>
+
+        <hr class="edupro-divider">
+
+        <!-- 4. Custom Course FAQs Repeater -->
+        <div class="edupro-section-heading">
+            <span><?php esc_html_e( 'Custom Course FAQs', 'edupro' ); ?></span>
+            <span id="edupro-faq-count-badge" class="edupro-badge">
+                <?php echo (int) count( $faqs ); ?> <?php esc_html_e( 'FAQs', 'edupro' ); ?>
+            </span>
+        </div>
+
+        <ul class="edupro-faq-list" id="edupro-faq-list">
+            <?php foreach ( $faqs as $faq ) : ?>
+            <li class="edupro-faq-row">
+                <div class="edupro-faq-row-head">
+                    <span class="edupro-drag-handle edupro-faq-handle" title="<?php esc_attr_e( 'Drag to reorder FAQ', 'edupro' ); ?>">
+                        <span class="dashicons dashicons-menu"></span>
+                    </span>
+                    <input type="text" class="edupro-faq-q"
+                           value="<?php echo esc_attr( $faq['q'] ); ?>"
+                           placeholder="<?php esc_attr_e( 'Question (e.g. Is this course accredited in the UK & India?)', 'edupro' ); ?>">
+                    <button type="button" class="edupro-icon-btn edupro-faq-remove" title="<?php esc_attr_e( 'Remove FAQ', 'edupro' ); ?>">
+                        <span class="dashicons dashicons-trash"></span>
+                    </button>
+                </div>
+                <div class="edupro-faq-row-body">
+                    <textarea class="edupro-faq-a" rows="2"
+                              placeholder="<?php esc_attr_e( 'Answer…', 'edupro' ); ?>"><?php echo esc_textarea( $faq['a'] ); ?></textarea>
+                </div>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <button type="button" class="edupro-btn edupro-btn-outline edupro-btn-sm" id="edupro-add-faq-btn">
+            <span class="dashicons dashicons-plus-alt2"></span>
+            <?php esc_html_e( 'Add FAQ', 'edupro' ); ?>
+        </button>
+        <p class="edupro-hint"><?php esc_html_e( 'Custom FAQs replace or extend the default FAQ tab on this course page. Drag handles to reorder.', 'edupro' ); ?></p>
+
+        <input type="hidden" id="_edupro_course_faqs" name="_edupro_course_faqs" value="<?php echo esc_attr( wp_json_encode( $faqs ) ); ?>">
+
+    </div>
+
+    <script>
+    (function($){
+        /* ---- 1. Course Gallery Multi-Select Media Picker ---- */
+        var $galleryInput = $('#_edupro_course_gallery');
+        var $galleryList  = $('#edupro-gallery-list');
+        var $galleryEmpty = $('#edupro-gallery-empty');
+        var $galleryClear = $('#edupro-gallery-clear-btn');
+        var $galleryBadge = $('#edupro-gallery-count-badge');
+        var galleryFrame;
+
+        function syncGalleryIds(){
+            var ids = [];
+            $galleryList.children('.edupro-gallery-thumb').each(function(){
+                var id = parseInt($(this).attr('data-id'), 10);
+                if(id > 0 && ids.indexOf(id) === -1){
+                    ids.push(id);
+                }
+            });
+            $galleryInput.val(ids.join(','));
+            $galleryBadge.text(ids.length + ' <?php echo esc_js( __( 'Images', 'edupro' ) ); ?>');
+            if(ids.length > 0){
+                $galleryList.show();
+                $galleryEmpty.hide();
+                $galleryClear.show();
+            } else {
+                $galleryList.hide();
+                $galleryEmpty.show();
+                $galleryClear.hide();
+            }
+        }
+
+        function appendGalleryThumb(id, url){
+            if(!id || !url) return;
+            if($galleryList.children('.edupro-gallery-thumb[data-id="' + id + '"]').length){
+                return;
+            }
+            var safeUrl = String(url).replace(/"/g, '&quot;');
+            var $li = $(
+                '<li class="edupro-gallery-thumb" data-id="' + id + '">'
+              +   '<img src="' + safeUrl + '" alt="">'
+              +   '<button type="button" class="edupro-gallery-thumb-remove" title="<?php echo esc_js( __( 'Remove image', 'edupro' ) ); ?>">'
+              +     '<span class="dashicons dashicons-no-alt"></span>'
+              +   '</button>'
+              + '</li>'
+            );
+            $galleryList.append($li);
+        }
+
+        $('#edupro-gallery-add-btn').on('click', function(e){
+            e.preventDefault();
+            if(typeof wp === 'undefined' || !wp.media) return;
+            if(galleryFrame){
+                galleryFrame.open();
+                return;
+            }
+            galleryFrame = wp.media({
+                title:    '<?php echo esc_js( __( 'Select Course Gallery Images', 'edupro' ) ); ?>',
+                button:   { text: '<?php echo esc_js( __( 'Add to Gallery', 'edupro' ) ); ?>' },
+                multiple: 'add',
+                library:  { type: 'image' }
+            });
+            galleryFrame.on('select', function(){
+                var selection = galleryFrame.state().get('selection');
+                selection.each(function(model){
+                    var att = model.toJSON();
+                    var thumb = (att.sizes && att.sizes.thumbnail)
+                        ? att.sizes.thumbnail.url
+                        : ((att.sizes && att.sizes.medium) ? att.sizes.medium.url : att.url);
+                    appendGalleryThumb(att.id, thumb);
+                });
+                syncGalleryIds();
+            });
+            galleryFrame.open();
+        });
+
+        $galleryList.on('click', '.edupro-gallery-thumb-remove', function(){
+            $(this).closest('.edupro-gallery-thumb').remove();
+            syncGalleryIds();
+        });
+
+        $galleryClear.on('click', function(){
+            $galleryList.empty();
+            syncGalleryIds();
+        });
+
+        if($.fn && $.fn.sortable){
+            $galleryList.sortable({
+                items: '> .edupro-gallery-thumb',
+                tolerance: 'pointer',
+                stop: syncGalleryIds
+            });
+        }
+
+        /* ---- 2. Testimonial Video Media Picker & Live Preview ---- */
+        var $testVideoInput   = $('#_edupro_testimonial_video');
+        var $testVideoPreview = $('#edupro-testimonial-video-preview');
+        var testVideoFrame;
+        var testVideoTimer;
+
+        function renderTestimonialVideo(url){
+            var html = window.eduproBuildVideoEmbed ? window.eduproBuildVideoEmbed(url) : '';
+            $testVideoPreview.html(html);
+            $testVideoPreview.toggle(!!html);
+        }
+
+        $testVideoInput.on('input', function(){
+            clearTimeout(testVideoTimer);
+            var val = $(this).val().trim();
+            testVideoTimer = setTimeout(function(){
+                renderTestimonialVideo(val);
+            }, 450);
+        });
+
+        $('#edupro-testimonial-video-upload').on('click', function(e){
+            e.preventDefault();
+            if(typeof wp === 'undefined' || !wp.media) return;
+            if(testVideoFrame){ testVideoFrame.open(); return; }
+            testVideoFrame = wp.media({
+                title:    '<?php echo esc_js( __( 'Select Testimonial Video', 'edupro' ) ); ?>',
+                button:   { text: '<?php echo esc_js( __( 'Use Video', 'edupro' ) ); ?>' },
+                multiple: false,
+                library:  { type: 'video' }
+            });
+            testVideoFrame.on('select', function(){
+                var att = testVideoFrame.state().get('selection').first().toJSON();
+                $testVideoInput.val(att.url);
+                renderTestimonialVideo(att.url);
+            });
+            testVideoFrame.open();
+        });
+
+        /* ---- 3. Custom Course FAQs Repeater ---- */
+        var $faqList  = $('#edupro-faq-list');
+        var $faqInput = $('#_edupro_course_faqs');
+        var $faqBadge = $('#edupro-faq-count-badge');
+
+        function syncFaqsJSON(){
+            var items = [];
+            $faqList.children('.edupro-faq-row').each(function(){
+                var q = $(this).find('.edupro-faq-q').val().trim();
+                var a = $(this).find('.edupro-faq-a').val().trim();
+                if(q || a){
+                    items.push({ q: q, a: a });
+                }
+            });
+            $faqInput.val(JSON.stringify(items));
+            $faqBadge.text(items.length + ' <?php echo esc_js( __( 'FAQs', 'edupro' ) ); ?>');
+        }
+
+        function buildFaqRow(){
+            return $(
+                '<li class="edupro-faq-row">'
+              +   '<div class="edupro-faq-row-head">'
+              +     '<span class="edupro-drag-handle edupro-faq-handle" title="<?php echo esc_js( __( 'Drag to reorder FAQ', 'edupro' ) ); ?>"><span class="dashicons dashicons-menu"></span></span>'
+              +     '<input type="text" class="edupro-faq-q" placeholder="<?php echo esc_js( __( 'Question (e.g. Is this course accredited in the UK & India?)', 'edupro' ) ); ?>">'
+              +     '<button type="button" class="edupro-icon-btn edupro-faq-remove" title="<?php echo esc_js( __( 'Remove FAQ', 'edupro' ) ); ?>"><span class="dashicons dashicons-trash"></span></button>'
+              +   '</div>'
+              +   '<div class="edupro-faq-row-body">'
+              +     '<textarea class="edupro-faq-a" rows="2" placeholder="<?php echo esc_js( __( 'Answer…', 'edupro' ) ); ?>"></textarea>'
+              +   '</div>'
+              + '</li>'
+            );
+        }
+
+        $('#edupro-add-faq-btn').on('click', function(){
+            var $row = buildFaqRow().appendTo($faqList);
+            $row.find('.edupro-faq-q').trigger('focus');
+            syncFaqsJSON();
+        });
+
+        $faqList.on('click', '.edupro-faq-remove', function(){
+            $(this).closest('.edupro-faq-row').remove();
+            syncFaqsJSON();
+        });
+
+        $faqList.on('input change', '.edupro-faq-q, .edupro-faq-a', syncFaqsJSON);
+
+        if($.fn && $.fn.sortable){
+            $faqList.sortable({
+                handle: '.edupro-faq-handle',
+                axis: 'y',
+                placeholder: 'edupro-faq-placeholder',
+                stop: syncFaqsJSON
+            });
+        }
+
+        // Sync before Classic Editor & Gutenberg saves
+        $('#post').on('submit', function(){
+            syncGalleryIds();
+            syncFaqsJSON();
+        });
+        if(typeof wp !== 'undefined' && wp.data && wp.data.subscribe){
+            var extrasWasSaving = false;
+            wp.data.subscribe(function(){
+                var editorStore = wp.data.select('core/editor');
+                if(!editorStore) return;
+                var isSaving = editorStore.isSavingPost();
+                if(isSaving && !extrasWasSaving){
+                    syncGalleryIds();
+                    syncFaqsJSON();
+                }
+                extrasWasSaving = isSaving;
+            });
+        }
+
+        syncGalleryIds();
+        syncFaqsJSON();
+    })(jQuery);
+    </script>
+    <?php
+}
+
+/* =========================================================================
    8. META BOX: LESSON DETAILS (lms_lesson)
    ========================================================================= */
 
@@ -2494,6 +3035,65 @@ function edupro_save_seo_metabox( $post_id ) {
     update_post_meta( $post_id, '_edupro_meta_title', $meta_title );
     update_post_meta( $post_id, '_edupro_meta_description', $meta_desc );
     update_post_meta( $post_id, '_edupro_og_image', $og_image );
+}
+
+/* ---- 10d-2. Save Course Page Extras, Gallery & FAQs ---- */
+add_action( 'save_post_lms_course', 'edupro_save_course_page_extras_metabox', 10, 1 );
+function edupro_save_course_page_extras_metabox( $post_id ) {
+    if ( ! edupro_can_save_metabox( $post_id, 'edupro_course_extras_nonce', 'edupro_save_course_extras' ) ) {
+        return;
+    }
+
+    // Key Course Facts
+    $text_keys = array(
+        '_edupro_awarding_body',
+        '_edupro_study_method',
+        '_edupro_assessment_method',
+        '_edupro_tutor_support',
+        '_edupro_testimonial_caption',
+    );
+    foreach ( $text_keys as $key ) {
+        $val = isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
+        update_post_meta( $post_id, $key, $val );
+    }
+
+    // Student Testimonial Video URL
+    $testimonial_video = isset( $_POST['_edupro_testimonial_video'] )
+        ? esc_url_raw( wp_unslash( $_POST['_edupro_testimonial_video'] ) )
+        : '';
+    update_post_meta( $post_id, '_edupro_testimonial_video', $testimonial_video );
+
+    // Course Gallery Images (sanitized positive integer CSV)
+    $gallery_csv = '';
+    if ( isset( $_POST['_edupro_course_gallery'] ) ) {
+        $raw_gallery = (string) wp_unslash( $_POST['_edupro_course_gallery'] );
+        $ids         = array_values( array_unique( array_filter( array_map( 'absint', explode( ',', $raw_gallery ) ) ) ) );
+        $gallery_csv = implode( ',', $ids );
+    }
+    update_post_meta( $post_id, '_edupro_course_gallery', $gallery_csv );
+
+    // Custom Course FAQs (JSON array of {q, a})
+    $clean_faqs = array();
+    if ( isset( $_POST['_edupro_course_faqs'] ) ) {
+        $raw_faqs = (string) wp_unslash( $_POST['_edupro_course_faqs'] );
+        $decoded  = json_decode( $raw_faqs, true );
+        if ( is_array( $decoded ) ) {
+            foreach ( $decoded as $faq ) {
+                if ( ! is_array( $faq ) ) {
+                    continue;
+                }
+                $q = sanitize_text_field( isset( $faq['q'] ) ? (string) $faq['q'] : '' );
+                $a = wp_kses_post( isset( $faq['a'] ) ? (string) $faq['a'] : '' );
+                if ( '' !== trim( $q ) || '' !== trim( wp_strip_all_tags( $a ) ) ) {
+                    $clean_faqs[] = array(
+                        'q' => $q,
+                        'a' => $a,
+                    );
+                }
+            }
+        }
+    }
+    update_post_meta( $post_id, '_edupro_course_faqs', wp_json_encode( $clean_faqs ) );
 }
 
 /* ---- 10e. Save Lesson Details (lms_lesson) ---- */

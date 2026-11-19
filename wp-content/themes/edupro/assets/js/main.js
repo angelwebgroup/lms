@@ -1204,33 +1204,48 @@
     }
 
     /* =========================================================================
-     * 11. GOOGLE REVIEWS CAROUSEL & REVIEW EXPAND
+     * 11. GOOGLE REVIEWS CAROUSEL, TRUSTED BRANDS CAROUSEL & VIDEO LIGHTBOX
      * ========================================================================= */
 
     function initReviewCarousel() {
-        const carousels = document.querySelectorAll('.edupro-google-reviews--carousel, .reviews-carousel, .edupro-reviews-carousel, [data-review-carousel]');
+        const carousels = document.querySelectorAll('.edupro-reviews-split, .edupro-google-reviews--carousel, .reviews-carousel, .edupro-reviews-carousel, [data-review-carousel]');
         if (!carousels.length) return;
 
         carousels.forEach((carousel) => {
+            if (carousel.dataset.reviewCarouselBound === '1') return;
+            // Avoid double-binding if .edupro-reviews-split sits inside .edupro-google-reviews--carousel
+            if (carousel.classList.contains('edupro-reviews-split') && carousel.closest('.edupro-google-reviews--carousel')) {
+                return;
+            }
             const track = carousel.querySelector('.edupro-reviews-track[data-edupro-reviews-slider], .edupro-reviews-track, .reviews-carousel__track, .reviews-track, .carousel-track');
             if (!track) return;
 
             const slides = Array.from(track.children);
             if (slides.length <= 1) return;
 
-            const prevBtn = carousel.querySelector('.carousel-prev, .reviews-prev, [data-carousel-prev]');
-            const nextBtn = carousel.querySelector('.carousel-next, .reviews-next, [data-carousel-next]');
-            const dotsWrap = carousel.querySelector('.carousel-dots, .reviews-dots');
-            const autoplayMs = parseInt(carousel.dataset.autoplay, 10) || 4500;
-            const usesNativeScroll = ['auto', 'scroll'].includes(window.getComputedStyle(track).overflowX);
+            carousel.dataset.reviewCarouselBound = '1';
+
+            const prevBtn = carousel.querySelector('.edupro-reviews-nav-btn--prev, .carousel-prev, .reviews-prev, [data-carousel-prev]');
+            const nextBtn = carousel.querySelector('.edupro-reviews-nav-btn--next, .carousel-next, .reviews-next, [data-carousel-next]');
+            const dotsWrap = carousel.querySelector('.edupro-reviews-dots, .carousel-dots, .reviews-dots');
+            const autoplayMs = parseInt(carousel.dataset.autoplay, 10) || 4800;
+            const isSplitLayout = carousel.classList.contains('edupro-reviews-split') || Boolean(carousel.querySelector('.edupro-reviews-split'));
 
             let currentIndex = 0;
             let timer = null;
             let touchStartX = 0;
 
+            function usesNativeScroll() {
+                return ['auto', 'scroll'].includes(window.getComputedStyle(track).overflowX);
+            }
+
             function getVisibleCount() {
                 const w = window.innerWidth;
-                if (w < 640) return 1;
+                if (w <= 640) return 1;
+                if (isSplitLayout) {
+                    if (w <= 1200) return 2;
+                    return parseInt(carousel.dataset.visible, 10) || 3;
+                }
                 if (w < 1024) return 2;
                 return parseInt(carousel.dataset.visible, 10) || 3;
             }
@@ -1239,15 +1254,25 @@
                 return Math.max(0, slides.length - getVisibleCount());
             }
 
+            function updateActiveDot(idx) {
+                if (!dotsWrap) return;
+                dotsWrap.querySelectorAll('.carousel-dot').forEach((d, i) => {
+                    d.classList.toggle('is-active', i === idx);
+                    d.setAttribute('aria-current', i === idx ? 'true' : 'false');
+                });
+            }
+
             function buildDots() {
                 if (!dotsWrap) return;
                 const totalSteps = getMaxIndex() + 1;
                 dotsWrap.innerHTML = '';
+                if (totalSteps <= 1) return;
                 for (let i = 0; i < totalSteps; i++) {
                     const dot = document.createElement('button');
                     dot.type = 'button';
                     dot.className = `carousel-dot${i === currentIndex ? ' is-active' : ''}`;
                     dot.setAttribute('aria-label', `Go to review slide ${i + 1}`);
+                    dot.setAttribute('aria-current', i === currentIndex ? 'true' : 'false');
                     dot.addEventListener('click', () => {
                         goTo(i);
                         restartAutoplay();
@@ -1269,22 +1294,18 @@
                 const gap = parseFloat(window.getComputedStyle(track).gap) || 24;
                 const slideWidth = slides[0].getBoundingClientRect().width;
                 const shift = currentIndex * (slideWidth + gap);
-                if (usesNativeScroll) {
+                if (usesNativeScroll()) {
                     track.scrollTo({ left: shift, behavior: 'smooth' });
                 } else {
                     track.style.transform = `translate3d(-${shift}px, 0, 0)`;
                 }
 
-                if (dotsWrap) {
-                    dotsWrap.querySelectorAll('.carousel-dot').forEach((d, idx) => {
-                        d.classList.toggle('is-active', idx === currentIndex);
-                    });
-                }
+                updateActiveDot(currentIndex);
             }
 
             function startAutoplay() {
                 stopAutoplay();
-                if (autoplayMs > 0) {
+                if (autoplayMs > 0 && getMaxIndex() > 0) {
                     timer = setInterval(() => goTo(currentIndex + 1), autoplayMs);
                 }
             }
@@ -1302,18 +1323,36 @@
             }
 
             if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
                     goTo(currentIndex - 1);
                     restartAutoplay();
                 });
             }
 
             if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
                     goTo(currentIndex + 1);
                     restartAutoplay();
                 });
             }
+
+            // Sync pagination dots when user swipes/scrolls natively
+            track.addEventListener(
+                'scroll',
+                debounce(() => {
+                    if (!usesNativeScroll()) return;
+                    const gap = parseFloat(window.getComputedStyle(track).gap) || 24;
+                    const slideWidth = slides[0].getBoundingClientRect().width;
+                    if (!slideWidth) return;
+                    const approxIdx = Math.round(track.scrollLeft / (slideWidth + gap));
+                    const clamped = Math.max(0, Math.min(getMaxIndex(), approxIdx));
+                    currentIndex = clamped;
+                    updateActiveDot(clamped);
+                }, 90),
+                { passive: true }
+            );
 
             // Pause on hover/focus
             carousel.addEventListener('mouseenter', stopAutoplay);
@@ -1329,7 +1368,7 @@
 
             track.addEventListener('touchend', (e) => {
                 const diff = touchStartX - e.changedTouches[0].clientX;
-                if (Math.abs(diff) > 45) {
+                if (Math.abs(diff) > 45 && !usesNativeScroll()) {
                     goTo(diff > 0 ? currentIndex + 1 : currentIndex - 1);
                 }
                 startAutoplay();
@@ -1345,7 +1384,7 @@
             startAutoplay();
         });
 
-        // Truncated review "Read more" expand toggle
+        // Truncated review "Read more" expand toggle (non-inline cards)
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.review-expand-btn, .edupro-review-toggle');
             if (!btn) return;
@@ -1356,6 +1395,231 @@
             btn.textContent = expanded ? 'Show less' : 'Read more';
         });
     }
+
+    function initBrandsCarousel() {
+        const carousels = document.querySelectorAll('.edupro-brands-carousel');
+        if (!carousels.length) return;
+
+        carousels.forEach((carousel) => {
+            if (carousel.dataset.brandsBound === '1') return;
+            carousel.dataset.brandsBound = '1';
+
+            const track = carousel.querySelector('.edupro-brands-track');
+            if (!track) return;
+
+            const viewport = carousel.querySelector('.edupro-brands-viewport') || track.parentElement;
+            const prevBtn = carousel.querySelector('.edupro-brands-nav--prev');
+            const nextBtn = carousel.querySelector('.edupro-brands-nav--next');
+
+            let resumeTimer = null;
+            let nudgeX = 0;
+            let isDragging = false;
+            let dragStartX = 0;
+            let dragStartScroll = 0;
+
+            function setPaused(paused) {
+                track.classList.toggle('is-paused', paused);
+                track.style.animationPlayState = paused ? 'paused' : '';
+            }
+
+            function scheduleResume(delayMs = 2400) {
+                clearTimeout(resumeTimer);
+                resumeTimer = setTimeout(() => {
+                    if (!carousel.matches(':hover') && !isDragging) {
+                        setPaused(false);
+                    }
+                }, delayMs);
+            }
+
+            function nudge(direction) {
+                setPaused(true);
+                const firstCard = track.querySelector('.edupro-brand-card');
+                const step = firstCard ? Math.max(220, firstCard.getBoundingClientRect().width + 20) : 260;
+
+                const canScrollViewport = viewport && viewport !== carousel && viewport.scrollWidth > viewport.clientWidth + 4 && ['auto', 'scroll'].includes(window.getComputedStyle(viewport).overflowX);
+                if (canScrollViewport) {
+                    viewport.scrollBy({ left: direction * step, behavior: 'smooth' });
+                } else {
+                    const maxShift = Math.max(280, Math.floor(track.scrollWidth / 2));
+                    nudgeX -= direction * step;
+                    if (nudgeX < -maxShift) nudgeX = 0;
+                    if (nudgeX > 0) nudgeX = -Math.min(maxShift, step);
+                    track.style.setProperty('--brands-nudge', `${nudgeX}px`);
+                    // Apply gentle visual shift on viewport/track margin so CSS marquee stays smooth
+                    track.style.transition = 'margin-left 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+                    track.style.marginLeft = `${nudgeX}px`;
+                }
+                scheduleResume(2600);
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    nudge(-1);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    nudge(1);
+                });
+            }
+
+            carousel.addEventListener('mouseenter', () => {
+                clearTimeout(resumeTimer);
+                setPaused(true);
+            });
+
+            carousel.addEventListener('mouseleave', () => {
+                if (!isDragging) setPaused(false);
+            });
+
+            carousel.addEventListener('focusin', () => {
+                clearTimeout(resumeTimer);
+                setPaused(true);
+            });
+
+            carousel.addEventListener('focusout', (e) => {
+                if (!carousel.contains(e.relatedTarget)) {
+                    setPaused(false);
+                }
+            });
+
+            // Pointer/touch drag pause & gentle nudge
+            track.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('button, a')) return;
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartScroll = viewport ? viewport.scrollLeft : 0;
+                clearTimeout(resumeTimer);
+                setPaused(true);
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!isDragging || !viewport) return;
+                const dx = e.clientX - dragStartX;
+                if (['auto', 'scroll'].includes(window.getComputedStyle(viewport).overflowX)) {
+                    viewport.scrollLeft = dragStartScroll - dx;
+                }
+            });
+
+            window.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const dx = e.clientX - dragStartX;
+                if (Math.abs(dx) > 40 && viewport && !['auto', 'scroll'].includes(window.getComputedStyle(viewport).overflowX)) {
+                    nudge(dx < 0 ? 1 : -1);
+                } else {
+                    scheduleResume(1200);
+                }
+            });
+        });
+    }
+
+    const VideoLightbox = (() => {
+        let lightboxEl = null;
+        let lastTrigger = null;
+
+        function ensureLightbox() {
+            lightboxEl = document.getElementById('edupro-video-lightbox');
+            if (!lightboxEl) {
+                lightboxEl = document.createElement('div');
+                lightboxEl.id = 'edupro-video-lightbox';
+                lightboxEl.className = 'edupro-video-lightbox';
+                lightboxEl.setAttribute('role', 'dialog');
+                lightboxEl.setAttribute('aria-modal', 'true');
+                lightboxEl.setAttribute('aria-hidden', 'true');
+                lightboxEl.setAttribute('aria-label', 'Video Player');
+                lightboxEl.innerHTML = `
+                    <div class="edupro-video-lightbox__backdrop" data-lightbox-close></div>
+                    <div class="edupro-video-lightbox__dialog" role="document">
+                        <div class="edupro-video-lightbox__header">
+                            <h3 class="edupro-video-lightbox__caption"></h3>
+                            <button type="button" class="edupro-video-lightbox__close" data-lightbox-close aria-label="Close video">&times;</button>
+                        </div>
+                        <div class="edupro-video-lightbox__stage"></div>
+                    </div>
+                `;
+                document.body.appendChild(lightboxEl);
+            }
+            return lightboxEl;
+        }
+
+        function open(videoUrl, caption = '', triggerEl = null) {
+            if (!videoUrl) return;
+            const box = ensureLightbox();
+            const stage = box.querySelector('.edupro-video-lightbox__stage');
+            const captionEl = box.querySelector('.edupro-video-lightbox__caption');
+
+            lastTrigger = triggerEl || document.activeElement;
+            if (captionEl) {
+                captionEl.textContent = caption || 'Student Story';
+            }
+            if (stage) {
+                stage.innerHTML = buildVideoEmbedHtml(videoUrl);
+            }
+
+            box.classList.add('is-open', 'active');
+            box.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('edupro-modal-open');
+
+            const closeBtn = box.querySelector('.edupro-video-lightbox__close');
+            if (closeBtn) {
+                setTimeout(() => closeBtn.focus(), 40);
+            }
+        }
+
+        function close() {
+            if (!lightboxEl || !lightboxEl.classList.contains('is-open')) return;
+            const stage = lightboxEl.querySelector('.edupro-video-lightbox__stage');
+            if (stage) {
+                // Stop audio/video immediately
+                stage.querySelectorAll('video').forEach((v) => v.pause());
+                stage.querySelectorAll('iframe').forEach((f) => {
+                    f.src = '';
+                });
+                stage.innerHTML = '';
+            }
+            lightboxEl.classList.remove('is-open', 'active');
+            lightboxEl.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('edupro-modal-open');
+
+            if (lastTrigger && typeof lastTrigger.focus === 'function') {
+                lastTrigger.focus();
+            }
+            lastTrigger = null;
+        }
+
+        function init() {
+            document.addEventListener('click', (e) => {
+                const trigger = e.target.closest('[data-video-modal]');
+                if (trigger) {
+                    const url = (trigger.dataset.videoModal || trigger.dataset.videoUrl || trigger.getAttribute('href') || '').trim();
+                    if (!url || url === '#') return;
+                    e.preventDefault();
+                    const title = trigger.dataset.videoTitle || trigger.dataset.modalTitle || trigger.getAttribute('aria-label') || '';
+                    open(url, title, trigger);
+                    return;
+                }
+
+                if (lightboxEl && lightboxEl.classList.contains('is-open')) {
+                    if (e.target.closest('[data-lightbox-close]') || e.target === lightboxEl) {
+                        e.preventDefault();
+                        close();
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightboxEl && lightboxEl.classList.contains('is-open')) {
+                    close();
+                }
+            });
+        }
+
+        return { init, open, close };
+    })();
 
     /* =========================================================================
      * 12. REAL-TIME FORM VALIDATION
@@ -3576,6 +3840,7 @@
         setButtonLoading,
         toast: Toast,
         modal: Modal,
+        videoLightbox: VideoLightbox,
         cart: Cart,
         validator: Validator,
         markLessonComplete,
@@ -3599,6 +3864,8 @@
         initCourseFilters();
         initLoadMoreCourses();
         initReviewCarousel();
+        initBrandsCarousel();
+        VideoLightbox.init();
         Validator.init();
         initAuthForms();
         initInlineVideos();

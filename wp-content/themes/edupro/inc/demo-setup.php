@@ -1552,6 +1552,13 @@ function edupro_demo_create_courses_and_lessons( $force = false ) {
 		update_post_meta( $course_id, '_edupro_meta_description', wp_trim_words( $course['excerpt'], 24, '…' ) );
 		update_post_meta( $course_id, '_edupro_demo_item', '1' );
 
+		// Single Course Key Facts meta (v1.3.0 — aligned with inc/metaboxes.php).
+		$course_facts = edupro_demo_get_course_key_facts( $course['slug'] );
+		update_post_meta( $course_id, '_edupro_awarding_body', $course_facts['awarding_body'] );
+		update_post_meta( $course_id, '_edupro_study_method', $course_facts['study_method'] );
+		update_post_meta( $course_id, '_edupro_assessment_method', $course_facts['assessment_method'] );
+		update_post_meta( $course_id, '_edupro_tutor_support', $course_facts['tutor_support'] );
+
 		// Seed course-level reviews if empty (powers star ratings & single course Reviews tab).
 		$existing_reviews = get_post_meta( $course_id, 'course_reviews', true );
 		if ( ( empty( $existing_reviews ) || $force ) && ! empty( $course['reviews'] ) ) {
@@ -1714,12 +1721,160 @@ function edupro_demo_seed_currency_defaults() {
 }
 
 /**
- * Seed starter Website Settings (`edupro_site_settings`) ONLY if the option is empty.
- * Admin can edit every field cleanly under WP Admin → Website Settings without touching code.
+ * Return tailored v1.3.0 Single Course Key Facts for each demo course slug.
+ *
+ * @param string $slug Course post_name.
+ * @return array
+ */
+function edupro_demo_get_course_key_facts( $slug ) {
+	$map = array(
+		'level-3-certificate-assessing-vocational-achievement-cava' => array(
+			'awarding_body'     => 'Focus Awards & CPD Accredited',
+			'study_method'      => '100% Online / Self-Paced',
+			'assessment_method' => 'Portfolio & Observation Evidence',
+			'tutor_support'     => 'Dedicated Assessor Tutor Support',
+		),
+		'phlebotomy-training-course-healthcare-professionals' => array(
+			'awarding_body'     => 'CPD Accredited & Clinical Endorsed',
+			'study_method'      => 'Online Theory + Clinical Protocol',
+			'assessment_method' => 'Online MCQ & Practical Checklist',
+			'tutor_support'     => '24/7 Clinical Tutor Support',
+		),
+		'full-stack-web-development-masterclass' => array(
+			'awarding_body'     => 'CPD Accredited & QLS Endorsed',
+			'study_method'      => '100% Online / Project-Based',
+			'assessment_method' => 'Capstone Builds & Code Reviews',
+			'tutor_support'     => '24/7 Mentor & Q&A Support',
+		),
+		'digital-marketing-seo-bootcamp' => array(
+			'awarding_body'     => 'CPD Accredited & QLS Endorsed',
+			'study_method'      => '100% Online / Self-Paced',
+			'assessment_method' => 'Online MCQ & Live Campaign Audit',
+			'tutor_support'     => '24/7 Dedicated Tutor Support',
+		),
+		'health-social-care-level-3-diploma' => array(
+			'awarding_body'     => 'NCFE CACHE & CPD Accredited',
+			'study_method'      => '100% Online / Flexible Study',
+			'assessment_method' => 'Written Assignments & Case Studies',
+			'tutor_support'     => 'Dedicated Healthcare Tutor',
+		),
+		'cyber-security-ethical-hacking' => array(
+			'awarding_body'     => 'CPD Accredited & QLS Endorsed',
+			'study_method'      => '100% Online / Hands-On Labs',
+			'assessment_method' => 'Online MCQ & Security Lab Report',
+			'tutor_support'     => '24/7 Security Instructor Support',
+		),
+		'executive-leadership-management' => array(
+			'awarding_body'     => 'CPD Accredited & QLS Endorsed',
+			'study_method'      => '100% Online / Executive Pace',
+			'assessment_method' => 'Online MCQ & Leadership Case Study',
+			'tutor_support'     => '24/7 Executive Coach Support',
+		),
+		'ui-ux-product-design-complete-course' => array(
+			'awarding_body'     => 'CPD Accredited & QLS Endorsed',
+			'study_method'      => '100% Online / Figma Studio Labs',
+			'assessment_method' => 'Portfolio Case Study & Quizzes',
+			'tutor_support'     => '24/7 Design Mentor Support',
+		),
+	);
+
+	if ( isset( $map[ $slug ] ) ) {
+		return $map[ $slug ];
+	}
+
+	return array(
+		'awarding_body'     => 'CPD Accredited & QLS Endorsed',
+		'study_method'      => '100% Online / Self-Paced',
+		'assessment_method' => 'Online MCQ & Practical',
+		'tutor_support'     => '24/7 Dedicated Tutor Support',
+	);
+}
+
+/**
+ * Return v1.3.0 Homepage Glassmorphism, Trusted Brands, Alumni Spotlight, Gift Card,
+ * and Single Course Layout default settings.
+ *
+ * @return array
+ */
+function edupro_demo_get_v13_site_settings_defaults() {
+	$courses_url = get_post_type_archive_link( 'lms_course' ) ?: home_url( '/courses/' );
+
+	return array(
+		// Tab 6 — Homepage Hero Glassmorphism
+		'hero_style'               => 'glass_light',
+		'hero_badge'               => __( "UK & India's Leading Online Learning & CPD Provider", 'edupro' ),
+		'hero_heading'             => __( 'An Interactive Platform For', 'edupro' ),
+		'hero_highlight_word'      => __( 'Learning', 'edupro' ),
+		'hero_subtitle'            => __( 'Advance your career from anywhere in the world with industry-recognized certifications, expert tutor mentorship, and flexible self-paced study.', 'edupro' ),
+		'hero_card_1_title'        => __( '1000+ Online Courses', 'edupro' ),
+		'hero_card_1_desc'         => __( 'Accredited vocational, healthcare, business & tech tracks.', 'edupro' ),
+		'hero_card_2_title'        => __( 'Lifetime Access', 'edupro' ),
+		'hero_card_2_desc'         => __( 'Study self-paced across desktop, tablet & mobile anytime.', 'edupro' ),
+		'hero_card_3_title'        => __( 'Accredited Certificates', 'edupro' ),
+		'hero_card_3_desc'         => __( 'Instant verifiable CPD & QLS endorsed certificates.', 'edupro' ),
+
+		// Tab 6 — Trusted Brands Carousel (8 prestigious partners)
+		'brands_enabled'           => '1',
+		'brands_heading_prefix'    => __( 'Trusted by', 'edupro' ),
+		'brands_heading_highlight' => __( '300+ Leading Universities', 'edupro' ),
+		'brands_heading_suffix'    => __( 'and Companies Globally', 'edupro' ),
+		'trusted_brands'           => array(
+			array( 'name' => 'Pearson', 'sublabel' => 'Approved Centre', 'badge_color' => '#007fa3', 'logo_url' => '' ),
+			array( 'name' => 'edexcel', 'sublabel' => 'Qualification Partner', 'badge_color' => '#0f3460', 'logo_url' => '' ),
+			array( 'name' => 'QUALITY LICENCE', 'sublabel' => 'SCHEME ENDORSED', 'badge_color' => '#be123c', 'logo_url' => '' ),
+			array( 'name' => 'RoSPA', 'sublabel' => 'Member', 'badge_color' => '#047857', 'logo_url' => '' ),
+			array( 'name' => 'The CPD', 'sublabel' => 'Certification Service', 'badge_color' => '#1e3a8a', 'logo_url' => '' ),
+			array( 'name' => 'NCFE', 'sublabel' => 'CACHE Endorsed', 'badge_color' => '#6d28d9', 'logo_url' => '' ),
+			array( 'name' => 'IOSH', 'sublabel' => 'Approved', 'badge_color' => '#b45309', 'logo_url' => '' ),
+			array( 'name' => 'NHS', 'sublabel' => 'Accepted Training', 'badge_color' => '#005eb8', 'logo_url' => '' ),
+		),
+
+		// Tab 6 — Success Stories / Alumni Spotlight
+		'spotlight_enabled'        => '1',
+		'spotlight_badge'          => __( 'Alumni Spotlight', 'edupro' ),
+		'spotlight_heading'        => __( 'Success Stories', 'edupro' ),
+		'spotlight_text'           => __( 'Thousands of graduates across the UK, India, and worldwide have turned flexible online courses into promotions, clinical careers, and high-growth tech roles.', 'edupro' ),
+		'spotlight_text_2'         => __( 'Every qualification combines structured self-paced modules, dedicated tutor guidance, and employer-trusted certification.', 'edupro' ),
+		'spotlight_stat_1_val'     => '96%',
+		'spotlight_stat_1_label'   => __( 'Career Advancement Rate', 'edupro' ),
+		'spotlight_stat_2_val'     => '140+',
+		'spotlight_stat_2_label'   => __( 'Countries Represented', 'edupro' ),
+		'spotlight_video_url'      => 'https://www.youtube.com/watch?v=M7lc1UVf-VE',
+		'spotlight_video_thumb'    => '',
+		'spotlight_video_name'     => 'OLIVIA SZULC',
+		'spotlight_video_label'    => __( 'GRADUATE INTERVIEW', 'edupro' ),
+
+		// Tab 6 — Gift Card Section
+		'giftcard_enabled'         => '1',
+		'giftcard_eyebrow'         => __( 'SHARE KNOWLEDGE', 'edupro' ),
+		'giftcard_heading'         => __( 'Order Gift Card for Your Loved Ones Today', 'edupro' ),
+		'giftcard_desc'            => __( 'Give the gift of lifelong learning. Redeemable across every accredited course and professional certification on EduPro.', 'edupro' ),
+		'giftcard_bullets'         => "Valid across all 500+ accredited online courses\nInstant digital delivery with personalized note\nNo expiration fees — flexible redemption anytime\nAvailable in both UK (£ GBP) & India (₹ INR)",
+		'giftcard_value_label'     => '£25 – £150',
+		'giftcard_cta_text'        => __( 'Order Gift Card', 'edupro' ),
+		'giftcard_cta_url'         => $courses_url,
+
+		// Tab 7 — Single Course Layout Toggles
+		'course_show_key_facts'        => '1',
+		'course_show_at_a_glance'      => '1',
+		'course_show_brands_carousel'  => '1',
+		'course_show_google_reviews'   => '1',
+		'course_show_help_card'        => '1',
+		'course_show_gallery'          => '1',
+		'course_default_awarding_body' => __( 'CPD Accredited & QLS Endorsed', 'edupro' ),
+		'course_help_card_title'       => __( 'Need Guidance?', 'edupro' ),
+		'course_help_card_desc'        => __( 'Speak with our friendly course advisors on phone or WhatsApp.', 'edupro' ),
+	);
+}
+
+/**
+ * Seed starter Website Settings (`edupro_site_settings`) if empty, or non-destructively
+ * merge any missing v1.3.0 keys into existing saved settings.
  */
 function edupro_demo_seed_site_settings() {
 	$existing = get_option( 'edupro_site_settings', array() );
 	if ( ! empty( $existing ) && is_array( $existing ) ) {
+		edupro_demo_backfill_v13_settings();
 		return;
 	}
 
@@ -1728,54 +1883,200 @@ function edupro_demo_seed_site_settings() {
 	$admin_email = get_option( 'admin_email', 'support@eduproacademy.com' );
 	$courses_url = get_post_type_archive_link( 'lms_course' ) ?: home_url( '/courses/' );
 
-	$defaults = array(
-		// Tab 1 — Brand & Identity
-		'site_name'                 => $site_name,
-		'site_tagline'              => $tagline,
-		'header_logo_id'            => 0,
-		'header_logo_url'           => '',
-		'footer_logo_id'            => 0,
-		'footer_logo_url'           => '',
-		'primary_color'             => '#e31b23',
-		'announcement_enabled'      => '1',
-		'announcement_text'         => __( '🎓 LIMITED TIME OFFER — Save up to 70% + Extra 20% OFF with code WELCOME20!', 'edupro' ),
-		'announcement_cta_text'     => __( 'Explore Courses →', 'edupro' ),
-		'announcement_cta_url'      => $courses_url,
+	$defaults = array_merge(
+		array(
+			// Tab 1 — Brand & Identity
+			'site_name'                 => $site_name,
+			'site_tagline'              => $tagline,
+			'header_logo_id'            => 0,
+			'header_logo_url'           => '',
+			'footer_logo_id'            => 0,
+			'footer_logo_url'           => '',
+			'primary_color'             => '#be123c',
+			'announcement_enabled'      => '1',
+			'announcement_text'         => __( '🎓 LIMITED TIME OFFER — Save up to 70% + Extra 20% OFF with code WELCOME20!', 'edupro' ),
+			'announcement_cta_text'     => __( 'Explore Courses →', 'edupro' ),
+			'announcement_cta_url'      => $courses_url,
 
-		// Tab 2 — Contact, Phone & WhatsApp
-		'phone_primary'             => '+44 20 7946 0192',
-		'phone_secondary'           => '+91 80 4568 2100',
-		'whatsapp_number'           => '+447700900123',
-		'whatsapp_message'          => __( 'Hi! I would like to enquire about EduPro courses and enrolment.', 'edupro' ),
-		'whatsapp_floating_enabled' => '1',
-		'email_support'             => $admin_email,
-		'email_sales'               => $admin_email,
-		'business_hours'            => __( 'Mon – Sat: 9:00 AM – 7:00 PM (UK & India Support)', 'edupro' ),
-		'address_primary'           => __( 'EduPro Learning Hub, 42 MG Road, Bengaluru, Karnataka 560001, India', 'edupro' ),
-		'address_secondary'         => __( 'EduPro Academy UK, 128 City Road, London EC1V 2NX, United Kingdom', 'edupro' ),
+			// Tab 2 — Contact, Phone & WhatsApp
+			'phone_primary'             => '+44 20 7946 0192',
+			'phone_secondary'           => '+91 80 4568 2100',
+			'whatsapp_number'           => '+447700900123',
+			'whatsapp_message'          => __( 'Hi! I would like to enquire about EduPro courses and enrolment.', 'edupro' ),
+			'whatsapp_floating_enabled' => '1',
+			'email_support'             => $admin_email,
+			'email_sales'               => $admin_email,
+			'business_hours'            => __( 'Mon – Sat: 9:00 AM – 7:00 PM (UK & India Support)', 'edupro' ),
+			'address_primary'           => __( 'EduPro Learning Hub, 42 MG Road, Bengaluru, Karnataka 560001, India', 'edupro' ),
+			'address_secondary'         => __( 'EduPro Academy UK, 128 City Road, London EC1V 2NX, United Kingdom', 'edupro' ),
 
-		// Tab 3 — Google Maps
-		'map_embed'                 => 'London, UK',
-		'map_directions_url'        => 'https://maps.google.com/?q=London,+UK',
-		'map_height'                => 380,
+			// Tab 3 — Google Maps
+			'map_embed'                 => 'London, UK',
+			'map_directions_url'        => 'https://maps.google.com/?q=London,+UK',
+			'map_height'                => 380,
 
-		// Tab 4 — Social Links
-		'social_facebook'           => 'https://facebook.com',
-		'social_instagram'          => 'https://instagram.com',
-		'social_youtube'            => 'https://youtube.com',
-		'social_linkedin'           => 'https://linkedin.com',
-		'social_twitter'            => 'https://x.com',
-		'social_tiktok'             => '',
-		'social_telegram'           => '',
+			// Tab 4 — Social Links
+			'social_facebook'           => 'https://facebook.com',
+			'social_instagram'          => 'https://instagram.com',
+			'social_youtube'            => 'https://youtube.com',
+			'social_linkedin'           => 'https://linkedin.com',
+			'social_twitter'            => 'https://x.com',
+			'social_tiktok'             => '',
+			'social_telegram'           => '',
 
-		// Tab 5 — Footer & Legal
-		'footer_about'              => __( 'Master in-demand vocational, healthcare, business, and technology skills with expert instructors, verified certificates, and lifetime course access.', 'edupro' ),
-		'footer_trust_badge'        => __( 'Rated 4.9/5 Excellent by 10,000+ Learners', 'edupro' ),
-		'footer_copyright'          => '© {year} {site_name}. All rights reserved.',
+			// Tab 5 — Footer & Legal
+			'footer_about'              => __( 'Master in-demand vocational, healthcare, business, and technology skills with expert instructors, verified certificates, and lifetime course access.', 'edupro' ),
+			'footer_trust_badge'        => __( 'Rated 4.9/5 Excellent by 10,000+ Learners', 'edupro' ),
+			'footer_copyright'          => '© {year} {site_name}. All rights reserved.',
+		),
+		edupro_demo_get_v13_site_settings_defaults()
 	);
 
 	update_option( 'edupro_site_settings', $defaults );
+	update_option( 'edupro_v13_settings_backfilled', '1' );
 }
+
+/**
+ * Non-destructively merge missing v1.3.0 Website Settings keys and course key facts
+ * on existing installations upgrading from v1.1.x / v1.2.x to v1.3.0.
+ */
+function edupro_demo_backfill_v13_settings() {
+	$existing = get_option( 'edupro_site_settings', array() );
+	if ( ! is_array( $existing ) ) {
+		$existing = array();
+	}
+
+	$v13_defaults = edupro_demo_get_v13_site_settings_defaults();
+	$changed      = false;
+
+	foreach ( $v13_defaults as $key => $val ) {
+		if ( ! array_key_exists( $key, $existing ) ) {
+			$existing[ $key ] = $val;
+			$changed          = true;
+		}
+	}
+
+	if ( $changed ) {
+		update_option( 'edupro_site_settings', $existing );
+	}
+
+	// Backfill missing Single Course Key Facts meta on existing demo courses.
+	$demo_courses = get_posts(
+		array(
+			'post_type'      => 'lms_course',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'meta_key'       => '_edupro_demo_item',
+			'meta_value'     => '1',
+		)
+	);
+
+	foreach ( $demo_courses as $course_post ) {
+		$facts = edupro_demo_get_course_key_facts( $course_post->post_name );
+		if ( '' === (string) get_post_meta( $course_post->ID, '_edupro_awarding_body', true ) ) {
+			update_post_meta( $course_post->ID, '_edupro_awarding_body', $facts['awarding_body'] );
+		}
+		if ( '' === (string) get_post_meta( $course_post->ID, '_edupro_study_method', true ) ) {
+			update_post_meta( $course_post->ID, '_edupro_study_method', $facts['study_method'] );
+		}
+		if ( '' === (string) get_post_meta( $course_post->ID, '_edupro_assessment_method', true ) ) {
+			update_post_meta( $course_post->ID, '_edupro_assessment_method', $facts['assessment_method'] );
+		}
+		if ( '' === (string) get_post_meta( $course_post->ID, '_edupro_tutor_support', true ) ) {
+			update_post_meta( $course_post->ID, '_edupro_tutor_support', $facts['tutor_support'] );
+		}
+	}
+
+	update_option( 'edupro_v13_settings_backfilled', '1' );
+}
+
+/**
+ * Run one-time v1.3.0 non-destructive settings & course key-facts backfill on admin_init
+ * for existing installations upgrading to v1.3.0.
+ */
+function edupro_demo_maybe_backfill_v13_on_upgrade() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( '1' === get_option( 'edupro_v13_settings_backfilled', '0' ) ) {
+		return;
+	}
+	edupro_demo_backfill_v13_settings();
+}
+add_action( 'admin_init', 'edupro_demo_maybe_backfill_v13_on_upgrade' );
+
+/**
+ * Non-destructively backfill UK GBP (£) and India INR (₹) regional price overrides
+ * onto existing demo courses when upgrading from earlier versions, ONLY populating
+ * meta fields that are currently empty so manual edits are never overwritten.
+ */
+function edupro_demo_backfill_v14_prices() {
+	$catalog   = edupro_demo_get_courses_catalog();
+	$by_slug   = array();
+	$by_title  = array();
+
+	foreach ( $catalog as $item ) {
+		if ( ! empty( $item['slug'] ) ) {
+			$by_slug[ $item['slug'] ] = $item;
+		}
+		if ( ! empty( $item['title'] ) ) {
+			$by_title[ strtolower( trim( $item['title'] ) ) ] = $item;
+		}
+	}
+
+	$courses = get_posts(
+		array(
+			'post_type'      => 'lms_course',
+			'post_status'    => array( 'publish', 'draft', 'private' ),
+			'posts_per_page' => -1,
+		)
+	);
+
+	foreach ( $courses as $course_post ) {
+		$slug_key  = (string) $course_post->post_name;
+		$title_key = strtolower( trim( (string) $course_post->post_title ) );
+
+		$matched = null;
+		if ( isset( $by_slug[ $slug_key ] ) ) {
+			$matched = $by_slug[ $slug_key ];
+		} elseif ( isset( $by_title[ $title_key ] ) ) {
+			$matched = $by_title[ $title_key ];
+		}
+
+		if ( ! $matched ) {
+			continue;
+		}
+
+		$price_map = array(
+			'_edupro_regular_price_gbp' => isset( $matched['regular_price_gbp'] ) ? (float) $matched['regular_price_gbp'] : '',
+			'_edupro_sale_price_gbp'    => isset( $matched['sale_price_gbp'] ) ? (float) $matched['sale_price_gbp'] : '',
+			'_edupro_regular_price_inr' => isset( $matched['regular_price_inr'] ) ? (float) $matched['regular_price_inr'] : '',
+			'_edupro_sale_price_inr'    => isset( $matched['sale_price_inr'] ) ? (float) $matched['sale_price_inr'] : '',
+		);
+
+		foreach ( $price_map as $meta_key => $meta_val ) {
+			if ( '' !== $meta_val && '' === trim( (string) get_post_meta( $course_post->ID, $meta_key, true ) ) ) {
+				update_post_meta( $course_post->ID, $meta_key, $meta_val );
+			}
+		}
+	}
+
+	update_option( 'edupro_v14_prices_backfilled', '1' );
+}
+
+/**
+ * Run one-time v1.4.0 dual-currency demo price backfill on admin_init for upgraded sites.
+ */
+function edupro_demo_maybe_backfill_v14_prices() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( '1' === get_option( 'edupro_v14_prices_backfilled', '0' ) ) {
+		return;
+	}
+	edupro_demo_backfill_v14_prices();
+}
+add_action( 'admin_init', 'edupro_demo_maybe_backfill_v14_prices' );
 
 /**
  * Seed starter UK + India Bank Transfer details and enable Bank Transfer ONLY if zero

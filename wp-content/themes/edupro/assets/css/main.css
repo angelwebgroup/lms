@@ -10706,3 +10706,2345 @@ input.is-valid {
         min-height: 44px;
     }
 }
+
+
+/* ==========================================================================
+   23. v1.3.0 LUXURY GLASSMORPHISM DESIGN SYSTEM, BRANDS CAROUSEL, ALUMNI
+       SPOTLIGHT, 3D GIFT CARD, SPLIT GOOGLE REVIEWS & SINGLE COURSE EXTRAS
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   23.1 Unified Glassmorphism Tokens & Global Surface Polish
+   -------------------------------------------------------------------------- */
+:root {
+    /* Refined Luxury Crimson & Rose-Blush Palette */
+    --color-bg: #fdf6f8;
+    --color-bg-alt: #f9eef2;
+    --color-primary: #be123c;
+    --color-primary-bright: #e11d48;
+    --color-primary-dark: #9f1239;
+    --color-primary-light: rgba(190, 18, 60, 0.1);
+    --color-primary-soft: #fff1f2;
+    --color-secondary: #120e18;
+    --color-secondary-light: #1e1828;
+    --color-secondary-dark: #0b0810;
+    --color-text-dark: #120e18;
+    --color-text-medium: #475569;
+    --color-text-light: #64748b;
+    --color-border: rgba(190, 18, 60, 0.1);
+    --color-border-dark: rgba(18, 14, 24, 0.14);
+
+    /* Typography */
+    --font-heading: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Glassmorphism Surface Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.74);
+    --glass-bg-strong: rgba(255, 255, 255, 0.88);
+    --glass-bg-rose: rgba(255, 241, 245, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.9);
+    --glass-shadow: 0 12px 32px -6px rgba(190, 18, 60, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    --glass-shadow-hover: 0 20px 44px -8px rgba(190, 18, 60, 0.15), inset 0 1px 0 rgba(255, 255, 255, 1);
+    --gradient-crimson: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+    --gradient-text: linear-gradient(135deg, #be123c 0%, #e11d48 52%, #9333ea 100%);
+
+    /* Upgraded Radii & Consistent Section Spacing */
+    --radius-card: 16px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --section-padding: clamp(3.5rem, 6vw, 5.25rem);
+    --shadow-primary: 0 10px 26px -4px rgba(190, 18, 60, 0.34);
+}
+
+body {
+    background-color: var(--color-bg);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(251, 207, 232, 0.24) 0px, transparent 42%),
+        radial-gradient(at 100% 10%, rgba(233, 213, 255, 0.22) 0px, transparent 38%);
+    background-attachment: scroll;
+    color: var(--color-text-dark);
+}
+
+.edupro-section {
+    padding: clamp(3.5rem, 6vw, 5.25rem) 0;
+}
+
+.edupro-section--tinted {
+    background: linear-gradient(180deg, rgba(255, 241, 245, 0.65) 0%, rgba(248, 240, 255, 0.45) 100%);
+}
+
+/* Frosted Glass Sticky Header */
+.site-header,
+.edupro-header {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.88);
+    box-shadow: 0 4px 20px -4px rgba(18, 14, 24, 0.05);
+}
+
+.site-header.scrolled,
+.edupro-header.scrolled {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 10px 30px -6px rgba(190, 18, 60, 0.09);
+}
+
+/* Reusable Frosted Glass Panel */
+.edupro-glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* Harmonized Glassmorphism Elevation Across Core Theme Cards */
+.course-card,
+.edupro-feature-card,
+.edupro-stat-card,
+.edupro-auth-card,
+.edupro-cart-summary-card,
+.edupro-summary-card,
+.edupro-checkout-card,
+.edupro-review-card,
+.edupro-contact-card,
+.edupro-course-box,
+.edupro-learn-box,
+.edupro-requirements-box,
+.edupro-description-box,
+.edupro-curriculum-box,
+.edupro-instructor-box,
+.edupro-reviews-box,
+.edupro-faq-box {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+}
+
+.course-card:hover,
+.edupro-feature-card:hover,
+.edupro-stat-card:hover,
+.edupro-review-card:hover,
+.edupro-contact-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--glass-shadow-hover);
+    border-color: rgba(190, 18, 60, 0.22);
+}
+
+.course-card__media,
+.course-card__thumbnail {
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+/* Refined Crimson Gradient Primary Pill & Standard Buttons */
+.btn-primary,
+.edupro-btn--primary,
+.edupro-btn-primary,
+.edupro-btn-red {
+    background: var(--gradient-crimson);
+    border-color: transparent;
+    color: #ffffff;
+    border-radius: var(--radius-pill);
+    box-shadow: 0 6px 18px -4px rgba(190, 18, 60, 0.32);
+}
+
+.btn-primary:hover,
+.edupro-btn--primary:hover,
+.edupro-btn-primary:hover,
+.edupro-btn-red:hover {
+    background: linear-gradient(135deg, #9f1239 0%, #be123c 100%);
+    border-color: transparent;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
+}
+
+.btn-outline,
+.edupro-btn--outline,
+.edupro-btn-outline {
+    border-radius: var(--radius-pill);
+    border-color: rgba(190, 18, 60, 0.45);
+    color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.btn-outline:hover,
+.edupro-btn--outline:hover,
+.edupro-btn-outline:hover {
+    background: var(--gradient-crimson);
+    border-color: transparent;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -4px rgba(190, 18, 60, 0.26);
+}
+
+.edupro-text-gradient {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   23.2 Luminous Glassmorphism Hero (.edupro-hero--glass)
+   -------------------------------------------------------------------------- */
+.edupro-hero--glass {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        #fff5f7 0%,
+        #fdf4ff 42%,
+        #fff7ed 100%
+    );
+    color: var(--color-text-dark);
+    padding: clamp(3.5rem, 6.5vw, 5.5rem) 0 clamp(3.25rem, 6vw, 5rem);
+    border-bottom: 1px solid rgba(190, 18, 60, 0.08);
+    isolation: isolate;
+}
+
+.edupro-hero--glass .edupro-hero__overlay {
+    display: none;
+}
+
+/* Soft Ambient Blurred Mesh Orbs (clipped ONLY inside .edupro-hero--glass) */
+.edupro-ambient-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.52;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.edupro-ambient-blob--1,
+.edupro-ambient-blob--rose {
+    width: 460px;
+    height: 460px;
+    top: -140px;
+    left: -120px;
+    background: radial-gradient(circle, rgba(244, 114, 182, 0.45) 0%, rgba(251, 207, 232, 0.1) 70%);
+}
+
+.edupro-ambient-blob--2,
+.edupro-ambient-blob--violet {
+    width: 420px;
+    height: 420px;
+    top: -80px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(192, 132, 252, 0.42) 0%, rgba(233, 213, 255, 0.08) 70%);
+}
+
+.edupro-ambient-blob--3,
+.edupro-ambient-blob--peach {
+    width: 380px;
+    height: 380px;
+    bottom: -150px;
+    left: 42%;
+    background: radial-gradient(circle, rgba(253, 186, 116, 0.38) 0%, rgba(254, 215, 170, 0.08) 70%);
+}
+
+.edupro-hero--glass .edupro-hero__eyebrow {
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(190, 18, 60, 0.16);
+    color: var(--color-primary);
+    box-shadow: 0 6px 20px -6px rgba(190, 18, 60, 0.14);
+}
+
+.edupro-hero--glass .edupro-hero__title {
+    color: var(--color-secondary);
+    font-size: clamp(2.25rem, 4.6vw, 3.6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.15rem;
+}
+
+.edupro-hero--glass .edupro-hero__subtitle {
+    color: var(--color-text-medium);
+    font-size: clamp(1rem, 1.45vw, 1.14rem);
+    line-height: 1.7;
+    max-width: 600px;
+    margin-bottom: 1.75rem;
+}
+
+.edupro-hero--glass .edupro-hero__search-box {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255, 255, 255, 0.98);
+    box-shadow: 0 18px 40px -10px rgba(190, 18, 60, 0.16), 0 0 0 1px rgba(190, 18, 60, 0.08);
+    padding: 7px 7px 7px 20px;
+    max-width: 600px;
+}
+
+.edupro-hero--glass .edupro-hero__search-box:focus-within {
+    border-color: rgba(190, 18, 60, 0.45);
+    box-shadow: 0 20px 44px -10px rgba(190, 18, 60, 0.2), 0 0 0 4px rgba(190, 18, 60, 0.08);
+}
+
+.edupro-hero--glass .edupro-hero__search-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.edupro-hero--glass .edupro-hero__popular {
+    color: var(--color-text-light);
+}
+
+.edupro-hero--glass .edupro-hero__popular-label {
+    font-weight: 600;
+    color: var(--color-text-medium);
+}
+
+.edupro-hero--glass .edupro-hero__pill {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(190, 18, 60, 0.14);
+    color: var(--color-secondary);
+    font-weight: 600;
+    padding: 5px 13px;
+}
+
+.edupro-hero--glass .edupro-hero__pill:hover {
+    background: var(--gradient-crimson);
+    border-color: transparent;
+    color: #ffffff;
+}
+
+.edupro-hero--glass .edupro-hero__stats {
+    border-top-color: rgba(18, 14, 24, 0.1);
+}
+
+.edupro-hero--glass .edupro-hero__stat strong,
+.edupro-hero--glass .hero-stat__value {
+    color: var(--color-secondary);
+}
+
+.edupro-hero--glass .edupro-hero__stat span,
+.edupro-hero--glass .hero-stat__label {
+    color: var(--color-text-medium);
+}
+
+/* Right-Side Glass Preview Card Inside Glass Hero */
+.edupro-hero--glass .edupro-hero__card {
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 22px;
+    color: var(--color-text-dark);
+    box-shadow: 0 24px 56px -12px rgba(190, 18, 60, 0.15), inset 0 1px 0 #ffffff;
+}
+
+.edupro-hero--glass .edupro-hero__card h3,
+.edupro-hero--glass .edupro-hero__card strong {
+    color: var(--color-secondary);
+}
+
+.edupro-hero--glass .edupro-hero__card p,
+.edupro-hero--glass .edupro-hero__checklist li {
+    color: var(--color-text-medium);
+}
+
+.edupro-hero--glass .edupro-hero__card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 13px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.85rem;
+}
+
+.edupro-hero__card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 3-Column Frosted Hero Value-Prop Cards */
+.edupro-hero-highlights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: clamp(2.25rem, 4vw, 3.25rem);
+}
+
+.edupro-hero-highlight-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.35rem 1.4rem;
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.edupro-hero-highlight-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+.edupro-hero-highlight-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.12), rgba(225, 29, 72, 0.06));
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.edupro-hero-highlight-card:nth-child(2) .edupro-hero-highlight-card__icon {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.14), rgba(168, 85, 247, 0.06));
+    color: #7e22ce;
+}
+
+.edupro-hero-highlight-card:nth-child(3) .edupro-hero-highlight-card__icon {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(52, 211, 153, 0.06));
+    color: #059669;
+}
+
+.edupro-hero-highlight-card__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.edupro-hero-highlight-card__title,
+.edupro-hero-highlight-card__text strong,
+.edupro-hero-highlight-card h3,
+.edupro-hero-highlight-card h4 {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    margin: 0 0 2px;
+    line-height: 1.3;
+}
+
+.edupro-hero-highlight-card__desc,
+.edupro-hero-highlight-card__text span,
+.edupro-hero-highlight-card p {
+    display: block;
+    font-size: 0.84rem;
+    color: var(--color-text-medium);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   23.3 Trusted Brands Continuous Auto-Carousel (.edupro-brands-section)
+   -------------------------------------------------------------------------- */
+.edupro-brands-section {
+    padding: clamp(2.5rem, 4.5vw, 3.75rem) 0;
+    background: rgba(255, 255, 255, 0.55);
+    border-top: 1px solid rgba(190, 18, 60, 0.06);
+    border-bottom: 1px solid rgba(190, 18, 60, 0.06);
+}
+
+.edupro-brands-section--compact {
+    padding: clamp(2rem, 3.5vw, 2.75rem) 0;
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.edupro-brands-heading {
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: clamp(1.15rem, 2vw, 1.55rem);
+    font-weight: 700;
+    color: var(--color-secondary);
+    margin: 0 auto 1.75rem;
+    max-width: 720px;
+}
+
+.edupro-brands-heading__highlight,
+.edupro-brands-highlight,
+.edupro-text-crimson {
+    color: var(--color-primary);
+}
+
+.edupro-brands-carousel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.edupro-brands-viewport {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    padding: 8px 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+}
+
+.edupro-brands-track {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    width: max-content;
+    will-change: transform;
+    animation: eduproBrandsMarquee 34s linear infinite;
+}
+
+.edupro-brands-carousel:hover .edupro-brands-track,
+.edupro-brands-carousel:focus-within .edupro-brands-track,
+.edupro-brands-carousel.is-paused .edupro-brands-track {
+    animation-play-state: paused;
+}
+
+@keyframes eduproBrandsMarquee {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.edupro-brand-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 190px;
+    height: 74px;
+    padding: 12px 22px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px -6px rgba(18, 14, 24, 0.08), inset 0 1px 0 #ffffff;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.edupro-brand-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(190, 18, 60, 0.25);
+    box-shadow: 0 14px 28px -8px rgba(190, 18, 60, 0.14);
+}
+
+.edupro-brand-card img {
+    max-height: 38px;
+    max-width: 140px;
+    width: auto;
+    object-fit: contain;
+}
+
+.edupro-brand-card__dot,
+.edupro-brand-card__badge {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--brand-accent, var(--brand-color, var(--color-primary)));
+    flex-shrink: 0;
+}
+
+.edupro-brand-card__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.18;
+    text-align: left;
+}
+
+.edupro-brand-card__name {
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--brand-accent, var(--brand-color, var(--color-secondary)));
+    white-space: nowrap;
+}
+
+.edupro-brand-card__sublabel,
+.edupro-brand-card__sub {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-light);
+    white-space: nowrap;
+}
+
+.edupro-brands-nav {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(190, 18, 60, 0.16);
+    color: var(--color-secondary);
+    box-shadow: 0 6px 18px -4px rgba(18, 14, 24, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 2;
+    transition: var(--transition-fast);
+}
+
+.edupro-brands-nav:hover {
+    background: var(--gradient-crimson);
+    border-color: transparent;
+    color: #ffffff;
+    transform: scale(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   23.4 3-Col Color-Coded Frosted Glass Course Categories
+   -------------------------------------------------------------------------- */
+.edupro-categories-section .edupro-categories-grid,
+.edupro-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.edupro-cat-card,
+.edupro-category-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.35rem;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.94);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+    color: var(--color-secondary);
+    position: relative;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.edupro-cat-card:hover,
+.edupro-category-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(190, 18, 60, 0.25);
+    box-shadow: var(--glass-shadow-hover);
+    color: var(--color-primary);
+}
+
+.edupro-cat-card__icon,
+.edupro-category-card__icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: #ffe4e6;
+    color: #be123c;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    transition: transform 0.28s ease, background-color 0.28s ease, color 0.28s ease;
+}
+
+/* 9 Curated Pastel Icon Palettes (auto-cycled + explicit modifier classes) */
+.edupro-cat-card:nth-child(9n+1) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+1) .edupro-category-card__icon,
+.edupro-cat-card__icon--rose { background: #ffe4e6; color: #be123c; }
+
+.edupro-cat-card:nth-child(9n+2) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+2) .edupro-category-card__icon,
+.edupro-cat-card__icon--purple { background: #f3e8ff; color: #7e22ce; }
+
+.edupro-cat-card:nth-child(9n+3) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+3) .edupro-category-card__icon,
+.edupro-cat-card__icon--amber { background: #fef3c7; color: #b45309; }
+
+.edupro-cat-card:nth-child(9n+4) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+4) .edupro-category-card__icon,
+.edupro-cat-card__icon--emerald { background: #d1fae5; color: #047857; }
+
+.edupro-cat-card:nth-child(9n+5) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+5) .edupro-category-card__icon,
+.edupro-cat-card__icon--sky { background: #e0f2fe; color: #0369a1; }
+
+.edupro-cat-card:nth-child(9n+6) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+6) .edupro-category-card__icon,
+.edupro-cat-card__icon--pink { background: #fce7f3; color: #be185d; }
+
+.edupro-cat-card:nth-child(9n+7) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+7) .edupro-category-card__icon,
+.edupro-cat-card__icon--violet { background: #ede9fe; color: #6d28d9; }
+
+.edupro-cat-card:nth-child(9n+8) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+8) .edupro-category-card__icon,
+.edupro-cat-card__icon--indigo { background: #e0e7ff; color: #4338ca; }
+
+.edupro-cat-card:nth-child(9n+9) .edupro-cat-card__icon,
+.edupro-category-card:nth-child(9n+9) .edupro-category-card__icon,
+.edupro-cat-card__icon--orange { background: #ffedd5; color: #c2410c; }
+
+.edupro-cat-card:hover .edupro-cat-card__icon,
+.edupro-category-card:hover .edupro-category-card__icon {
+    transform: scale(1.06);
+}
+
+.edupro-cat-card__body,
+.edupro-category-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.edupro-cat-card__name,
+.edupro-category-card__name {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    line-height: 1.3;
+    margin-bottom: 3px;
+}
+
+.edupro-cat-card:hover .edupro-cat-card__name,
+.edupro-category-card:hover .edupro-category-card__name {
+    color: var(--color-primary);
+}
+
+.edupro-cat-card__count,
+.edupro-category-card__count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+}
+
+.edupro-cat-card__arrow {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(190, 18, 60, 0.06);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+}
+
+.edupro-cat-card:hover .edupro-cat-card__arrow {
+    transform: translateX(4px);
+    background: var(--gradient-crimson);
+    color: #ffffff;
+}
+
+.edupro-categories-footer {
+    text-align: center;
+    margin-top: 2.25rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   23.5 Alumni Spotlight / Success Stories & Frosted Video Lightbox
+   -------------------------------------------------------------------------- */
+.edupro-spotlight-section {
+    padding: clamp(3.5rem, 6vw, 5.25rem) 0;
+}
+
+.edupro-spotlight-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: center;
+    padding: clamp(1.75rem, 4vw, 3.25rem);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+}
+
+.edupro-spotlight-badge,
+.edupro-spotlight__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 15px;
+    border-radius: var(--radius-pill);
+    background: #f3e8ff;
+    color: #7e22ce;
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+}
+
+.edupro-spotlight-heading,
+.edupro-spotlight__title {
+    font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+    font-weight: 800;
+    color: var(--color-secondary);
+    margin-bottom: 1rem;
+}
+
+.edupro-spotlight-text,
+.edupro-spotlight__text {
+    font-size: 0.98rem;
+    line-height: 1.72;
+    color: var(--color-text-medium);
+    margin-bottom: 1rem;
+}
+
+.edupro-spotlight-stats,
+.edupro-spotlight__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(190, 18, 60, 0.12);
+}
+
+.edupro-spotlight__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.edupro-spotlight-stat__val,
+.edupro-spotlight__stat strong {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: clamp(1.85rem, 3vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: var(--gradient-crimson);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+
+.edupro-spotlight-stat__label,
+.edupro-spotlight__stat span {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-medium);
+}
+
+/* Graduate Interview Video Preview Card */
+.edupro-spotlight-video,
+.edupro-spotlight__video {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: linear-gradient(145deg, #1b1325 0%, #120e18 55%, #3b0d20 100%);
+    box-shadow: 0 22px 46px -10px rgba(18, 14, 24, 0.35);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    isolation: isolate;
+}
+
+.edupro-spotlight-video img,
+.edupro-spotlight__video img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.55s ease;
+    z-index: -2;
+}
+
+.edupro-spotlight-video:hover img,
+.edupro-spotlight__video:hover img {
+    transform: scale(1.05);
+}
+
+.edupro-spotlight-video__overlay,
+.edupro-spotlight__video-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(18, 14, 24, 0.2) 0%, rgba(18, 14, 24, 0.82) 100%);
+    z-index: -1;
+}
+
+.edupro-spotlight__video-pill {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    background: rgba(18, 14, 24, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.edupro-video-play-btn,
+.edupro-spotlight__play-btn {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--gradient-crimson);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 32px rgba(225, 29, 72, 0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    z-index: 2;
+}
+
+.edupro-video-play-btn::before,
+.edupro-spotlight__play-btn::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    border: 2px solid rgba(225, 29, 72, 0.55);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.edupro-spotlight-video:hover .edupro-video-play-btn,
+.edupro-spotlight__video:hover .edupro-spotlight__play-btn,
+.edupro-sidebar-video-card:hover .edupro-video-play-btn {
+    transform: scale(1.08);
+    box-shadow: 0 16px 38px rgba(225, 29, 72, 0.62);
+}
+
+.edupro-spotlight-video__caption,
+.edupro-spotlight__video-caption {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 2;
+}
+
+.edupro-spotlight-video__name,
+.edupro-spotlight__video-caption strong {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+.edupro-spotlight-video__label,
+.edupro-spotlight__video-caption small {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fda4af;
+}
+
+/* Frosted Glass Video Lightbox Modal */
+#edupro-video-lightbox,
+.edupro-video-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+#edupro-video-lightbox.is-open,
+.edupro-video-lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edupro-video-lightbox__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 9, 16, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.edupro-video-lightbox__dialog {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 920px;
+    background: rgba(18, 14, 24, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    padding: 14px 16px 16px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+    transform: scale(0.95);
+    transition: transform 0.28s ease;
+}
+
+#edupro-video-lightbox.is-open .edupro-video-lightbox__dialog,
+.edupro-video-lightbox.is-open .edupro-video-lightbox__dialog {
+    transform: scale(1);
+}
+
+.edupro-video-lightbox__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 4px 12px;
+}
+
+.edupro-video-lightbox__caption {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edupro-video-lightbox__close {
+    position: static;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-size: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.edupro-video-lightbox__close:hover {
+    background: var(--gradient-crimson);
+    transform: scale(1.06);
+}
+
+.edupro-video-lightbox__stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000000;
+}
+
+.edupro-video-lightbox__stage iframe,
+.edupro-video-lightbox__stage video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   23.6 Order Gift Card Section with 3D Luxury Dark-Gold Pass
+   -------------------------------------------------------------------------- */
+.edupro-giftcard-section {
+    padding: clamp(3.5rem, 6vw, 5.25rem) 0;
+}
+
+.edupro-giftcard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: clamp(2rem, 4.5vw, 4rem);
+    align-items: center;
+    padding: clamp(2rem, 4.5vw, 3.5rem);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+}
+
+.edupro-giftcard-stage,
+.edupro-giftcard-visual {
+    perspective: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.edupro-giftcard-3d {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    aspect-ratio: 1.62 / 1;
+    border-radius: 22px;
+    padding: 1.75rem 1.9rem;
+    background: linear-gradient(135deg, #16111e 0%, #24192e 45%, #0f0b15 100%);
+    border: 1.5px solid rgba(245, 208, 122, 0.45);
+    box-shadow:
+        0 28px 56px -14px rgba(18, 14, 24, 0.48),
+        0 0 0 1px rgba(245, 208, 122, 0.14) inset;
+    color: #f8e3a8;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transform: rotateY(-10deg) rotateX(6deg);
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease;
+}
+
+.edupro-giftcard-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 18%,
+        rgba(255, 226, 153, 0.16) 44%,
+        rgba(255, 255, 255, 0.24) 50%,
+        rgba(255, 226, 153, 0.12) 56%,
+        transparent 80%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.8s ease;
+    pointer-events: none;
+}
+
+.edupro-giftcard-3d:hover {
+    transform: rotateY(0deg) rotateX(0deg) translateY(-6px);
+    box-shadow:
+        0 34px 66px -12px rgba(190, 18, 60, 0.28),
+        0 0 0 1.5px rgba(245, 208, 122, 0.65) inset;
+}
+
+.edupro-giftcard-3d:hover::before {
+    transform: translateX(120%);
+}
+
+.edupro-giftcard-3d__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.edupro-giftcard-3d__pass-label,
+.edupro-giftcard-3d__pass-tag {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #e9c46a;
+}
+
+.edupro-giftcard-3d__chip {
+    width: 38px;
+    height: 26px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #f6d365 0%, #c8963e 100%);
+    opacity: 0.88;
+}
+
+.edupro-giftcard-3d__center {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: auto 0;
+}
+
+.edupro-giftcard-3d__title,
+.edupro-giftcard-3d__headline {
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #fef08a 0%, #f59e0b 52%, #fde68a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    line-height: 1.15;
+}
+
+.edupro-giftcard-3d__sub {
+    font-size: 0.82rem;
+    color: rgba(248, 227, 168, 0.78);
+    letter-spacing: 0.04em;
+    margin: 0;
+}
+
+.edupro-giftcard-3d__bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.edupro-giftcard-3d__value,
+.edupro-giftcard-3d__bottom strong {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(245, 208, 122, 0.14);
+    border: 1px solid rgba(245, 208, 122, 0.42);
+    color: #fde68a;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.edupro-giftcard-3d__brand,
+.edupro-giftcard-3d__valid {
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.edupro-giftcard-desc {
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: var(--color-text-medium);
+    margin-bottom: 1.15rem;
+}
+
+.edupro-giftcard-bullets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1.25rem;
+    margin: 1.25rem 0 1.75rem;
+}
+
+.edupro-giftcard-bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-secondary);
+}
+
+.edupro-giftcard-bullets li svg,
+.edupro-giftcard-bullets .edupro-check-icon,
+.edupro-giftcard-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.edupro-giftcard-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   23.7 Split Google Reviews Summary Card + Carousel (.edupro-reviews-split)
+   -------------------------------------------------------------------------- */
+.edupro-reviews-split {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: stretch;
+}
+
+.edupro-reviews-split--no-summary {
+    grid-template-columns: 1fr;
+}
+
+/* Left Pink-Tinted Frosted Summary Card with Top-Left Crimson Corner Ribbon */
+.edupro-reviews-summary-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.15rem;
+    padding: 2rem 1.5rem 1.6rem;
+    background: linear-gradient(155deg, rgba(255, 241, 245, 0.92) 0%, rgba(255, 255, 255, 0.86) 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1.5px solid rgba(190, 18, 60, 0.16);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+}
+
+.edupro-reviews-ribbon,
+.edupro-reviews-summary-card__ribbon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 48px;
+    height: 44px;
+    background: var(--gradient-crimson);
+    color: #ffffff;
+    border-radius: 20px 0 14px 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px -4px rgba(190, 18, 60, 0.35);
+}
+
+.edupro-reviews-summary-card__title {
+    font-family: var(--font-heading);
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: var(--color-secondary);
+    margin: 0.6rem 0 0;
+}
+
+.edupro-reviews-summary-card__stars {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #00b67a;
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+}
+
+.edupro-reviews-summary-card__stars .edupro-stars__filled {
+    color: #00b67a;
+}
+
+.edupro-reviews-summary-metrics,
+.edupro-reviews-summary-card__metrics {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(190, 18, 60, 0.12);
+    border-radius: 14px;
+    padding: 0.9rem 0.5rem;
+}
+
+.edupro-reviews-summary-metric {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 0 8px;
+}
+
+.edupro-reviews-summary-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(190, 18, 60, 0.16);
+    flex-shrink: 0;
+}
+
+.edupro-reviews-summary-metric + .edupro-reviews-summary-metric {
+    border-left: 1px solid rgba(190, 18, 60, 0.14);
+}
+
+.edupro-reviews-summary-metric strong {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-secondary);
+    line-height: 1.1;
+}
+
+.edupro-reviews-summary-metric span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.edupro-reviews-summary-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(190, 18, 60, 0.1);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-medium);
+}
+
+.edupro-reviews-summary-card__seal-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #15803d;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+/* Right Carousel Stage with Flanking Circular Crimson Arrows & Pill Dots */
+.edupro-reviews-carousel-stage {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.edupro-reviews-split .edupro-reviews-track {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 6px 4px 14px;
+    scrollbar-width: none;
+}
+
+.edupro-reviews-split .edupro-reviews-track .edupro-review-card {
+    flex: 0 0 calc((100% - 2.5rem) / 3);
+    scroll-snap-align: start;
+    justify-content: space-between;
+}
+
+.edupro-review-verified,
+.edupro-review-verified-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    background: #dcfce7;
+    color: #15803d;
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.edupro-review-card--split {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.edupro-review-card__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.edupro-review-card__headline {
+    font-family: var(--font-heading);
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    line-height: 1.35;
+    margin: 0;
+}
+
+.edupro-review-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 0.85rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(190, 18, 60, 0.08);
+}
+
+.edupro-review-card__avatar--initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-crimson);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.edupro-reviews-nav-btn,
+.edupro-reviews-carousel-stage .carousel-prev,
+.edupro-reviews-carousel-stage .carousel-next {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--gradient-crimson);
+    border: none;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px -4px rgba(190, 18, 60, 0.35);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.edupro-reviews-carousel-stage .edupro-reviews-nav-btn--prev,
+.edupro-reviews-carousel-stage .edupro-reviews-nav-btn--next {
+    position: absolute;
+    top: 44%;
+    transform: translateY(-50%);
+    z-index: 3;
+}
+
+.edupro-reviews-carousel-stage .edupro-reviews-nav-btn--prev {
+    left: -18px;
+}
+
+.edupro-reviews-carousel-stage .edupro-reviews-nav-btn--next {
+    right: -18px;
+}
+
+.edupro-reviews-nav-btn:hover,
+.edupro-reviews-carousel-stage .carousel-prev:hover,
+.edupro-reviews-carousel-stage .carousel-next:hover {
+    box-shadow: 0 12px 26px -4px rgba(190, 18, 60, 0.48);
+    color: #ffffff;
+}
+
+.edupro-reviews-carousel-stage .edupro-reviews-nav-btn--prev:hover,
+.edupro-reviews-carousel-stage .edupro-reviews-nav-btn--next:hover {
+    transform: translateY(-50%) scale(1.08);
+}
+
+.edupro-reviews-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 0.75rem;
+}
+
+.edupro-reviews-dots .carousel-dot,
+.edupro-reviews-dots button {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-pill);
+    background: rgba(190, 18, 60, 0.22);
+    transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.edupro-reviews-dots .carousel-dot.is-active,
+.edupro-reviews-dots .carousel-dot.active,
+.edupro-reviews-dots button.is-active {
+    width: 28px;
+    background: var(--gradient-crimson);
+}
+
+/* --------------------------------------------------------------------------
+   23.8 Single Course Page Dashboard-Controlled Extras
+   -------------------------------------------------------------------------- */
+.edupro-course-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.edupro-course-fact-tile {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 1.1rem 1.15rem;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.94);
+    border-radius: 14px;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.edupro-course-fact-tile:hover {
+    transform: translateY(-3px);
+    border-color: rgba(190, 18, 60, 0.25);
+}
+
+.edupro-course-fact-tile__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.edupro-course-fact-tile__label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-light);
+    margin-bottom: 2px;
+}
+
+.edupro-course-fact-tile__val {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    line-height: 1.3;
+}
+
+/* Course At a Glance Rose-Glass Highlight Card */
+.edupro-course-glance-box {
+    background: linear-gradient(140deg, rgba(255, 241, 245, 0.9) 0%, rgba(255, 255, 255, 0.84) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(190, 18, 60, 0.16);
+    border-radius: var(--radius-card);
+    padding: 1.65rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+.edupro-course-glance-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1.35rem;
+    margin-top: 1rem;
+}
+
+.edupro-course-glance-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-secondary);
+}
+
+.edupro-course-glance-list li svg {
+    color: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+/* Course Gallery Horizontal Photo Strip */
+.edupro-course-gallery {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 4px 2px 12px;
+    margin-bottom: 1.5rem;
+    scroll-snap-type: x mandatory;
+}
+
+.edupro-course-gallery__item {
+    flex: 0 0 220px;
+    aspect-ratio: 16 / 10;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    box-shadow: var(--glass-shadow);
+    scroll-snap-align: start;
+    background: var(--color-secondary);
+}
+
+.edupro-course-gallery__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.edupro-course-gallery__item:hover img {
+    transform: scale(1.06);
+}
+
+/* Sidebar Frosted Advisor Help Card & Student Testimonial Video Card */
+.edupro-sidebar-help-card {
+    margin-top: 1.25rem;
+    padding: 1.4rem;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-card);
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+}
+
+.edupro-sidebar-help-card h4 {
+    font-size: 1.05rem;
+    margin-bottom: 0.35rem;
+}
+
+.edupro-sidebar-help-card p {
+    font-size: 0.85rem;
+    color: var(--color-text-medium);
+    margin-bottom: 1rem;
+}
+
+.edupro-sidebar-help-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edupro-sidebar-help-card__whatsapp {
+    background: #25D366 !important;
+    border-color: #25D366 !important;
+    color: #ffffff !important;
+    border-radius: var(--radius-pill);
+}
+
+.edupro-sidebar-help-card__whatsapp:hover {
+    background: #1ebe5b !important;
+    color: #ffffff !important;
+}
+
+.edupro-sidebar-video-card {
+    position: relative;
+    margin-top: 1.25rem;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, #1b1325, #120e18);
+    box-shadow: var(--glass-shadow);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    isolation: isolate;
+}
+
+.edupro-sidebar-video-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+}
+
+.edupro-sidebar-video-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(18, 14, 24, 0.25) 0%, rgba(18, 14, 24, 0.85) 100%);
+    z-index: -1;
+}
+
+.edupro-sidebar-video-card .edupro-video-play-btn {
+    width: 54px;
+    height: 54px;
+}
+
+.edupro-sidebar-video-card__caption {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   23.9 Responsive Breakpoints for v1.3.0 Glassmorphism Modules
+   -------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+    .edupro-reviews-split .edupro-reviews-track .edupro-review-card {
+        flex: 0 0 calc((100% - 1.25rem) / 2);
+    }
+
+    .edupro-course-facts-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .edupro-hero-highlights {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-categories-section .edupro-categories-grid,
+    .edupro-categories-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .edupro-spotlight-card,
+    .edupro-giftcard-grid,
+    .edupro-reviews-split {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-giftcard-3d {
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .edupro-course-glance-list,
+    .edupro-giftcard-bullets {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-brands-nav {
+        width: 34px;
+        height: 34px;
+    }
+
+    .edupro-reviews-carousel-stage .edupro-reviews-nav-btn--prev {
+        left: 6px;
+    }
+
+    .edupro-reviews-carousel-stage .edupro-reviews-nav-btn--next {
+        right: 6px;
+    }
+}
+
+@media (max-width: 640px) {
+    .edupro-categories-section .edupro-categories-grid,
+    .edupro-categories-grid,
+    .edupro-course-facts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-reviews-split .edupro-reviews-track .edupro-review-card {
+        flex: 0 0 92%;
+    }
+
+    .edupro-spotlight-card,
+    .edupro-giftcard-grid {
+        padding: 1.35rem;
+        border-radius: 18px;
+    }
+
+    .edupro-giftcard-3d {
+        padding: 1.25rem 1.35rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .edupro-brand-card {
+        min-width: 162px;
+        height: 64px;
+        padding: 10px 14px;
+    }
+
+    .edupro-spotlight-stats,
+    .edupro-spotlight__stats {
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+    }
+
+    .edupro-reviews-summary-card {
+        padding: 1.75rem 1.1rem 1.35rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .edupro-brands-track {
+        animation: none !important;
+    }
+
+    .edupro-giftcard-3d,
+    .edupro-giftcard-3d::before {
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+
+/* ==========================================================================
+   24. v1.4.0 UX/UI PERFECTION, SPACING RHYTHM, PROMINENT ICONS &
+       60FPS MOBILE GPU PERFORMANCE PASS
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   24.1 Section Headers & Right-Aligned Action Buttons
+   -------------------------------------------------------------------------- */
+.edupro-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+}
+
+.edupro-section-header > div {
+    max-width: 680px;
+}
+
+.edupro-section-header .edupro-section-title,
+.edupro-section-header h2 {
+    margin-bottom: 0.35rem;
+}
+
+.edupro-section-header .edupro-section-subtitle {
+    margin-bottom: 0;
+}
+
+.edupro-section-header > .edupro-btn,
+.edupro-section-header > .btn {
+    flex-shrink: 0;
+}
+
+.edupro-section-header--center {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 2.75rem;
+}
+
+.edupro-section-header--center > div {
+    max-width: 100%;
+}
+
+.edupro-section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-family: var(--font-heading);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.65rem;
+}
+
+/* --------------------------------------------------------------------------
+   24.2 Consistent Section Vertical Rhythm & Inner Card Padding
+   -------------------------------------------------------------------------- */
+.edupro-section {
+    padding: clamp(4rem, 6.5vw, 5.5rem) 0;
+}
+
+/* Trusted Brands Spacing & Prominent Badge Icon */
+.edupro-brands-section {
+    padding: 2.75rem 0;
+}
+
+.edupro-brand-card {
+    min-height: 68px;
+    height: auto;
+    padding: 14px 22px;
+}
+
+.edupro-brand-card__badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 800;
+    background: var(--brand-accent, var(--brand-color, var(--color-primary)));
+    flex-shrink: 0;
+}
+
+/* Hero 3 Highlight Cards — Spacious Vertical Stack & 48x48 Icon Tile */
+.edupro-hero-highlight-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px 18px;
+}
+
+.edupro-hero-highlight-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 1.35rem;
+}
+
+.edupro-hero-highlight-card__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Hero Right Preview Card & 2-Column Mini Stats */
+.edupro-hero__card {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.edupro-hero__card-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px 0;
+    border-top: 1px solid rgba(190, 18, 60, 0.1);
+    border-bottom: 1px solid rgba(190, 18, 60, 0.1);
+}
+
+.edupro-hero__card-stats strong {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--color-primary);
+}
+
+.edupro-hero__card-stats span {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    margin-top: 2px;
+}
+
+/* Course Categories Cards — Generous Height & 52x52 Icon Box */
+.edupro-categories-section .edupro-categories-grid,
+.edupro-categories-grid {
+    gap: 1.25rem;
+}
+
+.edupro-cat-card,
+.edupro-category-card {
+    padding: 20px 22px;
+    min-height: 88px;
+    gap: 16px;
+    overflow: visible;
+}
+
+.edupro-cat-card__icon,
+.edupro-category-card__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 1.45rem;
+}
+
+.edupro-cat-card__icon svg,
+.edupro-category-card__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Course Cards — Generous Body Padding, Crisp Meta Icons & Uncramped Footer */
+.course-card__body {
+    padding: 20px 20px 22px;
+    gap: 12px;
+}
+
+.course-card__body > * {
+    margin-bottom: 0;
+}
+
+.course-card__meta-item svg,
+.course-card__stats svg,
+.course-card__lessons-meta svg,
+.course-card__duration svg,
+.course-card__students svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.course-card__footer {
+    padding-top: 14px;
+    margin-top: auto;
+    gap: 10px;
+}
+
+/* Stats Counter Cards — Spacious Padding & 54x54 Prominent Icon Tile */
+.edupro-stat-card,
+.edupro-stat-box {
+    padding: 32px 24px;
+}
+
+.edupro-stat-card__icon,
+.edupro-stat-box__icon {
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 14px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.14), rgba(225, 29, 72, 0.06));
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+}
+
+.edupro-stat-card:nth-child(4n+2) .edupro-stat-card__icon,
+.edupro-stat-box:nth-child(4n+2) .edupro-stat-box__icon {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(251, 191, 36, 0.06));
+    color: #d97706;
+}
+
+.edupro-stat-card:nth-child(4n+3) .edupro-stat-card__icon,
+.edupro-stat-box:nth-child(4n+3) .edupro-stat-box__icon {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(52, 211, 153, 0.06));
+    color: #059669;
+}
+
+.edupro-stat-card:nth-child(4n+4) .edupro-stat-card__icon,
+.edupro-stat-box:nth-child(4n+4) .edupro-stat-box__icon {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(168, 85, 247, 0.06));
+    color: #7e22ce;
+}
+
+.edupro-stat-card__icon svg,
+.edupro-stat-box__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Why Choose Us Feature Cards — 32x28 Padding & 60x60 Frosted Gradient Badge */
+.edupro-feature-card,
+.feature-card {
+    padding: 32px 28px;
+}
+
+.edupro-feature-card__icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.14) 0%, rgba(147, 51, 234, 0.08) 100%);
+    border: 1px solid rgba(190, 18, 60, 0.12);
+    color: var(--color-primary);
+    box-shadow: 0 8px 20px -6px rgba(190, 18, 60, 0.16);
+}
+
+.edupro-feature-card__icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+/* Alumni Spotlight & Gift Card Generous Padding & 26x26 Checkmarks */
+.edupro-spotlight-card,
+.edupro-giftcard-grid,
+.edupro-giftcard-wrap {
+    padding: clamp(24px, 4vw, 44px);
+    gap: clamp(2rem, 4vw, 3.5rem);
+}
+
+.edupro-giftcard-check {
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+}
+
+.edupro-giftcard-check svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* Newsletter CTA Banner & Unified White Pill Form */
+.edupro-cta-box {
+    padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+}
+
+.edupro-newsletter-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 560px;
+    margin: 0 auto;
+    gap: 0;
+}
+
+.edupro-newsletter-pill {
+    width: 100%;
+    max-width: 540px;
+    margin: 1.5rem auto 0.85rem;
+    padding: 6px 6px 6px 20px;
+    border-radius: 999px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 14px 34px -8px rgba(18, 14, 24, 0.28);
+}
+
+.edupro-newsletter-pill input[type="email"] {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0 8px 0 0;
+    border: none;
+    background: transparent;
+    color: var(--color-text-dark);
+    font-size: 0.94rem;
+}
+
+.edupro-newsletter-pill input[type="email"]:focus {
+    outline: none;
+}
+
+.edupro-newsletter-pill button,
+.edupro-newsletter-pill .edupro-btn {
+    min-height: 44px;
+    padding: 0 24px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.edupro-newsletter-note {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+/* --------------------------------------------------------------------------
+   24.3 Mobile GPU Lightweight Optimization (60 FPS Scrolling <= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* Hide decorative heavy blur orbs on mobile */
+    .edupro-ambient-blob {
+        display: none !important;
+    }
+
+    /* Replace stacked heavy backdrop blurs with lightweight frosted surfaces */
+    .site-header,
+    .edupro-header,
+    .site-header.scrolled,
+    .edupro-header.scrolled {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .edupro-glass-panel,
+    .course-card,
+    .edupro-cat-card,
+    .edupro-category-card,
+    .edupro-feature-card,
+    .edupro-stat-card,
+    .edupro-stat-box,
+    .edupro-auth-card,
+    .edupro-cart-summary-card,
+    .edupro-summary-card,
+    .edupro-checkout-card,
+    .edupro-review-card,
+    .edupro-reviews-summary-card,
+    .edupro-contact-card,
+    .edupro-spotlight-card,
+    .edupro-giftcard-grid,
+    .edupro-giftcard-wrap,
+    .edupro-hero-highlight-card,
+    .edupro-hero--glass .edupro-hero__card,
+    .edupro-brand-card,
+    .edupro-course-fact-tile,
+    .edupro-course-glance-box,
+    .edupro-sidebar-help-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255, 255, 255, 0.96);
+    }
+
+    .edupro-section-header {
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .edupro-hero__card {
+        padding: 22px;
+    }
+
+    .edupro-newsletter-pill {
+        flex-direction: column;
+        border-radius: 18px;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .edupro-newsletter-pill input[type="email"] {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    .edupro-newsletter-pill button,
+    .edupro-newsletter-pill .edupro-btn {
+        width: 100%;
+    }
+}

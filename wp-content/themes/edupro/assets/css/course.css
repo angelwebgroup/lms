@@ -19,26 +19,30 @@
  */
 
 :root {
-    --ep-primary: var(--edupro-primary, #e31b23);
-    --ep-primary-dark: #c0151c;
-    --ep-secondary: #1a1a2e;
-    --ep-dark-surface: #121223;
-    --ep-dark-elevated: #1e1e36;
+    --ep-primary: var(--edupro-primary, #be123c);
+    --ep-primary-bright: #e11d48;
+    --ep-primary-dark: #9f1239;
+    --ep-secondary: #120e18;
+    --ep-dark-surface: #120e18;
+    --ep-dark-elevated: #1b1526;
     --ep-dark-border: rgba(255, 255, 255, 0.1);
     --ep-accent: #f4a261;
     --ep-gold: #f5a623;
-    --ep-success: #2ecc71;
-    --ep-warning: #f39c12;
-    --ep-text-dark: #1a1a2e;
-    --ep-text-medium: #4a4a6a;
-    --ep-text-light: #8888aa;
-    --ep-bg: #f8f9ff;
+    --ep-success: #10b981;
+    --ep-warning: #f59e0b;
+    --ep-text-dark: #120e18;
+    --ep-text-medium: #4a455a;
+    --ep-text-light: #7c768e;
+    --ep-bg: #fdf6f8;
     --ep-white: #ffffff;
-    --ep-border: #e8e8f0;
-    --ep-radius: 10px;
-    --ep-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    --ep-shadow-lg: 0 14px 36px rgba(26, 26, 46, 0.14);
-    --ep-transition: all 0.3s ease;
+    --ep-border: rgba(190, 18, 60, 0.12);
+    --ep-glass-bg: rgba(255, 255, 255, 0.78);
+    --ep-glass-border: rgba(255, 255, 255, 0.92);
+    --ep-glass-shadow: 0 12px 32px -6px rgba(190, 18, 60, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    --ep-radius: 16px;
+    --ep-shadow: 0 8px 26px rgba(18, 14, 24, 0.07);
+    --ep-shadow-lg: 0 18px 44px rgba(18, 14, 24, 0.14);
+    --ep-transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ============================================================================
@@ -1935,5 +1939,675 @@
     .edupro-certificate__footer {
         grid-template-columns: 1fr;
         justify-items: center;
+    }
+}
+
+
+/* ============================================================================
+ * 12. v1.3.0 LUXURY GLASSMORPHISM HARMONIZATION & SINGLE COURSE EXTRAS
+ * ========================================================================= */
+
+.edupro-single-course {
+    background: var(--ep-bg);
+}
+
+/* Harmonized Glass Surfaces for Single Course Cards, Sidebar & Accordions */
+.edupro-course-box,
+.course-sidebar-box,
+.edupro-course-card-sticky,
+.curriculum-section,
+.edupro-curriculum-section,
+.review-card,
+.edupro-review-card {
+    background: var(--ep-glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--ep-glass-border);
+    border-radius: var(--ep-radius);
+    box-shadow: var(--ep-glass-shadow);
+}
+
+.edupro-course-tabs,
+.course-tabs {
+    background: var(--ep-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--ep-glass-border);
+    border-radius: 999px;
+    padding: 6px;
+    gap: 6px;
+    box-shadow: 0 6px 20px -4px rgba(190, 18, 60, 0.07);
+}
+
+.edupro-course-tab,
+.course-tab-btn {
+    border-radius: 999px;
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    padding: 10px 18px;
+}
+
+.edupro-course-tab.is-active,
+.course-tab-btn.is-active {
+    background: linear-gradient(135deg, var(--ep-primary) 0%, var(--ep-primary-bright) 100%);
+    color: var(--ep-white) !important;
+    box-shadow: 0 6px 16px -3px rgba(190, 18, 60, 0.38);
+}
+
+.edupro-course-tab::after,
+.course-tab-btn::after {
+    display: none;
+}
+
+/* Key Facts / Accreditation 6-Tile Glass Grid */
+.edupro-course-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.edupro-course-fact-tile {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--ep-radius);
+    background: var(--ep-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--ep-glass-border);
+    box-shadow: var(--ep-glass-shadow);
+    transition: var(--ep-transition);
+}
+
+.edupro-course-fact-tile:hover {
+    transform: translateY(-3px);
+    border-color: rgba(190, 18, 60, 0.24);
+    box-shadow: 0 14px 30px -8px rgba(190, 18, 60, 0.14);
+}
+
+.edupro-course-fact-tile__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.12), rgba(225, 29, 72, 0.18));
+    color: var(--ep-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.05rem;
+}
+
+.edupro-course-fact-tile__body,
+.edupro-course-fact-tile > div {
+    min-width: 0;
+}
+
+.edupro-course-fact-tile__label,
+.edupro-course-fact-tile small {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ep-text-light);
+    margin-bottom: 3px;
+}
+
+.edupro-course-fact-tile__value,
+.edupro-course-fact-tile strong {
+    display: block;
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ep-text-dark);
+    line-height: 1.35;
+}
+
+/* Course At a Glance Rose-Glass Box */
+.edupro-course-glance-box {
+    background: linear-gradient(135deg, rgba(255, 241, 244, 0.88) 0%, rgba(255, 255, 255, 0.82) 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(190, 18, 60, 0.18);
+    border-radius: var(--ep-radius);
+    padding: 24px 26px;
+    margin-bottom: 24px;
+    box-shadow: var(--ep-glass-shadow);
+}
+
+.edupro-course-glance-box__title {
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ep-text-dark);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edupro-course-glance-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+}
+
+.edupro-course-glance-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-left: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--ep-text-medium);
+}
+
+.edupro-glance-check {
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ep-primary), var(--ep-primary-bright));
+    color: var(--ep-white);
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(190, 18, 60, 0.25);
+}
+
+/* Course Gallery Strip */
+.edupro-course-gallery {
+    margin-bottom: 24px;
+}
+
+.edupro-course-gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
+}
+
+.edupro-course-gallery__item {
+    display: block;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border: 2px solid var(--ep-glass-border);
+    box-shadow: 0 8px 20px rgba(18, 14, 24, 0.08);
+    background: var(--ep-white);
+}
+
+.edupro-course-gallery__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.edupro-course-gallery__item:hover img {
+    transform: scale(1.06);
+}
+
+/* Sidebar Need Help / Advisor Glass Card */
+.edupro-sidebar-help-card {
+    margin-top: 20px;
+    padding: 22px;
+    border-radius: var(--ep-radius);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.86) 0%, rgba(253, 242, 246, 0.92) 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--ep-glass-border);
+    box-shadow: var(--ep-glass-shadow);
+}
+
+.edupro-sidebar-help-card__title {
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ep-text-dark);
+    margin: 0 0 6px;
+}
+
+.edupro-sidebar-help-card__desc {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--ep-text-medium);
+    margin: 0 0 16px;
+}
+
+.edupro-sidebar-help-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.edupro-sidebar-help-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--ep-transition);
+}
+
+.edupro-sidebar-help-btn--whatsapp {
+    background: #25d366;
+    color: #ffffff;
+    box-shadow: 0 8px 18px -4px rgba(37, 211, 102, 0.38);
+}
+
+.edupro-sidebar-help-btn--whatsapp:hover {
+    background: #1ebe5b;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.edupro-sidebar-help-btn--phone {
+    background: var(--ep-secondary);
+    color: #ffffff;
+}
+
+.edupro-sidebar-help-btn--phone:hover {
+    background: var(--ep-primary);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Sidebar Student Testimonial Video Card */
+.edupro-sidebar-video-card {
+    margin-top: 20px;
+    border-radius: var(--ep-radius);
+    overflow: hidden;
+    background: var(--ep-secondary);
+    border: 1px solid var(--ep-glass-border);
+    box-shadow: var(--ep-shadow-lg);
+}
+
+.edupro-sidebar-video-card__trigger {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    padding: 0;
+    border: 0;
+    background: linear-gradient(135deg, #1b1326 0%, #3a1122 100%);
+    cursor: pointer;
+    overflow: hidden;
+    text-align: left;
+}
+
+.edupro-sidebar-video-card__trigger img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.72;
+    transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+.edupro-sidebar-video-card__trigger:hover img {
+    transform: scale(1.05);
+    opacity: 0.85;
+}
+
+.edupro-sidebar-video-card__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ep-primary), var(--ep-primary-bright));
+    color: var(--ep-white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 8px rgba(225, 29, 72, 0.24), 0 10px 24px rgba(0, 0, 0, 0.4);
+    transition: transform 0.25s ease;
+}
+
+.edupro-sidebar-video-card__trigger:hover .edupro-sidebar-video-card__play {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.edupro-sidebar-video-card__caption,
+.edupro-sidebar-video-card__info {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 28px 16px 14px;
+    background: linear-gradient(to top, rgba(18, 14, 24, 0.94) 0%, rgba(18, 14, 24, 0.65) 55%, transparent 100%);
+    color: var(--ep-white) !important;
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.edupro-sidebar-video-card__info small {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.edupro-sidebar-video-card__info strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    line-height: 1.35;
+}
+
+/* Video Lightbox Modal (Complementing main.css) */
+.edupro-video-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.edupro-video-lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.edupro-video-lightbox__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(18, 14, 24, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.edupro-video-lightbox__dialog {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 920px;
+    background: rgba(24, 19, 30, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+    transform: scale(0.95);
+    transition: transform 0.25s ease;
+}
+
+.edupro-video-lightbox.is-open .edupro-video-lightbox__dialog {
+    transform: scale(1);
+}
+
+.edupro-video-lightbox__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.edupro-video-lightbox__caption {
+    margin: 0;
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.edupro-video-lightbox__close {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 1.45rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.edupro-video-lightbox__close:hover {
+    background: var(--ep-primary);
+}
+
+.edupro-video-lightbox__stage {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000000;
+}
+
+/* Responsive Overrides for v1.3.0 Single Course Extras */
+@media (max-width: 992px) {
+    .edupro-course-facts-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .edupro-course-facts-grid,
+    .edupro-course-glance-list {
+        grid-template-columns: 1fr;
+    }
+
+    .edupro-course-tabs,
+    .course-tabs {
+        border-radius: 16px;
+    }
+}
+
+
+/* ============================================================================
+ * 13. v1.4.0 UX/UI SPACING, ICON SIZE & MOBILE GPU PERFECTION PASS
+ * ========================================================================= */
+
+/* Key Facts 6-Tile Grid — Prominent 44x44 Icon Tiles & Balanced Padding */
+.edupro-course-facts-grid {
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.edupro-course-fact-tile {
+    padding: 18px 20px;
+    gap: 14px;
+    align-items: center;
+}
+
+.edupro-course-fact-tile__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 1.25rem;
+}
+
+.edupro-course-fact-tile__icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Course At a Glance — Generous Padding & 24x24 Crimson Checkmarks */
+.edupro-course-glance-box {
+    padding: 28px 30px;
+    margin-bottom: 24px;
+}
+
+.edupro-course-glance-box__title {
+    margin: 0 0 18px;
+}
+
+.edupro-course-glance-list {
+    gap: 14px 24px;
+}
+
+.edupro-course-glance-list li {
+    gap: 12px;
+    line-height: 1.55;
+}
+
+.edupro-glance-check {
+    width: 24px;
+    height: 24px;
+    font-size: 0.78rem;
+}
+
+/* Consistent Padding & Vertical Rhythm Across All Course Content Cards */
+.edupro-course-box,
+.what-you-learn-box,
+.edupro-learn-box,
+.edupro-requirements-box,
+.edupro-description-box,
+.edupro-curriculum-box,
+.edupro-instructor-box,
+.edupro-reviews-box,
+.edupro-faq-box {
+    padding: 28px 30px;
+    margin-bottom: 24px;
+}
+
+.edupro-course-box__title {
+    font-family: "Plus Jakarta Sans", "Poppins", sans-serif;
+    margin: 0 0 18px;
+    line-height: 1.3;
+}
+
+/* Course Tabs Bar — Frosted Glass Container */
+.edupro-course-tabs,
+.course-tabs {
+    padding: 8px;
+    gap: 8px;
+    margin-bottom: 28px;
+    border-radius: 16px;
+}
+
+.edupro-course-tab,
+.course-tab-btn {
+    border-radius: 12px;
+    padding: 10px 18px;
+}
+
+/* Sticky Course Sidebar Box — Crisp 18px-20px Icons & Balanced Rhythm */
+.course-sidebar-box__body,
+.edupro-course-card-sticky .edupro-course-card-sticky__body,
+.edupro-course-sidebar-body {
+    padding: 24px;
+}
+
+.edupro-course-card-sticky .edupro-course-price-wrap,
+.course-sidebar-box .course-price-row {
+    margin-bottom: 18px;
+}
+
+.edupro-course-box__cta-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.edupro-guarantee-badge,
+.course-guarantee-badge {
+    margin: 14px 0 20px;
+}
+
+.course-includes-list,
+.edupro-course-includes-list {
+    gap: 12px;
+}
+
+.course-includes-list li,
+.edupro-course-includes-list li {
+    gap: 12px;
+    line-height: 1.45;
+}
+
+.course-includes-list li svg,
+.edupro-course-includes-list li svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+}
+
+/* Advisor Help Card — Touch-Friendly 44px Buttons */
+.edupro-sidebar-help-card {
+    padding: 24px;
+}
+
+.edupro-sidebar-help-btn {
+    min-height: 44px;
+    padding: 11px 18px;
+}
+
+/* Mobile GPU Lightweight Optimization (60 FPS scrolling) */
+@media (max-width: 768px) {
+    .edupro-course-box,
+    .course-sidebar-box,
+    .edupro-course-card-sticky,
+    .curriculum-section,
+    .edupro-curriculum-section,
+    .review-card,
+    .edupro-review-card,
+    .edupro-course-fact-tile,
+    .edupro-course-glance-box,
+    .edupro-sidebar-help-card,
+    .edupro-course-tabs,
+    .course-tabs {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .edupro-course-glance-box {
+        background: rgba(255, 245, 247, 0.96);
+    }
+}
+
+@media (max-width: 640px) {
+    .edupro-course-box,
+    .what-you-learn-box,
+    .edupro-learn-box,
+    .edupro-requirements-box,
+    .edupro-description-box,
+    .edupro-curriculum-box,
+    .edupro-instructor-box,
+    .edupro-reviews-box,
+    .edupro-faq-box,
+    .edupro-course-glance-box {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .edupro-course-fact-tile {
+        padding: 16px;
     }
 }

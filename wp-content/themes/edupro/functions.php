@@ -6,7 +6,7 @@
  * declares theme-supports, and enqueues assets.
  *
  * @package EduPro
- * @version 1.2.0
+ * @version 1.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 // 0. Constants
 // ---------------------------------------------------------------------------
-define( 'EDUPRO_VERSION',   '1.2.1' );
+define( 'EDUPRO_VERSION',   '1.4.0' );
 define( 'EDUPRO_DIR',       get_template_directory() );
 define( 'EDUPRO_URI',       get_template_directory_uri() );
 define( 'EDUPRO_INC',       EDUPRO_DIR . '/inc/' );
@@ -118,19 +118,39 @@ endif;
 add_action( 'after_setup_theme', 'edupro_theme_setup' );
 
 // ---------------------------------------------------------------------------
-// 3. Enqueue Styles
+// 3. Smart Minified Asset Loader & Enqueue Styles
 // ---------------------------------------------------------------------------
+if ( ! function_exists( 'edupro_asset_uri' ) ) :
+    /**
+     * Resolve minified (.min.css / .min.js) asset URI when SCRIPT_DEBUG is disabled
+     * and the minified sibling exists on disk; falls back safely to the source file.
+     *
+     * @param string $rel_path Relative path inside theme directory (e.g. 'assets/css/main.css').
+     * @return string Full asset URI.
+     */
+    function edupro_asset_uri( $rel_path ) {
+        $rel_path = ltrim( (string) $rel_path, '/' );
+        if ( ! defined( 'SCRIPT_DEBUG' ) || ! SCRIPT_DEBUG ) {
+            $min_path = preg_replace( '/\.(css|js)$/i', '.min.$1', $rel_path );
+            if ( $min_path && $min_path !== $rel_path && file_exists( EDUPRO_DIR . '/' . $min_path ) ) {
+                return EDUPRO_URI . '/' . $min_path;
+            }
+        }
+        return EDUPRO_URI . '/' . $rel_path;
+    }
+endif;
+
+// Preconnect to Google Fonts early for faster typography paint.
+add_action( 'wp_head', function() {
+    echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+    echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+}, 1 );
+
 if ( ! function_exists( 'edupro_enqueue_styles' ) ) :
     function edupro_enqueue_styles() {
 
-        // Google Fonts: Inter + Poppins
-        $google_fonts_url = add_query_arg(
-            [
-                'family'  => 'Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800',
-                'display' => 'swap',
-            ],
-            'https://fonts.googleapis.com/css2'
-        );
+        // Lean Google Fonts: Plus Jakarta Sans + Inter (display=swap)
+        $google_fonts_url = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap';
         wp_enqueue_style(
             'edupro-google-fonts',
             esc_url( $google_fonts_url ),
@@ -138,56 +158,66 @@ if ( ! function_exists( 'edupro_enqueue_styles' ) ) :
             null
         );
 
-        // Main stylesheet
+        // Main stylesheet (global)
         wp_enqueue_style(
             'edupro-main',
-            EDUPRO_URI . '/assets/css/main.css',
+            edupro_asset_uri( 'assets/css/main.css' ),
             [ 'edupro-google-fonts' ],
             EDUPRO_VERSION
         );
 
-        // Course-specific styles
-        wp_enqueue_style(
-            'edupro-course',
-            EDUPRO_URI . '/assets/css/course.css',
-            [ 'edupro-main' ],
-            EDUPRO_VERSION
-        );
+        // Course & lesson styles (conditional: course/lesson singles, archive & course taxonomies only)
+        if (
+            is_singular( [ 'lms_course', 'lms_lesson' ] ) ||
+            is_post_type_archive( 'lms_course' ) ||
+            is_tax( [ 'course_category', 'course_tag', 'course_level', 'course_language' ] )
+        ) {
+            wp_enqueue_style(
+                'edupro-course',
+                edupro_asset_uri( 'assets/css/course.css' ),
+                [ 'edupro-main' ],
+                EDUPRO_VERSION
+            );
+        }
 
-        // Student dashboard styles
-        wp_enqueue_style(
-            'edupro-dashboard',
-            EDUPRO_URI . '/assets/css/dashboard.css',
-            [ 'edupro-main' ],
-            EDUPRO_VERSION
-        );
+        // Student dashboard styles (conditional: dashboard template only)
+        if ( is_page_template( 'templates/template-dashboard.php' ) ) {
+            wp_enqueue_style(
+                'edupro-dashboard',
+                edupro_asset_uri( 'assets/css/dashboard.css' ),
+                [ 'edupro-main' ],
+                EDUPRO_VERSION
+            );
+        }
     }
 endif;
 add_action( 'wp_enqueue_scripts', 'edupro_enqueue_styles' );
 
 // ---------------------------------------------------------------------------
-// 4. Enqueue Scripts
+// 4. Enqueue Scripts (Conditional + Deferred)
 // ---------------------------------------------------------------------------
 if ( ! function_exists( 'edupro_enqueue_scripts' ) ) :
     function edupro_enqueue_scripts() {
 
-        // Main JS (jQuery as dependency — WordPress ships jQuery)
+        // Main JS (global; jQuery as dependency — WordPress ships jQuery)
         wp_enqueue_script(
             'edupro-main',
-            EDUPRO_URI . '/assets/js/main.js',
+            edupro_asset_uri( 'assets/js/main.js' ),
             [ 'jquery' ],
             EDUPRO_VERSION,
             true  // load in footer
         );
 
-        // Course player JS
-        wp_enqueue_script(
-            'edupro-course-player',
-            EDUPRO_URI . '/assets/js/course-player.js',
-            [ 'jquery', 'edupro-main' ],
-            EDUPRO_VERSION,
-            true
-        );
+        // Course player JS (conditional: single lesson pages only)
+        if ( is_singular( 'lms_lesson' ) ) {
+            wp_enqueue_script(
+                'edupro-course-player',
+                edupro_asset_uri( 'assets/js/course-player.js' ),
+                [ 'jquery', 'edupro-main' ],
+                EDUPRO_VERSION,
+                true
+            );
+        }
 
         // Localise variables for JS
         wp_localize_script(
@@ -211,6 +241,17 @@ if ( ! function_exists( 'edupro_enqueue_scripts' ) ) :
     }
 endif;
 add_action( 'wp_enqueue_scripts', 'edupro_enqueue_scripts' );
+
+// Defer EduPro frontend JS so first paint is never render-blocked.
+add_filter( 'script_loader_tag', function( $tag, $handle ) {
+    if ( is_admin() ) {
+        return $tag;
+    }
+    if ( in_array( $handle, [ 'edupro-main', 'edupro-course-player' ], true ) && false === strpos( $tag, ' defer' ) ) {
+        return str_replace( ' src=', ' defer src=', $tag );
+    }
+    return $tag;
+}, 10, 2 );
 
 // ---------------------------------------------------------------------------
 // 5. Register Sidebars / Widget Areas
@@ -359,6 +400,13 @@ add_filter( 'image_size_names_choose', function( $sizes ) {
 } );
 
 // ---------------------------------------------------------------------------
-// 10. Remove WordPress version from public head for security
+// 10. Security & Frontend Bloat Cleanup
 // ---------------------------------------------------------------------------
 remove_action( 'wp_head', 'wp_generator' );
+
+add_action( 'init', function() {
+    if ( ! is_admin() ) {
+        remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+        remove_action( 'wp_print_styles', 'print_emoji_styles' );
+    }
+} );

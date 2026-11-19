@@ -294,156 +294,279 @@ function edupro_render_google_reviews( $count = 6, $args = array() ) {
 		return '<div class="edupro-reviews-empty"><p>' . esc_html__( 'No reviews available yet.', 'edupro' ) . '</p></div>';
 	}
 
-	$stars_fn = function_exists( 'edupro_get_star_rating_html' );
-	$layout   = in_array( $args['layout'], array( 'grid', 'carousel', 'list' ), true ) ? $args['layout'] : 'carousel';
+	$stars_fn    = function_exists( 'edupro_get_star_rating_html' );
+	$layout      = in_array( $args['layout'], array( 'grid', 'carousel', 'list' ), true ) ? $args['layout'] : 'carousel';
+	$is_carousel = ( 'carousel' === $layout );
+	$show_badge  = ! empty( $args['show_badge'] );
 
 	ob_start();
 	?>
 	<div class="edupro-google-reviews edupro-google-reviews--<?php echo esc_attr( $layout ); ?>">
-		<?php if ( ! empty( $args['show_badge'] ) ) : ?>
-			<div class="edupro-reviews-summary-badge">
-				<div class="edupro-reviews-badge-left">
-					<div class="edupro-reviews-badge-brand">
-						<?php echo edupro_get_google_g_svg( 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<span class="edupro-reviews-badge-title">
-							<?php esc_html_e( 'Google Reviews', 'edupro' ); ?>
-						</span>
-					</div>
-					<div class="edupro-reviews-badge-score">
-						<strong class="edupro-reviews-score-number"><?php echo esc_html( number_format( (float) $data['rating'], 1 ) ); ?></strong>
-						<span class="edupro-reviews-score-stars">
-							<?php
-							if ( $stars_fn ) {
-								echo edupro_get_star_rating_html( $data['rating'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							} else {
-								echo '<span class="edupro-stars-fallback">' . esc_html( str_repeat( '★', (int) round( $data['rating'] ) ) ) . '</span>';
-							}
-							?>
-						</span>
-						<span class="edupro-reviews-score-count">
-							<?php
-							printf(
-								/* translators: %s: total reviews count */
-								esc_html__( 'Based on %s reviews', 'edupro' ),
-								'<strong>' . esc_html( number_format_i18n( (int) $data['total_reviews'] ) ) . '</strong>'
-							);
-							?>
-						</span>
-					</div>
-				</div>
-				<?php if ( ! empty( $data['place_url'] ) ) : ?>
-					<div class="edupro-reviews-badge-right">
-						<a href="<?php echo esc_url( $data['place_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="edupro-btn edupro-btn-outline edupro-review-cta-btn">
-							<?php esc_html_e( 'Review Us on Google', 'edupro' ); ?>
-						</a>
-					</div>
-				<?php endif; ?>
-			</div>
-		<?php endif; ?>
+		<?php if ( $is_carousel ) : ?>
+		<div class="edupro-reviews-split<?php echo $show_badge ? '' : ' edupro-reviews-split--no-summary'; ?>">
+			<?php if ( $show_badge ) : ?>
+				<aside class="edupro-reviews-summary-card" aria-label="<?php esc_attr_e( 'Google Reviews Summary', 'edupro' ); ?>">
+					<span class="edupro-reviews-summary-card__ribbon" aria-hidden="true">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+							<path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+						</svg>
+					</span>
 
-		<?php
-		$track_classes = 'carousel' === $layout
-			? 'edupro-reviews-track'
-			: 'edupro-reviews-track edupro-reviews-grid';
-		?>
-		<?php if ( 'carousel' === $layout ) : ?>
-		<div class="edupro-reviews-carousel-stage">
-			<?php if ( count( $reviews ) > 1 ) : ?>
-				<button
-					type="button"
-					class="edupro-reviews-nav-btn edupro-reviews-nav-btn--prev carousel-prev"
-					data-carousel-prev
-					aria-label="<?php esc_attr_e( 'Previous reviews', 'edupro' ); ?>"
-				>
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<polyline points="15 18 9 12 15 6"></polyline>
-					</svg>
-				</button>
-			<?php endif; ?>
-		<?php endif; ?>
+					<h3 class="edupro-reviews-summary-card__title"><?php esc_html_e( 'Google Reviews', 'edupro' ); ?></h3>
 
-		<div class="<?php echo esc_attr( $track_classes ); ?>" data-edupro-reviews-slider>
-			<?php foreach ( $reviews as $idx => $review ) : ?>
-				<?php
-				$name       = ! empty( $review['name'] ) ? $review['name'] : __( 'Verified Student', 'edupro' );
-				$rating     = isset( $review['rating'] ) ? max( 1, min( 5, (float) $review['rating'] ) ) : 5;
-				$date       = ! empty( $review['date'] ) ? $review['date'] : '';
-				$photo      = ! empty( $review['photo'] ) ? $review['photo'] : '';
-				$full_text  = ! empty( $review['text'] ) ? trim( $review['text'] ) : '';
-				$max_chars  = 160;
-				$is_long    = mb_strlen( $full_text ) > $max_chars;
-				$short_text = $is_long ? rtrim( mb_substr( $full_text, 0, $max_chars ) ) . '…' : $full_text;
-
-				// Build initials for avatar fallback.
-				$parts    = preg_split( '/\s+/', trim( $name ) );
-				$initials = '';
-				foreach ( array_slice( $parts, 0, 2 ) as $p ) {
-					$initials .= mb_strtoupper( mb_substr( $p, 0, 1 ) );
-				}
-				?>
-				<article class="edupro-review-card">
-					<header class="edupro-review-card__header">
-						<div class="edupro-review-card__author">
-							<?php if ( $photo ) : ?>
-								<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $name ); ?>" class="edupro-review-card__avatar" loading="lazy" width="44" height="44">
-							<?php else : ?>
-								<span class="edupro-review-card__avatar edupro-review-card__avatar--initials" aria-hidden="true">
-									<?php echo esc_html( $initials ? $initials : 'S' ); ?>
-								</span>
-							<?php endif; ?>
-							<div class="edupro-review-card__meta">
-								<h4 class="edupro-review-card__name"><?php echo esc_html( $name ); ?></h4>
-								<?php if ( $date ) : ?>
-									<time class="edupro-review-card__date"><?php echo esc_html( $date ); ?></time>
-								<?php endif; ?>
-							</div>
-						</div>
-						<span class="edupro-review-card__google-badge" title="<?php esc_attr_e( 'Verified Google Review', 'edupro' ); ?>">
-							<?php echo edupro_get_google_g_svg( 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						</span>
-					</header>
-
-					<div class="edupro-review-card__rating">
+					<div class="edupro-reviews-summary-card__stars">
 						<?php
 						if ( $stars_fn ) {
-							echo edupro_get_star_rating_html( $rating ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo edupro_get_star_rating_html( $data['rating'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						} else {
-							echo '<span class="edupro-stars-fallback">' . esc_html( str_repeat( '★', (int) round( $rating ) ) ) . '</span>';
+							echo '<span class="edupro-stars-fallback">' . esc_html( str_repeat( '★', (int) round( $data['rating'] ) ) ) . '</span>';
 						}
 						?>
 					</div>
 
-					<div class="edupro-review-card__body">
-						<?php if ( $is_long ) : ?>
-							<p class="edupro-review-card__text edupro-review-text-short"><?php echo esc_html( $short_text ); ?></p>
-							<p class="edupro-review-card__text edupro-review-text-full" style="display:none;"><?php echo esc_html( $full_text ); ?></p>
-							<button type="button" class="edupro-review-expand-btn" data-more="<?php esc_attr_e( 'Read more', 'edupro' ); ?>" data-less="<?php esc_attr_e( 'Show less', 'edupro' ); ?>" aria-expanded="false">
-								<?php esc_html_e( 'Read more', 'edupro' ); ?>
-							</button>
-						<?php else : ?>
-							<p class="edupro-review-card__text"><?php echo esc_html( $full_text ); ?></p>
-						<?php endif; ?>
+					<div class="edupro-reviews-summary-card__metrics">
+						<div class="edupro-reviews-summary-metric">
+							<strong><?php echo esc_html( number_format( (float) $data['rating'], 1 ) ); ?></strong>
+							<span><?php esc_html_e( 'Rating', 'edupro' ); ?></span>
+						</div>
+						<span class="edupro-reviews-summary-divider" aria-hidden="true"></span>
+						<div class="edupro-reviews-summary-metric">
+							<strong><?php echo esc_html( number_format_i18n( (int) $data['total_reviews'] ) ); ?></strong>
+							<span><?php esc_html_e( 'Reviews', 'edupro' ); ?></span>
+						</div>
 					</div>
-				</article>
-			<?php endforeach; ?>
-		</div>
-		<?php if ( 'carousel' === $layout ) : ?>
-			<?php if ( count( $reviews ) > 1 ) : ?>
-				<button
-					type="button"
-					class="edupro-reviews-nav-btn edupro-reviews-nav-btn--next carousel-next"
-					data-carousel-next
-					aria-label="<?php esc_attr_e( 'Next reviews', 'edupro' ); ?>"
-				>
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<polyline points="9 18 15 12 9 6"></polyline>
-					</svg>
-				</button>
+
+					<div class="edupro-reviews-summary-card__footer">
+						<?php echo edupro_get_google_g_svg( 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="edupro-reviews-summary-card__seal-label"><?php esc_html_e( 'Customer Reviews', 'edupro' ); ?></span>
+						<span class="edupro-reviews-summary-card__seal-check" aria-hidden="true" title="<?php esc_attr_e( 'Verified Reviews', 'edupro' ); ?>">
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+								<polyline points="22 4 12 14.01 9 11.01"/>
+							</svg>
+						</span>
+					</div>
+
+					<?php if ( ! empty( $data['place_url'] ) ) : ?>
+						<a href="<?php echo esc_url( $data['place_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="edupro-btn edupro-btn-outline edupro-btn-sm edupro-review-cta-btn">
+							<?php esc_html_e( 'Review Us on Google', 'edupro' ); ?>
+						</a>
+					<?php endif; ?>
+				</aside>
 			<?php endif; ?>
-		</div><!-- .edupro-reviews-carousel-stage -->
-		<?php if ( count( $reviews ) > 1 ) : ?>
-			<div class="edupro-reviews-dots carousel-dots" role="tablist" aria-label="<?php esc_attr_e( 'Review slides navigation', 'edupro' ); ?>"></div>
-		<?php endif; ?>
+
+			<div class="edupro-reviews-carousel-stage">
+				<?php if ( count( $reviews ) > 1 ) : ?>
+					<button
+						type="button"
+						class="edupro-reviews-nav-btn edupro-reviews-nav-btn--prev carousel-prev"
+						data-carousel-prev
+						aria-label="<?php esc_attr_e( 'Previous reviews', 'edupro' ); ?>"
+					>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<polyline points="15 18 9 12 15 6"></polyline>
+						</svg>
+					</button>
+				<?php endif; ?>
+
+				<div class="edupro-reviews-track" data-edupro-reviews-slider>
+					<?php foreach ( $reviews as $review ) : ?>
+						<?php
+						$name       = ! empty( $review['name'] ) ? $review['name'] : __( 'Verified Student', 'edupro' );
+						$headline   = ! empty( $review['title'] ) ? trim( (string) $review['title'] ) : '';
+						$rating     = isset( $review['rating'] ) ? max( 1, min( 5, (float) $review['rating'] ) ) : 5;
+						$date       = ! empty( $review['date'] ) ? $review['date'] : '';
+						$photo      = ! empty( $review['photo'] ) ? $review['photo'] : '';
+						$full_text  = ! empty( $review['text'] ) ? trim( $review['text'] ) : '';
+						$max_chars  = 155;
+						$is_long    = mb_strlen( $full_text ) > $max_chars;
+						$short_text = $is_long ? rtrim( mb_substr( $full_text, 0, $max_chars ) ) . '…' : $full_text;
+
+						$parts    = preg_split( '/\s+/', trim( $name ) );
+						$initials = '';
+						foreach ( array_slice( $parts, 0, 2 ) as $p ) {
+							$initials .= mb_strtoupper( mb_substr( $p, 0, 1 ) );
+						}
+						?>
+						<article class="edupro-review-card edupro-review-card--split">
+							<div class="edupro-review-card__top">
+								<div class="edupro-review-card__rating">
+									<?php
+									if ( $stars_fn ) {
+										echo edupro_get_star_rating_html( $rating ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									} else {
+										echo '<span class="edupro-stars-fallback">' . esc_html( str_repeat( '★', (int) round( $rating ) ) ) . '</span>';
+									}
+									?>
+								</div>
+								<span class="edupro-review-verified-pill">
+									<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+									<?php esc_html_e( 'VERIFIED', 'edupro' ); ?>
+								</span>
+							</div>
+
+							<div class="edupro-review-card__body">
+								<?php if ( $headline ) : ?>
+									<h4 class="edupro-review-card__headline"><?php echo esc_html( $headline ); ?></h4>
+								<?php endif; ?>
+								<?php if ( $is_long ) : ?>
+									<p class="edupro-review-card__text edupro-review-text-short"><?php echo esc_html( $short_text ); ?></p>
+									<p class="edupro-review-card__text edupro-review-text-full" style="display:none;"><?php echo esc_html( $full_text ); ?></p>
+									<button type="button" class="edupro-review-expand-btn" data-more="<?php esc_attr_e( 'Read more', 'edupro' ); ?>" data-less="<?php esc_attr_e( 'Show less', 'edupro' ); ?>" aria-expanded="false">
+										<?php esc_html_e( 'Read more', 'edupro' ); ?>
+									</button>
+								<?php else : ?>
+									<p class="edupro-review-card__text"><?php echo esc_html( $full_text ); ?></p>
+								<?php endif; ?>
+							</div>
+
+							<footer class="edupro-review-card__footer">
+								<div class="edupro-review-card__author">
+									<?php if ( $photo ) : ?>
+										<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $name ); ?>" class="edupro-review-card__avatar" loading="lazy" width="40" height="40">
+									<?php else : ?>
+										<span class="edupro-review-card__avatar edupro-review-card__avatar--initials" aria-hidden="true">
+											<?php echo esc_html( $initials ? $initials : 'S' ); ?>
+										</span>
+									<?php endif; ?>
+									<div class="edupro-review-card__meta">
+										<h4 class="edupro-review-card__name"><?php echo esc_html( $name ); ?></h4>
+										<?php if ( $date ) : ?>
+											<time class="edupro-review-card__date"><?php echo esc_html( $date ); ?></time>
+										<?php endif; ?>
+									</div>
+								</div>
+								<span class="edupro-review-card__google-badge" title="<?php esc_attr_e( 'Verified Google Review', 'edupro' ); ?>">
+									<?php echo edupro_get_google_g_svg( 18 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</span>
+							</footer>
+						</article>
+					<?php endforeach; ?>
+				</div>
+
+				<?php if ( count( $reviews ) > 1 ) : ?>
+					<button
+						type="button"
+						class="edupro-reviews-nav-btn edupro-reviews-nav-btn--next carousel-next"
+						data-carousel-next
+						aria-label="<?php esc_attr_e( 'Next reviews', 'edupro' ); ?>"
+					>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<polyline points="9 18 15 12 9 6"></polyline>
+						</svg>
+					</button>
+					<div class="edupro-reviews-dots carousel-dots" role="tablist" aria-label="<?php esc_attr_e( 'Review slides navigation', 'edupro' ); ?>"></div>
+				<?php endif; ?>
+			</div><!-- .edupro-reviews-carousel-stage -->
+		</div><!-- .edupro-reviews-split -->
+
+		<?php else : ?>
+			<?php if ( $show_badge ) : ?>
+				<div class="edupro-reviews-summary-badge">
+					<div class="edupro-reviews-badge-left">
+						<div class="edupro-reviews-badge-brand">
+							<?php echo edupro_get_google_g_svg( 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<span class="edupro-reviews-badge-title">
+								<?php esc_html_e( 'Google Reviews', 'edupro' ); ?>
+							</span>
+						</div>
+						<div class="edupro-reviews-badge-score">
+							<strong class="edupro-reviews-score-number"><?php echo esc_html( number_format( (float) $data['rating'], 1 ) ); ?></strong>
+							<span class="edupro-reviews-score-stars">
+								<?php
+								if ( $stars_fn ) {
+									echo edupro_get_star_rating_html( $data['rating'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								} else {
+									echo '<span class="edupro-stars-fallback">' . esc_html( str_repeat( '★', (int) round( $data['rating'] ) ) ) . '</span>';
+								}
+								?>
+							</span>
+							<span class="edupro-reviews-score-count">
+								<?php
+								printf(
+									/* translators: %s: total reviews count */
+									esc_html__( 'Based on %s reviews', 'edupro' ),
+									'<strong>' . esc_html( number_format_i18n( (int) $data['total_reviews'] ) ) . '</strong>'
+								);
+								?>
+							</span>
+						</div>
+					</div>
+					<?php if ( ! empty( $data['place_url'] ) ) : ?>
+						<div class="edupro-reviews-badge-right">
+							<a href="<?php echo esc_url( $data['place_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="edupro-btn edupro-btn-outline edupro-review-cta-btn">
+								<?php esc_html_e( 'Review Us on Google', 'edupro' ); ?>
+							</a>
+						</div>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<div class="edupro-reviews-track edupro-reviews-grid" data-edupro-reviews-slider>
+				<?php foreach ( $reviews as $review ) : ?>
+					<?php
+					$name       = ! empty( $review['name'] ) ? $review['name'] : __( 'Verified Student', 'edupro' );
+					$rating     = isset( $review['rating'] ) ? max( 1, min( 5, (float) $review['rating'] ) ) : 5;
+					$date       = ! empty( $review['date'] ) ? $review['date'] : '';
+					$photo      = ! empty( $review['photo'] ) ? $review['photo'] : '';
+					$full_text  = ! empty( $review['text'] ) ? trim( $review['text'] ) : '';
+					$max_chars  = 160;
+					$is_long    = mb_strlen( $full_text ) > $max_chars;
+					$short_text = $is_long ? rtrim( mb_substr( $full_text, 0, $max_chars ) ) . '…' : $full_text;
+
+					$parts    = preg_split( '/\s+/', trim( $name ) );
+					$initials = '';
+					foreach ( array_slice( $parts, 0, 2 ) as $p ) {
+						$initials .= mb_strtoupper( mb_substr( $p, 0, 1 ) );
+					}
+					?>
+					<article class="edupro-review-card">
+						<header class="edupro-review-card__header">
+							<div class="edupro-review-card__author">
+								<?php if ( $photo ) : ?>
+									<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $name ); ?>" class="edupro-review-card__avatar" loading="lazy" width="44" height="44">
+								<?php else : ?>
+									<span class="edupro-review-card__avatar edupro-review-card__avatar--initials" aria-hidden="true">
+										<?php echo esc_html( $initials ? $initials : 'S' ); ?>
+									</span>
+								<?php endif; ?>
+								<div class="edupro-review-card__meta">
+									<h4 class="edupro-review-card__name"><?php echo esc_html( $name ); ?></h4>
+									<?php if ( $date ) : ?>
+										<time class="edupro-review-card__date"><?php echo esc_html( $date ); ?></time>
+									<?php endif; ?>
+								</div>
+							</div>
+							<span class="edupro-review-card__google-badge" title="<?php esc_attr_e( 'Verified Google Review', 'edupro' ); ?>">
+								<?php echo edupro_get_google_g_svg( 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</span>
+						</header>
+
+						<div class="edupro-review-card__rating">
+							<?php
+							if ( $stars_fn ) {
+								echo edupro_get_star_rating_html( $rating ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							} else {
+								echo '<span class="edupro-stars-fallback">' . esc_html( str_repeat( '★', (int) round( $rating ) ) ) . '</span>';
+							}
+							?>
+						</div>
+
+						<div class="edupro-review-card__body">
+							<?php if ( $is_long ) : ?>
+								<p class="edupro-review-card__text edupro-review-text-short"><?php echo esc_html( $short_text ); ?></p>
+								<p class="edupro-review-card__text edupro-review-text-full" style="display:none;"><?php echo esc_html( $full_text ); ?></p>
+								<button type="button" class="edupro-review-expand-btn" data-more="<?php esc_attr_e( 'Read more', 'edupro' ); ?>" data-less="<?php esc_attr_e( 'Show less', 'edupro' ); ?>" aria-expanded="false">
+									<?php esc_html_e( 'Read more', 'edupro' ); ?>
+								</button>
+							<?php else : ?>
+								<p class="edupro-review-card__text"><?php echo esc_html( $full_text ); ?></p>
+							<?php endif; ?>
+						</div>
+					</article>
+				<?php endforeach; ?>
+			</div>
 		<?php endif; ?>
 	</div>
 	<?php

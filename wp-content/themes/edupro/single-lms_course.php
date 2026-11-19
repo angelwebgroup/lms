@@ -65,7 +65,7 @@ while ( have_posts() ) :
             : 0;
     }
 
-    // Details meta.
+    // Curriculum & Details meta.
     $duration_mins    = (int) get_post_meta( $course_id, '_edupro_duration', true );
     $duration_label   = ( $duration_mins > 0 && function_exists( 'edupro_get_duration_label' ) ) ? edupro_get_duration_label( $duration_mins ) : __( 'Self-Paced', 'edupro' );
     $meta_level       = get_post_meta( $course_id, '_edupro_course_level', true );
@@ -75,6 +75,68 @@ while ( have_posts() ) :
     $intro_video      = get_post_meta( $course_id, '_edupro_course_intro_video', true );
     $has_certificate  = ( '1' === (string) get_post_meta( $course_id, '_edupro_certificate', true ) );
     $curriculum_raw   = get_post_meta( $course_id, '_edupro_curriculum', true );
+
+    // v1.3.0 Website Settings toggles & Per-Course Extras meta.
+    $edupro_sc_setting = function ( $key, $default = '' ) {
+        if ( function_exists( 'edupro_get_site_setting' ) ) {
+            $val = edupro_get_site_setting( $key, $default );
+            return ( '' !== $val && null !== $val ) ? $val : $default;
+        }
+        return $default;
+    };
+    $edupro_sc_toggle = function ( $key, $default = '1' ) {
+        if ( function_exists( 'edupro_get_site_setting' ) ) {
+            return '1' === (string) edupro_get_site_setting( $key, $default );
+        }
+        return '1' === (string) $default;
+    };
+
+    $show_key_facts      = $edupro_sc_toggle( 'course_show_key_facts', '1' );
+    $show_at_a_glance    = $edupro_sc_toggle( 'course_show_at_a_glance', '1' );
+    $show_brands_strip   = $edupro_sc_toggle( 'course_show_brands_carousel', '1' );
+    $show_google_reviews = $edupro_sc_toggle( 'course_show_google_reviews', '1' );
+    $show_help_card      = $edupro_sc_toggle( 'course_show_help_card', '1' );
+    $show_gallery        = $edupro_sc_toggle( 'course_show_gallery', '1' );
+
+    $default_awarding_body = $edupro_sc_setting( 'course_default_awarding_body', __( 'CPD Accredited & QLS Endorsed', 'edupro' ) );
+    $awarding_body         = trim( (string) get_post_meta( $course_id, '_edupro_awarding_body', true ) ) ?: $default_awarding_body;
+    $study_method          = trim( (string) get_post_meta( $course_id, '_edupro_study_method', true ) ) ?: __( '100% Online / Self-Paced', 'edupro' );
+    $assessment_method     = trim( (string) get_post_meta( $course_id, '_edupro_assessment_method', true ) ) ?: __( 'Online MCQ & Practical', 'edupro' );
+    $tutor_support         = trim( (string) get_post_meta( $course_id, '_edupro_tutor_support', true ) ) ?: __( '24/7 Dedicated Tutor Support', 'edupro' );
+
+    $gallery_raw = trim( (string) get_post_meta( $course_id, '_edupro_course_gallery', true ) );
+    $gallery_ids = $gallery_raw ? array_filter( array_map( 'absint', explode( ',', $gallery_raw ) ) ) : array();
+
+    $testimonial_video   = trim( (string) get_post_meta( $course_id, '_edupro_testimonial_video', true ) );
+    $testimonial_caption = trim( (string) get_post_meta( $course_id, '_edupro_testimonial_caption', true ) ) ?: __( 'Watch Student Review', 'edupro' );
+
+    $custom_faqs_raw = get_post_meta( $course_id, '_edupro_course_faqs', true );
+    $custom_faqs     = array();
+    if ( ! empty( $custom_faqs_raw ) ) {
+        $decoded_faqs = is_array( $custom_faqs_raw ) ? $custom_faqs_raw : json_decode( (string) $custom_faqs_raw, true );
+        if ( is_array( $decoded_faqs ) ) {
+            foreach ( $decoded_faqs as $f_item ) {
+                if ( is_array( $f_item ) && ! empty( $f_item['q'] ) && ! empty( $f_item['a'] ) ) {
+                    $custom_faqs[] = array(
+                        'q' => trim( (string) $f_item['q'] ),
+                        'a' => trim( (string) $f_item['a'] ),
+                    );
+                }
+            }
+        }
+    }
+
+    $help_card_title  = $edupro_sc_setting( 'course_help_card_title', __( 'Need Guidance?', 'edupro' ) );
+    $help_card_desc   = $edupro_sc_setting( 'course_help_card_desc', __( 'Speak with our friendly course advisors on phone or WhatsApp.', 'edupro' ) );
+    $help_phone       = trim( (string) $edupro_sc_setting( 'phone_primary', '' ) );
+    $help_phone_href  = $help_phone ? 'tel:' . preg_replace( '/[^0-9+]/', '', $help_phone ) : '';
+    $help_wa_num      = trim( (string) $edupro_sc_setting( 'whatsapp_number', '' ) );
+    $help_wa_url      = '';
+    if ( '' !== $help_wa_num ) {
+        $help_wa_url = function_exists( 'edupro_get_whatsapp_url' )
+            ? edupro_get_whatsapp_url( sprintf( __( 'Hi, I have a question about the course: %s', 'edupro' ), get_the_title( $course_id ) ) )
+            : ( preg_replace( '/[^0-9]/', '', $help_wa_num ) ? 'https://wa.me/' . preg_replace( '/[^0-9]/', '', $help_wa_num ) : '' );
+    }
 
     // Level & Language labels (taxonomy fallback to meta).
     $level_terms = get_the_terms( $course_id, 'course_level' );
@@ -190,24 +252,61 @@ while ( have_posts() ) :
     // Hero background thumbnail URL.
     $hero_bg_url = has_post_thumbnail( $course_id ) ? get_the_post_thumbnail_url( $course_id, 'hero-thumb' ) : '';
 
-    // Related courses (same category).
+    // Related courses (same category first, automatically backfilled to 4 courses for a balanced 4-col grid).
     $course_cats = get_the_terms( $course_id, 'course_category' );
-    $related_args = array(
-        'post_type'      => 'lms_course',
-        'post_status'    => 'publish',
-        'posts_per_page' => 4,
-        'post__not_in'   => array( $course_id ),
-    );
+    $related_ids = array();
+
     if ( $course_cats && ! is_wp_error( $course_cats ) ) {
-        $related_args['tax_query'] = array(
-            array(
-                'taxonomy' => 'course_category',
-                'field'    => 'term_id',
-                'terms'    => wp_list_pluck( $course_cats, 'term_id' ),
+        $same_cat_ids = get_posts( array(
+            'post_type'      => 'lms_course',
+            'post_status'    => 'publish',
+            'posts_per_page' => 4,
+            'post__not_in'   => array( $course_id ),
+            'fields'         => 'ids',
+            'tax_query'      => array(
+                array(
+                    'taxonomy' => 'course_category',
+                    'field'    => 'term_id',
+                    'terms'    => wp_list_pluck( $course_cats, 'term_id' ),
+                ),
             ),
-        );
+        ) );
+        if ( is_array( $same_cat_ids ) ) {
+            $related_ids = array_map( 'absint', $same_cat_ids );
+        }
     }
-    $related_query = new WP_Query( $related_args );
+
+    if ( count( $related_ids ) < 4 ) {
+        $needed       = 4 - count( $related_ids );
+        $backfill_ids = get_posts( array(
+            'post_type'      => 'lms_course',
+            'post_status'    => 'publish',
+            'posts_per_page' => $needed,
+            'post__not_in'   => array_merge( array( $course_id ), $related_ids ),
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'fields'         => 'ids',
+        ) );
+        if ( is_array( $backfill_ids ) ) {
+            $related_ids = array_merge( $related_ids, array_map( 'absint', $backfill_ids ) );
+        }
+    }
+
+    $related_query = new WP_Query(
+        ! empty( $related_ids )
+            ? array(
+                'post_type'      => 'lms_course',
+                'post_status'    => 'publish',
+                'post__in'       => $related_ids,
+                'orderby'        => 'post__in',
+                'posts_per_page' => 4,
+            )
+            : array(
+                'post_type'      => 'lms_course',
+                'post__in'       => array( 0 ),
+                'posts_per_page' => 0,
+            )
+    );
     ?>
 
     <main id="primary" class="site-main edupro-single-course">
@@ -278,7 +377,7 @@ while ( have_posts() ) :
                             <a href="#instructor"><strong><?php echo esc_html( $author_name ); ?></strong></a>
                         </span>
                         <span class="edupro-course-hero__meta-item">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
                             </svg>
@@ -291,7 +390,7 @@ while ( have_posts() ) :
                             ?>
                         </span>
                         <span class="edupro-course-hero__meta-item">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="2" y1="12" x2="22" y2="12"></line>
                                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
@@ -335,6 +434,126 @@ while ( have_posts() ) :
 
                         <!-- TAB 1: OVERVIEW -->
                         <div id="overview" class="edupro-course-panel is-active" data-panel="overview" role="tabpanel">
+
+                            <!-- Key Facts / Accreditation 6-Tile Glass Grid (Dashboard-Controlled) -->
+                            <?php if ( $show_key_facts ) : ?>
+                                <div class="edupro-course-facts-grid" aria-label="<?php esc_attr_e( 'Key Course Facts', 'edupro' ); ?>">
+                                    <div class="edupro-course-fact-tile edupro-glass-panel">
+                                        <span class="edupro-course-fact-tile__icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <small><?php esc_html_e( 'Duration', 'edupro' ); ?></small>
+                                            <strong><?php echo esc_html( $duration_label ); ?></strong>
+                                        </div>
+                                    </div>
+                                    <div class="edupro-course-fact-tile edupro-glass-panel">
+                                        <span class="edupro-course-fact-tile__icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <small><?php esc_html_e( 'Study Method', 'edupro' ); ?></small>
+                                            <strong><?php echo esc_html( $study_method ); ?></strong>
+                                        </div>
+                                    </div>
+                                    <div class="edupro-course-fact-tile edupro-glass-panel">
+                                        <span class="edupro-course-fact-tile__icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                <polyline points="9 12 11 14 15 10"></polyline>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <small><?php esc_html_e( 'Awarding Body', 'edupro' ); ?></small>
+                                            <strong><?php echo esc_html( $awarding_body ); ?></strong>
+                                        </div>
+                                    </div>
+                                    <div class="edupro-course-fact-tile edupro-glass-panel">
+                                        <span class="edupro-course-fact-tile__icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <small><?php esc_html_e( 'Assessment', 'edupro' ); ?></small>
+                                            <strong><?php echo esc_html( $assessment_method ); ?></strong>
+                                        </div>
+                                    </div>
+                                    <div class="edupro-course-fact-tile edupro-glass-panel">
+                                        <span class="edupro-course-fact-tile__icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <small><?php esc_html_e( 'Tutor Support', 'edupro' ); ?></small>
+                                            <strong><?php echo esc_html( $tutor_support ); ?></strong>
+                                        </div>
+                                    </div>
+                                    <div class="edupro-course-fact-tile edupro-glass-panel">
+                                        <span class="edupro-course-fact-tile__icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="8" r="7"></circle>
+                                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <small><?php esc_html_e( 'Level & Award', 'edupro' ); ?></small>
+                                            <strong>
+                                                <?php
+                                                echo esc_html( $level_label );
+                                                if ( $has_certificate ) {
+                                                    echo ' • ' . esc_html__( 'Certificate', 'edupro' );
+                                                }
+                                                ?>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Course At a Glance Rose-Glass Highlight Box (Dashboard-Controlled) -->
+                            <?php if ( $show_at_a_glance ) : ?>
+                                <div class="edupro-course-glance-box">
+                                    <h2 class="edupro-course-glance-box__title"><?php esc_html_e( 'Course At a Glance', 'edupro' ); ?></h2>
+                                    <ul class="edupro-course-glance-list">
+                                        <li>
+                                            <span class="edupro-glance-check" aria-hidden="true">✓</span>
+                                            <span>
+                                                <?php
+                                                printf(
+                                                    /* translators: %s: awarding body */
+                                                    esc_html__( 'Accredited & endorsed by %s', 'edupro' ),
+                                                    '<strong>' . esc_html( $awarding_body ) . '</strong>'
+                                                );
+                                                ?>
+                                            </span>
+                                        </li>
+                                        <li>
+                                            <span class="edupro-glance-check" aria-hidden="true">✓</span>
+                                            <span><?php echo esc_html( $study_method ); ?> — <?php esc_html_e( 'lifetime access across desktop, tablet & mobile', 'edupro' ); ?></span>
+                                        </li>
+                                        <li>
+                                            <span class="edupro-glance-check" aria-hidden="true">✓</span>
+                                            <span><?php echo esc_html( $tutor_support ); ?> <?php esc_html_e( 'with practical guidance throughout your study', 'edupro' ); ?></span>
+                                        </li>
+                                        <li>
+                                            <span class="edupro-glance-check" aria-hidden="true">✓</span>
+                                            <span><?php esc_html_e( 'Instant verifiable digital PDF certificate upon completion + 30-day guarantee', 'edupro' ); ?></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
 
                             <!-- What You'll Learn Grid -->
                             <?php if ( ! empty( $learn_items ) ) : ?>
@@ -393,6 +612,36 @@ while ( have_posts() ) :
                                     <?php esc_html_e( 'Show More ↓', 'edupro' ); ?>
                                 </button>
                             </div>
+
+                            <!-- Course Photo Gallery Strip (Dashboard-Controlled) -->
+                            <?php if ( $show_gallery && ! empty( $gallery_ids ) ) : ?>
+                                <div class="edupro-course-box edupro-course-gallery-box">
+                                    <h2 class="edupro-course-box__title"><?php esc_html_e( 'Course & Training Gallery', 'edupro' ); ?></h2>
+                                    <div class="edupro-course-gallery">
+                                        <?php foreach ( $gallery_ids as $g_id ) : ?>
+                                            <?php
+                                            $g_full = wp_get_attachment_image_url( $g_id, 'large' );
+                                            if ( ! $g_full ) {
+                                                continue;
+                                            }
+                                            ?>
+                                            <a href="<?php echo esc_url( $g_full ); ?>" target="_blank" rel="noopener noreferrer" class="edupro-course-gallery__item">
+                                                <?php
+                                                echo wp_get_attachment_image(
+                                                    $g_id,
+                                                    'course-card',
+                                                    false,
+                                                    array(
+                                                        'class'   => 'edupro-course-gallery__img',
+                                                        'loading' => 'lazy',
+                                                    )
+                                                );
+                                                ?>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                         <!-- TAB 2: CURRICULUM ACCORDION -->
@@ -716,7 +965,7 @@ while ( have_posts() ) :
                             <div class="edupro-course-box edupro-faq-box">
                                 <h2 class="edupro-course-box__title"><?php esc_html_e( 'Frequently Asked Questions', 'edupro' ); ?></h2>
                                 <?php
-                                $faqs = array(
+                                $default_faqs = array(
                                     array(
                                         'q' => __( 'How long do I have access to this course?', 'edupro' ),
                                         'a' => __( 'Once enrolled, you receive unlimited lifetime access to all video lessons, downloadable resources, and future curriculum updates across desktop and mobile devices.', 'edupro' ),
@@ -734,6 +983,7 @@ while ( have_posts() ) :
                                         'a' => __( 'Every paid course is backed by our 30-day 100% money-back guarantee. Reach out to our support team within 30 days for a full refund.', 'edupro' ),
                                     ),
                                 );
+                                $faqs = ! empty( $custom_faqs ) ? $custom_faqs : $default_faqs;
                                 ?>
                                 <div class="edupro-faq-list">
                                     <?php foreach ( $faqs as $f_idx => $faq ) : ?>
@@ -745,7 +995,7 @@ while ( have_posts() ) :
                                                 </svg>
                                             </button>
                                             <div class="edupro-accordion-content">
-                                                <p><?php echo esc_html( $faq['a'] ); ?></p>
+                                                <p><?php echo wp_kses_post( $faq['a'] ); ?></p>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -872,11 +1122,21 @@ while ( have_posts() ) :
                                     <h4><?php esc_html_e( 'This course includes:', 'edupro' ); ?></h4>
                                     <ul>
                                         <li>
-                                            <span aria-hidden="true">🎬</span>
+                                            <span class="edupro-course-includes__icon" aria-hidden="true">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                                </svg>
+                                            </span>
                                             <span><?php echo esc_html( $duration_label ); ?> <?php esc_html_e( 'of on-demand content', 'edupro' ); ?></span>
                                         </li>
                                         <li>
-                                            <span aria-hidden="true">📚</span>
+                                            <span class="edupro-course-includes__icon" aria-hidden="true">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                                </svg>
+                                            </span>
                                             <span>
                                                 <?php
                                                 printf(
@@ -887,22 +1147,42 @@ while ( have_posts() ) :
                                             </span>
                                         </li>
                                         <li>
-                                            <span aria-hidden="true">♾️</span>
+                                            <span class="edupro-course-includes__icon" aria-hidden="true">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                                </svg>
+                                            </span>
                                             <span><?php esc_html_e( 'Full lifetime access', 'edupro' ); ?></span>
                                         </li>
                                         <li>
-                                            <span aria-hidden="true">📱</span>
+                                            <span class="edupro-course-includes__icon" aria-hidden="true">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                                </svg>
+                                            </span>
                                             <span><?php esc_html_e( 'Access on mobile, tablet & desktop', 'edupro' ); ?></span>
                                         </li>
                                         <?php if ( $has_certificate ) : ?>
                                             <li>
-                                                <span aria-hidden="true">🏆</span>
+                                                <span class="edupro-course-includes__icon" aria-hidden="true">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="8" r="7"></circle>
+                                                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                                                    </svg>
+                                                </span>
                                                 <span><?php esc_html_e( 'Certificate of Completion', 'edupro' ); ?></span>
                                             </li>
                                         <?php endif; ?>
                                         <?php if ( $enrollment_limit > 0 ) : ?>
                                             <li>
-                                                <span aria-hidden="true">🎟️</span>
+                                                <span class="edupro-course-includes__icon" aria-hidden="true">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                        <circle cx="9" cy="7" r="4"></circle>
+                                                    </svg>
+                                                </span>
                                                 <span>
                                                     <?php
                                                     printf(
@@ -965,11 +1245,76 @@ while ( have_posts() ) :
 
                             </div>
                         </div>
+
+                        <!-- Sidebar Student Testimonial Video Card -->
+                        <?php if ( '' !== $testimonial_video ) : ?>
+                            <div class="edupro-sidebar-video-card edupro-glass-panel">
+                                <button
+                                    type="button"
+                                    class="edupro-sidebar-video-card__trigger"
+                                    data-video-modal="<?php echo esc_url( $testimonial_video ); ?>"
+                                    data-video-title="<?php echo esc_attr( $testimonial_caption ); ?>"
+                                    aria-label="<?php echo esc_attr( $testimonial_caption ); ?>"
+                                >
+                                    <span class="edupro-sidebar-video-card__play" aria-hidden="true">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                                        </svg>
+                                    </span>
+                                    <span class="edupro-sidebar-video-card__info">
+                                        <small><?php esc_html_e( 'Student Story', 'edupro' ); ?></small>
+                                        <strong><?php echo esc_html( $testimonial_caption ); ?></strong>
+                                    </span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Sidebar "Need Guidance?" Call / WhatsApp Glass Card -->
+                        <?php if ( $show_help_card && ( $help_phone_href || $help_wa_url ) ) : ?>
+                            <div class="edupro-sidebar-help-card edupro-glass-panel">
+                                <h4 class="edupro-sidebar-help-card__title"><?php echo esc_html( $help_card_title ); ?></h4>
+                                <p class="edupro-sidebar-help-card__desc"><?php echo esc_html( $help_card_desc ); ?></p>
+                                <div class="edupro-sidebar-help-card__actions">
+                                    <?php if ( $help_wa_url ) : ?>
+                                        <a href="<?php echo esc_url( $help_wa_url ); ?>" target="_blank" rel="noopener noreferrer" class="edupro-sidebar-help-btn edupro-sidebar-help-btn--whatsapp">
+                                            <span>💬 <?php esc_html_e( 'Chat on WhatsApp', 'edupro' ); ?></span>
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if ( $help_phone_href ) : ?>
+                                        <a href="<?php echo esc_url( $help_phone_href ); ?>" class="edupro-sidebar-help-btn edupro-sidebar-help-btn--phone">
+                                            <span>📞 <?php echo esc_html( $help_phone ); ?></span>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </aside>
 
                 </div><!-- .edupro-course-layout -->
             </div>
         </section>
+
+        <!-- =================================================================
+             2B. TRUSTED BRANDS CAROUSEL (Dashboard-Controlled)
+             ================================================================= -->
+        <?php if ( $show_brands_strip && function_exists( 'edupro_render_brands_carousel' ) ) : ?>
+            <?php echo edupro_render_brands_carousel( 'edupro-brands-section--compact' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+        <?php endif; ?>
+
+        <!-- =================================================================
+             2C. VERIFIED GOOGLE REVIEWS CAROUSEL (Dashboard-Controlled)
+             ================================================================= -->
+        <?php if ( $show_google_reviews && function_exists( 'edupro_render_google_reviews' ) ) : ?>
+            <section class="edupro-section edupro-course-google-reviews">
+                <div class="edupro-container container">
+                    <div class="edupro-section-header edupro-section-header--center">
+                        <span class="edupro-section-eyebrow"><?php esc_html_e( 'Verified Student Feedback', 'edupro' ); ?></span>
+                        <h2 class="edupro-section-title"><?php esc_html_e( 'What Our Learners Say on Google', 'edupro' ); ?></h2>
+                    </div>
+                    <?php echo edupro_render_google_reviews( 6 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <!-- =================================================================
              3. RELATED COURSES GRID

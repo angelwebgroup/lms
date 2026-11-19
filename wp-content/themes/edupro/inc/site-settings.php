@@ -19,60 +19,171 @@ defined( 'ABSPATH' ) || exit;
  * ========================================================================== */
 
 /**
+ * Return the default 8 prestigious accreditation & partner brands.
+ *
+ * @return array<int, array{name:string, sublabel:string, badge_color:string, logo_url:string}>
+ */
+function edupro_get_default_trusted_brands() {
+    return array(
+        array(
+            'name'        => 'Pearson',
+            'sublabel'    => 'Accredited Partner',
+            'badge_color' => '#005a70',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'edexcel',
+            'sublabel'    => 'Approved Centre',
+            'badge_color' => '#0f172a',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'QUALITY LICENCE',
+            'sublabel'    => 'SCHEME ENDORSED',
+            'badge_color' => '#be123c',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'RoSPA',
+            'sublabel'    => 'Member',
+            'badge_color' => '#1d4ed8',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'The CPD',
+            'sublabel'    => 'Certification Service',
+            'badge_color' => '#047857',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'NCFE',
+            'sublabel'    => 'CACHE Endorsed',
+            'badge_color' => '#6d28d9',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'IOSH',
+            'sublabel'    => 'Approved',
+            'badge_color' => '#b45309',
+            'logo_url'    => '',
+        ),
+        array(
+            'name'        => 'NHS',
+            'sublabel'    => 'Accepted Training',
+            'badge_color' => '#005eb8',
+            'logo_url'    => '',
+        ),
+    );
+}
+
+/**
  * Return the default values for EduPro Website Settings.
  *
  * @return array<string, mixed>
  */
 function edupro_get_site_settings_defaults() {
-    $wp_name        = get_bloginfo( 'name' );
-    $wp_description = get_bloginfo( 'description' );
-    $custom_logo_id = (int) get_theme_mod( 'custom_logo', 0 );
+    $wp_name         = get_bloginfo( 'name' );
+    $wp_description  = get_bloginfo( 'description' );
+    $custom_logo_id  = (int) get_theme_mod( 'custom_logo', 0 );
     $custom_logo_url = $custom_logo_id ? (string) wp_get_attachment_image_url( $custom_logo_id, 'full' ) : '';
 
     return array(
         // Tab 1: Brand & Identity
-        'site_name'                 => $wp_name ? $wp_name : 'EduPro LMS',
-        'site_tagline'              => $wp_description ? $wp_description : __( 'Accredited Online Courses & Certifications', 'edupro' ),
-        'header_logo_id'            => $custom_logo_id,
-        'header_logo_url'           => $custom_logo_url,
-        'footer_logo_id'            => 0,
-        'footer_logo_url'           => '',
-        'primary_color'             => get_theme_mod( 'edupro_primary_color', '#e31b23' ),
-        'announcement_enabled'      => '1',
-        'announcement_text'         => __( 'Special Offer: Use code WELCOME20 at checkout for 20% off accredited courses!', 'edupro' ),
-        'announcement_cta_text'     => __( 'Explore Courses', 'edupro' ),
-        'announcement_cta_url'      => home_url( '/courses/' ),
+        'site_name'                    => $wp_name ? $wp_name : 'EduPro LMS',
+        'site_tagline'                 => $wp_description ? $wp_description : __( 'Accredited Online Courses & Certifications', 'edupro' ),
+        'header_logo_id'               => $custom_logo_id,
+        'header_logo_url'              => $custom_logo_url,
+        'footer_logo_id'               => 0,
+        'footer_logo_url'              => '',
+        'primary_color'                => get_theme_mod( 'edupro_primary_color', '#be123c' ),
+        'announcement_enabled'         => '1',
+        'announcement_text'            => __( 'Special Offer: Use code WELCOME20 at checkout for 20% off accredited courses!', 'edupro' ),
+        'announcement_cta_text'        => __( 'Explore Courses', 'edupro' ),
+        'announcement_cta_url'         => home_url( '/courses/' ),
 
         // Tab 2: Contact, Phone & WhatsApp
-        'phone_primary'             => '',
-        'phone_secondary'           => '',
-        'whatsapp_number'           => '',
-        'whatsapp_message'          => __( 'Hello! I would like to learn more about your courses.', 'edupro' ),
-        'whatsapp_floating_enabled' => '1',
-        'email_support'             => (string) get_option( 'admin_email', '' ),
-        'email_sales'               => '',
-        'business_hours'            => __( 'Mon – Sat: 9:00 AM – 7:00 PM', 'edupro' ),
-        'address_primary'           => '',
-        'address_secondary'         => '',
+        'phone_primary'                => '',
+        'phone_secondary'              => '',
+        'whatsapp_number'              => '',
+        'whatsapp_message'             => __( 'Hello! I would like to learn more about your courses.', 'edupro' ),
+        'whatsapp_floating_enabled'    => '1',
+        'email_support'                => (string) get_option( 'admin_email', '' ),
+        'email_sales'                  => '',
+        'business_hours'               => __( 'Mon – Sat: 9:00 AM – 7:00 PM', 'edupro' ),
+        'address_primary'              => '',
+        'address_secondary'            => '',
 
         // Tab 3: Google Maps
-        'map_embed'                 => '',
-        'map_directions_url'        => '',
-        'map_height'                => 380,
+        'map_embed'                    => '',
+        'map_directions_url'           => '',
+        'map_height'                   => 380,
 
         // Tab 4: Social Links
-        'social_facebook'           => '',
-        'social_instagram'          => '',
-        'social_youtube'            => '',
-        'social_linkedin'           => '',
-        'social_twitter'            => '',
-        'social_tiktok'             => '',
-        'social_telegram'           => '',
+        'social_facebook'              => '',
+        'social_instagram'             => '',
+        'social_youtube'               => '',
+        'social_linkedin'              => '',
+        'social_twitter'               => '',
+        'social_tiktok'                => '',
+        'social_telegram'              => '',
 
         // Tab 5: Footer & Legal
-        'footer_about'              => __( 'Empowering learners worldwide with career-focused, accredited online courses taught by industry experts.', 'edupro' ),
-        'footer_trust_badge'        => __( 'CPD Accredited & ISO Certified Online Learning', 'edupro' ),
-        'footer_copyright'          => '© {year} {site_name}. All rights reserved.',
+        'footer_about'                 => __( 'Empowering learners worldwide with career-focused, accredited online courses taught by industry experts.', 'edupro' ),
+        'footer_trust_badge'           => __( 'CPD Accredited & ISO Certified Online Learning', 'edupro' ),
+        'footer_copyright'             => '© {year} {site_name}. All rights reserved.',
+
+        // Tab 6: Homepage & Carousels (v1.3.0)
+        'hero_style'                   => 'glass_light',
+        'hero_badge'                   => __( "UK & India's Leading Online Learning & CPD Provider", 'edupro' ),
+        'hero_heading'                 => __( 'An Interactive Platform For', 'edupro' ),
+        'hero_highlight_word'          => __( 'Learning', 'edupro' ),
+        'hero_subtitle'                => __( 'Advance your career from anywhere in the world with industry-recognized certifications, expert tutor mentorship, and flexible self-paced study.', 'edupro' ),
+        'hero_card_1_title'            => __( '1000+ Online Courses', 'edupro' ),
+        'hero_card_1_desc'             => __( 'Explore accredited programmes across business, tech, healthcare, and design.', 'edupro' ),
+        'hero_card_2_title'            => __( 'Lifetime Access', 'edupro' ),
+        'hero_card_2_desc'             => __( 'Study at your own pace anytime, anywhere, on desktop, tablet, or mobile.', 'edupro' ),
+        'hero_card_3_title'            => __( 'Accredited Certificates', 'edupro' ),
+        'hero_card_3_desc'             => __( 'Earn globally recognized CPD & QLS certificates verified by employers.', 'edupro' ),
+
+        'brands_enabled'               => '1',
+        'brands_heading_prefix'        => __( 'Trusted by', 'edupro' ),
+        'brands_heading_highlight'     => __( '300+ Leading Universities', 'edupro' ),
+        'brands_heading_suffix'        => __( 'and Companies Globally', 'edupro' ),
+        'trusted_brands'               => edupro_get_default_trusted_brands(),
+
+        'spotlight_enabled'            => '1',
+        'spotlight_badge'              => __( 'Alumni Spotlight', 'edupro' ),
+        'spotlight_heading'            => __( 'Success Stories', 'edupro' ),
+        'spotlight_text'               => __( 'Join thousands of graduates who transformed their careers through our accredited online programmes, practical assessments, and dedicated 1-to-1 tutor support.', 'edupro' ),
+        'spotlight_text_2'             => __( 'Whether you are upskilling for a promotion, transitioning into a new industry, or launching your own practice, our internationally recognized qualifications open doors worldwide.', 'edupro' ),
+        'spotlight_stat_1_val'         => '96%',
+        'spotlight_stat_1_label'       => __( 'Career Advancement Rate', 'edupro' ),
+        'spotlight_stat_2_val'         => '140+',
+        'spotlight_stat_2_label'       => __( 'Countries Represented', 'edupro' ),
+        'spotlight_video_url'          => '',
+        'spotlight_video_thumb'        => '',
+        'spotlight_video_name'         => 'OLIVIA SZULC',
+        'spotlight_video_label'        => __( 'GRADUATE INTERVIEW', 'edupro' ),
+
+        'giftcard_enabled'             => '1',
+        'giftcard_eyebrow'             => __( 'SHARE KNOWLEDGE', 'edupro' ),
+        'giftcard_heading'             => __( 'Order Gift Card for Your Loved Ones Today', 'edupro' ),
+        'giftcard_desc'                => __( 'Give the gift of career growth and lifelong learning. Let friends, family, or team members unlock accredited courses at their own pace.', 'edupro' ),
+        'giftcard_bullets'             => "Instant digital gift delivery by email\nRedeemable across 1,000+ accredited courses\nFlexible gift amounts with 12-month validity\nIncludes official CPD & QLS certification",
+        'giftcard_value_label'         => '£25 – £150',
+        'giftcard_cta_text'            => __( 'Order Gift Card', 'edupro' ),
+        'giftcard_cta_url'             => home_url( '/courses/' ),
+
+        // Tab 7: Single Course Layout (v1.3.0)
+        'course_show_key_facts'        => '1',
+        'course_show_at_a_glance'      => '1',
+        'course_show_brands_carousel'  => '1',
+        'course_show_google_reviews'   => '1',
+        'course_show_help_card'        => '1',
+        'course_show_gallery'          => '1',
+        'course_default_awarding_body' => __( 'CPD Accredited & QLS Endorsed', 'edupro' ),
+        'course_help_card_title'       => __( 'Need Guidance?', 'edupro' ),
+        'course_help_card_desc'        => __( 'Speak with our friendly course advisors on phone or WhatsApp.', 'edupro' ),
     );
 }
 
@@ -109,9 +220,16 @@ function edupro_get_site_settings() {
         }
     }
 
+    // Ensure trusted_brands is always a well-formed indexed array.
+    if ( ! isset( $saved['trusted_brands'] ) || ! is_array( $saved['trusted_brands'] ) ) {
+        $settings['trusted_brands'] = $defaults['trusted_brands'];
+    } else {
+        $settings['trusted_brands'] = array_values( $saved['trusted_brands'] );
+    }
+
     // Ensure primary_color is always a valid hex color.
     $clean_color               = sanitize_hex_color( (string) $settings['primary_color'] );
-    $settings['primary_color'] = $clean_color ? $clean_color : '#e31b23';
+    $settings['primary_color'] = $clean_color ? $clean_color : '#be123c';
 
     return $settings;
 }
@@ -297,9 +415,9 @@ function edupro_get_social_networks_meta() {
  * Runs at priority 20 so it overrides functions.php's default Customizer style tag.
  */
 function edupro_site_settings_dynamic_css() {
-    $primary = sanitize_hex_color( (string) edupro_get_site_setting( 'primary_color', '#e31b23' ) );
+    $primary = sanitize_hex_color( (string) edupro_get_site_setting( 'primary_color', '#be123c' ) );
     if ( ! $primary ) {
-        $primary = '#e31b23';
+        $primary = '#be123c';
     }
     $primary_dark = edupro_darken_hex_color( $primary, 14 );
 
@@ -367,16 +485,16 @@ function edupro_handle_save_site_settings() {
         ? wp_unslash( $_POST['edupro_site_settings'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         : array();
 
-    $active_tab    = isset( $_POST['edupro_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['edupro_active_tab'] ) ) : 'brand';
-    $allowed_tabs  = array( 'brand', 'contact', 'maps', 'social', 'footer' );
+    $active_tab   = isset( $_POST['edupro_active_tab'] ) ? sanitize_key( wp_unslash( $_POST['edupro_active_tab'] ) ) : 'brand';
+    $allowed_tabs = array( 'brand', 'contact', 'maps', 'social', 'footer', 'homepage', 'course_layout' );
     if ( ! in_array( $active_tab, $allowed_tabs, true ) ) {
         $active_tab = 'brand';
     }
 
     // Sanitize color.
-    $primary_color = isset( $raw['primary_color'] ) ? sanitize_hex_color( trim( (string) $raw['primary_color'] ) ) : '#e31b23';
+    $primary_color = isset( $raw['primary_color'] ) ? sanitize_hex_color( trim( (string) $raw['primary_color'] ) ) : '#be123c';
     if ( ! $primary_color ) {
-        $primary_color = '#e31b23';
+        $primary_color = '#be123c';
     }
 
     // Sanitize header & footer logos.
@@ -423,50 +541,138 @@ function edupro_handle_save_site_settings() {
         $map_height = 900;
     }
 
+    // Sanitize hero style.
+    $hero_style = isset( $raw['hero_style'] ) ? sanitize_key( (string) $raw['hero_style'] ) : 'glass_light';
+    if ( ! in_array( $hero_style, array( 'glass_light', 'dark_pro' ), true ) ) {
+        $hero_style = 'glass_light';
+    }
+
+    // Sanitize Trusted Brands repeater array.
+    $clean_brands = array();
+    if ( isset( $raw['trusted_brands'] ) && is_array( $raw['trusted_brands'] ) ) {
+        foreach ( $raw['trusted_brands'] as $brand_row ) {
+            if ( ! is_array( $brand_row ) ) {
+                continue;
+            }
+            $b_name     = isset( $brand_row['name'] ) ? sanitize_text_field( trim( (string) $brand_row['name'] ) ) : '';
+            $b_sublabel = isset( $brand_row['sublabel'] ) ? sanitize_text_field( trim( (string) $brand_row['sublabel'] ) ) : '';
+            $b_color    = isset( $brand_row['badge_color'] ) ? sanitize_hex_color( trim( (string) $brand_row['badge_color'] ) ) : '#be123c';
+            $b_logo     = isset( $brand_row['logo_url'] ) ? esc_url_raw( trim( (string) $brand_row['logo_url'] ) ) : '';
+
+            if ( '' === $b_name && '' === $b_logo ) {
+                continue;
+            }
+
+            $clean_brands[] = array(
+                'name'        => $b_name,
+                'sublabel'    => $b_sublabel,
+                'badge_color' => $b_color ? $b_color : '#be123c',
+                'logo_url'    => $b_logo,
+            );
+        }
+    } elseif ( empty( $raw['trusted_brands_submitted'] ) ) {
+        // Preserve existing brands if the repeater was not part of the submission.
+        $existing     = edupro_get_site_settings();
+        $clean_brands = is_array( $existing['trusted_brands'] ) ? $existing['trusted_brands'] : edupro_get_default_trusted_brands();
+    }
+
     $clean = array(
         // Tab 1: Brand & Identity
-        'site_name'                 => isset( $raw['site_name'] ) ? sanitize_text_field( $raw['site_name'] ) : '',
-        'site_tagline'              => isset( $raw['site_tagline'] ) ? sanitize_text_field( $raw['site_tagline'] ) : '',
-        'header_logo_id'            => $header_logo_id,
-        'header_logo_url'           => $header_logo_url,
-        'footer_logo_id'            => $footer_logo_id,
-        'footer_logo_url'           => $footer_logo_url,
-        'primary_color'             => $primary_color,
-        'announcement_enabled'      => ! empty( $raw['announcement_enabled'] ) ? '1' : '0',
-        'announcement_text'         => isset( $raw['announcement_text'] ) ? sanitize_text_field( $raw['announcement_text'] ) : '',
-        'announcement_cta_text'     => isset( $raw['announcement_cta_text'] ) ? sanitize_text_field( $raw['announcement_cta_text'] ) : '',
-        'announcement_cta_url'      => isset( $raw['announcement_cta_url'] ) ? esc_url_raw( trim( (string) $raw['announcement_cta_url'] ) ) : '',
+        'site_name'                    => isset( $raw['site_name'] ) ? sanitize_text_field( $raw['site_name'] ) : '',
+        'site_tagline'                 => isset( $raw['site_tagline'] ) ? sanitize_text_field( $raw['site_tagline'] ) : '',
+        'header_logo_id'               => $header_logo_id,
+        'header_logo_url'              => $header_logo_url,
+        'footer_logo_id'               => $footer_logo_id,
+        'footer_logo_url'              => $footer_logo_url,
+        'primary_color'                => $primary_color,
+        'announcement_enabled'         => ! empty( $raw['announcement_enabled'] ) ? '1' : '0',
+        'announcement_text'            => isset( $raw['announcement_text'] ) ? sanitize_text_field( $raw['announcement_text'] ) : '',
+        'announcement_cta_text'        => isset( $raw['announcement_cta_text'] ) ? sanitize_text_field( $raw['announcement_cta_text'] ) : '',
+        'announcement_cta_url'         => isset( $raw['announcement_cta_url'] ) ? esc_url_raw( trim( (string) $raw['announcement_cta_url'] ) ) : '',
 
         // Tab 2: Contact, Phone & WhatsApp
-        'phone_primary'             => isset( $raw['phone_primary'] ) ? sanitize_text_field( $raw['phone_primary'] ) : '',
-        'phone_secondary'           => isset( $raw['phone_secondary'] ) ? sanitize_text_field( $raw['phone_secondary'] ) : '',
-        'whatsapp_number'           => isset( $raw['whatsapp_number'] ) ? sanitize_text_field( $raw['whatsapp_number'] ) : '',
-        'whatsapp_message'          => isset( $raw['whatsapp_message'] ) ? sanitize_textarea_field( $raw['whatsapp_message'] ) : '',
-        'whatsapp_floating_enabled' => ! empty( $raw['whatsapp_floating_enabled'] ) ? '1' : '0',
-        'email_support'             => isset( $raw['email_support'] ) ? sanitize_email( $raw['email_support'] ) : '',
-        'email_sales'               => isset( $raw['email_sales'] ) ? sanitize_email( $raw['email_sales'] ) : '',
-        'business_hours'            => isset( $raw['business_hours'] ) ? sanitize_text_field( $raw['business_hours'] ) : '',
-        'address_primary'           => isset( $raw['address_primary'] ) ? sanitize_textarea_field( $raw['address_primary'] ) : '',
-        'address_secondary'         => isset( $raw['address_secondary'] ) ? sanitize_textarea_field( $raw['address_secondary'] ) : '',
+        'phone_primary'                => isset( $raw['phone_primary'] ) ? sanitize_text_field( $raw['phone_primary'] ) : '',
+        'phone_secondary'              => isset( $raw['phone_secondary'] ) ? sanitize_text_field( $raw['phone_secondary'] ) : '',
+        'whatsapp_number'              => isset( $raw['whatsapp_number'] ) ? sanitize_text_field( $raw['whatsapp_number'] ) : '',
+        'whatsapp_message'             => isset( $raw['whatsapp_message'] ) ? sanitize_textarea_field( $raw['whatsapp_message'] ) : '',
+        'whatsapp_floating_enabled'    => ! empty( $raw['whatsapp_floating_enabled'] ) ? '1' : '0',
+        'email_support'                => isset( $raw['email_support'] ) ? sanitize_email( $raw['email_support'] ) : '',
+        'email_sales'                  => isset( $raw['email_sales'] ) ? sanitize_email( $raw['email_sales'] ) : '',
+        'business_hours'               => isset( $raw['business_hours'] ) ? sanitize_text_field( $raw['business_hours'] ) : '',
+        'address_primary'              => isset( $raw['address_primary'] ) ? sanitize_textarea_field( $raw['address_primary'] ) : '',
+        'address_secondary'            => isset( $raw['address_secondary'] ) ? sanitize_textarea_field( $raw['address_secondary'] ) : '',
 
         // Tab 3: Google Maps
-        'map_embed'                 => $clean_map_embed,
-        'map_directions_url'        => isset( $raw['map_directions_url'] ) ? esc_url_raw( trim( (string) $raw['map_directions_url'] ) ) : '',
-        'map_height'                => $map_height,
+        'map_embed'                    => $clean_map_embed,
+        'map_directions_url'           => isset( $raw['map_directions_url'] ) ? esc_url_raw( trim( (string) $raw['map_directions_url'] ) ) : '',
+        'map_height'                   => $map_height,
 
         // Tab 4: Social Links
-        'social_facebook'           => isset( $raw['social_facebook'] ) ? esc_url_raw( trim( (string) $raw['social_facebook'] ) ) : '',
-        'social_instagram'          => isset( $raw['social_instagram'] ) ? esc_url_raw( trim( (string) $raw['social_instagram'] ) ) : '',
-        'social_youtube'            => isset( $raw['social_youtube'] ) ? esc_url_raw( trim( (string) $raw['social_youtube'] ) ) : '',
-        'social_linkedin'           => isset( $raw['social_linkedin'] ) ? esc_url_raw( trim( (string) $raw['social_linkedin'] ) ) : '',
-        'social_twitter'            => isset( $raw['social_twitter'] ) ? esc_url_raw( trim( (string) $raw['social_twitter'] ) ) : '',
-        'social_tiktok'             => isset( $raw['social_tiktok'] ) ? esc_url_raw( trim( (string) $raw['social_tiktok'] ) ) : '',
-        'social_telegram'           => isset( $raw['social_telegram'] ) ? esc_url_raw( trim( (string) $raw['social_telegram'] ) ) : '',
+        'social_facebook'              => isset( $raw['social_facebook'] ) ? esc_url_raw( trim( (string) $raw['social_facebook'] ) ) : '',
+        'social_instagram'             => isset( $raw['social_instagram'] ) ? esc_url_raw( trim( (string) $raw['social_instagram'] ) ) : '',
+        'social_youtube'               => isset( $raw['social_youtube'] ) ? esc_url_raw( trim( (string) $raw['social_youtube'] ) ) : '',
+        'social_linkedin'              => isset( $raw['social_linkedin'] ) ? esc_url_raw( trim( (string) $raw['social_linkedin'] ) ) : '',
+        'social_twitter'               => isset( $raw['social_twitter'] ) ? esc_url_raw( trim( (string) $raw['social_twitter'] ) ) : '',
+        'social_tiktok'                => isset( $raw['social_tiktok'] ) ? esc_url_raw( trim( (string) $raw['social_tiktok'] ) ) : '',
+        'social_telegram'              => isset( $raw['social_telegram'] ) ? esc_url_raw( trim( (string) $raw['social_telegram'] ) ) : '',
 
         // Tab 5: Footer & Legal
-        'footer_about'              => isset( $raw['footer_about'] ) ? sanitize_textarea_field( $raw['footer_about'] ) : '',
-        'footer_trust_badge'        => isset( $raw['footer_trust_badge'] ) ? sanitize_text_field( $raw['footer_trust_badge'] ) : '',
-        'footer_copyright'          => isset( $raw['footer_copyright'] ) ? wp_kses_post( $raw['footer_copyright'] ) : '',
+        'footer_about'                 => isset( $raw['footer_about'] ) ? sanitize_textarea_field( $raw['footer_about'] ) : '',
+        'footer_trust_badge'           => isset( $raw['footer_trust_badge'] ) ? sanitize_text_field( $raw['footer_trust_badge'] ) : '',
+        'footer_copyright'             => isset( $raw['footer_copyright'] ) ? wp_kses_post( $raw['footer_copyright'] ) : '',
+
+        // Tab 6: Homepage & Carousels
+        'hero_style'                   => $hero_style,
+        'hero_badge'                   => isset( $raw['hero_badge'] ) ? sanitize_text_field( $raw['hero_badge'] ) : '',
+        'hero_heading'                 => isset( $raw['hero_heading'] ) ? sanitize_text_field( $raw['hero_heading'] ) : '',
+        'hero_highlight_word'          => isset( $raw['hero_highlight_word'] ) ? sanitize_text_field( $raw['hero_highlight_word'] ) : '',
+        'hero_subtitle'                => isset( $raw['hero_subtitle'] ) ? sanitize_textarea_field( $raw['hero_subtitle'] ) : '',
+        'hero_card_1_title'            => isset( $raw['hero_card_1_title'] ) ? sanitize_text_field( $raw['hero_card_1_title'] ) : '',
+        'hero_card_1_desc'             => isset( $raw['hero_card_1_desc'] ) ? sanitize_text_field( $raw['hero_card_1_desc'] ) : '',
+        'hero_card_2_title'            => isset( $raw['hero_card_2_title'] ) ? sanitize_text_field( $raw['hero_card_2_title'] ) : '',
+        'hero_card_2_desc'             => isset( $raw['hero_card_2_desc'] ) ? sanitize_text_field( $raw['hero_card_2_desc'] ) : '',
+        'hero_card_3_title'            => isset( $raw['hero_card_3_title'] ) ? sanitize_text_field( $raw['hero_card_3_title'] ) : '',
+        'hero_card_3_desc'             => isset( $raw['hero_card_3_desc'] ) ? sanitize_text_field( $raw['hero_card_3_desc'] ) : '',
+
+        'brands_enabled'               => ! empty( $raw['brands_enabled'] ) ? '1' : '0',
+        'brands_heading_prefix'        => isset( $raw['brands_heading_prefix'] ) ? sanitize_text_field( $raw['brands_heading_prefix'] ) : '',
+        'brands_heading_highlight'     => isset( $raw['brands_heading_highlight'] ) ? sanitize_text_field( $raw['brands_heading_highlight'] ) : '',
+        'brands_heading_suffix'        => isset( $raw['brands_heading_suffix'] ) ? sanitize_text_field( $raw['brands_heading_suffix'] ) : '',
+        'trusted_brands'               => $clean_brands,
+
+        'spotlight_enabled'            => ! empty( $raw['spotlight_enabled'] ) ? '1' : '0',
+        'spotlight_badge'              => isset( $raw['spotlight_badge'] ) ? sanitize_text_field( $raw['spotlight_badge'] ) : '',
+        'spotlight_heading'            => isset( $raw['spotlight_heading'] ) ? sanitize_text_field( $raw['spotlight_heading'] ) : '',
+        'spotlight_text'               => isset( $raw['spotlight_text'] ) ? sanitize_textarea_field( $raw['spotlight_text'] ) : '',
+        'spotlight_text_2'             => isset( $raw['spotlight_text_2'] ) ? sanitize_textarea_field( $raw['spotlight_text_2'] ) : '',
+        'spotlight_stat_1_val'         => isset( $raw['spotlight_stat_1_val'] ) ? sanitize_text_field( $raw['spotlight_stat_1_val'] ) : '',
+        'spotlight_stat_1_label'       => isset( $raw['spotlight_stat_1_label'] ) ? sanitize_text_field( $raw['spotlight_stat_1_label'] ) : '',
+        'spotlight_stat_2_val'         => isset( $raw['spotlight_stat_2_val'] ) ? sanitize_text_field( $raw['spotlight_stat_2_val'] ) : '',
+        'spotlight_stat_2_label'       => isset( $raw['spotlight_stat_2_label'] ) ? sanitize_text_field( $raw['spotlight_stat_2_label'] ) : '',
+        'spotlight_video_url'          => isset( $raw['spotlight_video_url'] ) ? esc_url_raw( trim( (string) $raw['spotlight_video_url'] ) ) : '',
+        'spotlight_video_thumb'        => isset( $raw['spotlight_video_thumb'] ) ? esc_url_raw( trim( (string) $raw['spotlight_video_thumb'] ) ) : '',
+        'spotlight_video_name'         => isset( $raw['spotlight_video_name'] ) ? sanitize_text_field( $raw['spotlight_video_name'] ) : '',
+        'spotlight_video_label'        => isset( $raw['spotlight_video_label'] ) ? sanitize_text_field( $raw['spotlight_video_label'] ) : '',
+
+        'giftcard_enabled'             => ! empty( $raw['giftcard_enabled'] ) ? '1' : '0',
+        'giftcard_eyebrow'             => isset( $raw['giftcard_eyebrow'] ) ? sanitize_text_field( $raw['giftcard_eyebrow'] ) : '',
+        'giftcard_heading'             => isset( $raw['giftcard_heading'] ) ? sanitize_text_field( $raw['giftcard_heading'] ) : '',
+        'giftcard_desc'                => isset( $raw['giftcard_desc'] ) ? sanitize_textarea_field( $raw['giftcard_desc'] ) : '',
+        'giftcard_bullets'             => isset( $raw['giftcard_bullets'] ) ? sanitize_textarea_field( $raw['giftcard_bullets'] ) : '',
+        'giftcard_value_label'         => isset( $raw['giftcard_value_label'] ) ? sanitize_text_field( $raw['giftcard_value_label'] ) : '',
+        'giftcard_cta_text'            => isset( $raw['giftcard_cta_text'] ) ? sanitize_text_field( $raw['giftcard_cta_text'] ) : '',
+        'giftcard_cta_url'             => isset( $raw['giftcard_cta_url'] ) ? esc_url_raw( trim( (string) $raw['giftcard_cta_url'] ) ) : '',
+
+        // Tab 7: Single Course Layout
+        'course_show_key_facts'        => ! empty( $raw['course_show_key_facts'] ) ? '1' : '0',
+        'course_show_at_a_glance'      => ! empty( $raw['course_show_at_a_glance'] ) ? '1' : '0',
+        'course_show_brands_carousel'  => ! empty( $raw['course_show_brands_carousel'] ) ? '1' : '0',
+        'course_show_google_reviews'   => ! empty( $raw['course_show_google_reviews'] ) ? '1' : '0',
+        'course_show_help_card'        => ! empty( $raw['course_show_help_card'] ) ? '1' : '0',
+        'course_show_gallery'          => ! empty( $raw['course_show_gallery'] ) ? '1' : '0',
+        'course_default_awarding_body' => isset( $raw['course_default_awarding_body'] ) ? sanitize_text_field( $raw['course_default_awarding_body'] ) : '',
+        'course_help_card_title'       => isset( $raw['course_help_card_title'] ) ? sanitize_text_field( $raw['course_help_card_title'] ) : '',
+        'course_help_card_desc'        => isset( $raw['course_help_card_desc'] ) ? sanitize_textarea_field( $raw['course_help_card_desc'] ) : '',
     );
 
     update_option( 'edupro_site_settings', $clean );
@@ -500,7 +706,7 @@ function edupro_handle_save_site_settings() {
 add_action( 'admin_post_edupro_save_site_settings', 'edupro_handle_save_site_settings' );
 
 /* ==========================================================================
- * 5. ADMIN PAGE UI (5-TAB INTERFACE)
+ * 5. ADMIN PAGE UI (7-TAB INTERFACE)
  * ========================================================================== */
 
 /**
@@ -514,25 +720,33 @@ function edupro_render_site_settings_page() {
     $settings   = edupro_get_site_settings();
     $active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'brand'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     $tabs       = array(
-        'brand'   => array(
+        'brand'         => array(
             'label' => __( 'Brand & Identity', 'edupro' ),
             'icon'  => 'dashicons-art',
         ),
-        'contact' => array(
+        'contact'       => array(
             'label' => __( 'Contact, Phone & WhatsApp', 'edupro' ),
             'icon'  => 'dashicons-phone',
         ),
-        'maps'    => array(
+        'maps'          => array(
             'label' => __( 'Google Maps', 'edupro' ),
             'icon'  => 'dashicons-location-alt',
         ),
-        'social'  => array(
+        'social'        => array(
             'label' => __( 'Social Links', 'edupro' ),
             'icon'  => 'dashicons-share',
         ),
-        'footer'  => array(
+        'footer'        => array(
             'label' => __( 'Footer & Legal', 'edupro' ),
             'icon'  => 'dashicons-editor-insertmore',
+        ),
+        'homepage'      => array(
+            'label' => __( 'Homepage & Carousels', 'edupro' ),
+            'icon'  => 'dashicons-slides',
+        ),
+        'course_layout' => array(
+            'label' => __( 'Single Course Layout', 'edupro' ),
+            'icon'  => 'dashicons-welcome-learn-more',
         ),
     );
 
@@ -557,6 +771,7 @@ function edupro_render_site_settings_page() {
                 <code>[edupro_contact_info]</code>
                 <code>[edupro_map]</code>
                 <code>[edupro_social_links]</code>
+                <code>[edupro_brands_carousel]</code>
             </div>
         </div>
 
@@ -654,7 +869,7 @@ function edupro_render_site_settings_page() {
                         <tr>
                             <th scope="row"><label for="edupro_primary_color"><?php esc_html_e( 'Primary Brand Color', 'edupro' ); ?></label></th>
                             <td>
-                                <input type="text" id="edupro_primary_color" name="edupro_site_settings[primary_color]" value="<?php echo esc_attr( $settings['primary_color'] ); ?>" class="edupro-color-picker" data-default-color="#e31b23" />
+                                <input type="text" id="edupro_primary_color" name="edupro_site_settings[primary_color]" value="<?php echo esc_attr( $settings['primary_color'] ); ?>" class="edupro-color-picker" data-default-color="#be123c" />
                                 <p class="description"><?php esc_html_e( 'Applied globally via --color-primary and --edupro-primary CSS custom properties.', 'edupro' ); ?></p>
                             </td>
                         </tr>
@@ -912,29 +1127,404 @@ function edupro_render_site_settings_page() {
                 </div>
             </div>
 
+            <!-- ==========================================================
+                 TAB 6: HOMEPAGE & CAROUSELS (v1.3.0)
+                 ========================================================== -->
+            <div class="edupro-ws-panel <?php echo 'homepage' === $active_tab ? 'is-active' : ''; ?>" data-panel="homepage">
+
+                <!-- 6A: Hero Section -->
+                <div class="edupro-ws-card">
+                    <h2><?php esc_html_e( 'Hero Section (Luxury Glassmorphism / Dark Pro)', 'edupro' ); ?></h2>
+                    <p class="edupro-ws-card-desc"><?php esc_html_e( 'Control your homepage hero visual style, headline, gradient highlight word, and 3 value-proposition glass cards.', 'edupro' ); ?></p>
+
+                    <table class="form-table" role="presentation">
+                        <tr>
+                            <th scope="row"><label for="edupro_hero_style"><?php esc_html_e( 'Hero Visual Style', 'edupro' ); ?></label></th>
+                            <td>
+                                <select id="edupro_hero_style" name="edupro_site_settings[hero_style]">
+                                    <option value="glass_light" <?php selected( $settings['hero_style'], 'glass_light' ); ?>><?php esc_html_e( 'Luxury Glassmorphism (Light Ambient Rose)', 'edupro' ); ?></option>
+                                    <option value="dark_pro" <?php selected( $settings['hero_style'], 'dark_pro' ); ?>><?php esc_html_e( 'Dark Pro Executive', 'edupro' ); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_hero_badge"><?php esc_html_e( 'Hero Eyebrow Badge', 'edupro' ); ?></label></th>
+                            <td>
+                                <input type="text" id="edupro_hero_badge" name="edupro_site_settings[hero_badge]" value="<?php echo esc_attr( $settings['hero_badge'] ); ?>" class="large-text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_hero_heading"><?php esc_html_e( 'Hero Heading Prefix', 'edupro' ); ?></label></th>
+                            <td>
+                                <input type="text" id="edupro_hero_heading" name="edupro_site_settings[hero_heading]" value="<?php echo esc_attr( $settings['hero_heading'] ); ?>" class="large-text" placeholder="An Interactive Platform For" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_hero_highlight_word"><?php esc_html_e( 'Gradient Highlight Word', 'edupro' ); ?></label></th>
+                            <td>
+                                <input type="text" id="edupro_hero_highlight_word" name="edupro_site_settings[hero_highlight_word]" value="<?php echo esc_attr( $settings['hero_highlight_word'] ); ?>" class="regular-text" placeholder="Learning" />
+                                <p class="description"><?php esc_html_e( 'Displayed in the signature crimson-to-violet gradient right after the heading prefix.', 'edupro' ); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_hero_subtitle"><?php esc_html_e( 'Hero Subtitle', 'edupro' ); ?></label></th>
+                            <td>
+                                <textarea id="edupro_hero_subtitle" name="edupro_site_settings[hero_subtitle]" rows="3" class="large-text"><?php echo esc_textarea( $settings['hero_subtitle'] ); ?></textarea>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h3 class="edupro-ws-subhead"><?php esc_html_e( 'Hero Feature Glass Cards (3 Columns)', 'edupro' ); ?></h3>
+                    <div class="edupro-ws-grid-3">
+                        <?php for ( $i = 1; $i <= 3; $i++ ) : ?>
+                            <div class="edupro-ws-mini-card">
+                                <strong><?php echo esc_html( sprintf( __( 'Feature Card %d', 'edupro' ), $i ) ); ?></strong>
+                                <p>
+                                    <label for="edupro_hero_card_<?php echo esc_attr( (string) $i ); ?>_title"><?php esc_html_e( 'Title', 'edupro' ); ?></label>
+                                    <input type="text" id="edupro_hero_card_<?php echo esc_attr( (string) $i ); ?>_title" name="edupro_site_settings[hero_card_<?php echo esc_attr( (string) $i ); ?>_title]" value="<?php echo esc_attr( (string) $settings[ 'hero_card_' . $i . '_title' ] ); ?>" class="widefat" />
+                                </p>
+                                <p>
+                                    <label for="edupro_hero_card_<?php echo esc_attr( (string) $i ); ?>_desc"><?php esc_html_e( 'Description', 'edupro' ); ?></label>
+                                    <input type="text" id="edupro_hero_card_<?php echo esc_attr( (string) $i ); ?>_desc" name="edupro_site_settings[hero_card_<?php echo esc_attr( (string) $i ); ?>_desc]" value="<?php echo esc_attr( (string) $settings[ 'hero_card_' . $i . '_desc' ] ); ?>" class="widefat" />
+                                </p>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+
+                <!-- 6B: Trusted Brands Carousel -->
+                <div class="edupro-ws-card">
+                    <h2><?php esc_html_e( 'Trusted Brands & Accreditation Carousel', 'edupro' ); ?></h2>
+                    <p class="edupro-ws-card-desc">
+                        <?php esc_html_e( 'Displayed on the homepage, optionally on single course pages, and via', 'edupro' ); ?>
+                        <code>[edupro_brands_carousel]</code>.
+                        <?php esc_html_e( 'Add custom partner logos via Media Library or style typographic accreditation badges.', 'edupro' ); ?>
+                    </p>
+
+                    <input type="hidden" name="edupro_site_settings[trusted_brands_submitted]" value="1" />
+
+                    <table class="form-table" role="presentation">
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Enable Brands Carousel', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[brands_enabled]" value="1" <?php checked( $settings['brands_enabled'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Display the Trusted Brands & Accreditation Carousel on the homepage', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Section Heading', 'edupro' ); ?></th>
+                            <td>
+                                <div class="edupro-ws-inline-3">
+                                    <input type="text" name="edupro_site_settings[brands_heading_prefix]" value="<?php echo esc_attr( $settings['brands_heading_prefix'] ); ?>" placeholder="Trusted by" />
+                                    <input type="text" name="edupro_site_settings[brands_heading_highlight]" value="<?php echo esc_attr( $settings['brands_heading_highlight'] ); ?>" placeholder="300+ Leading Universities" />
+                                    <input type="text" name="edupro_site_settings[brands_heading_suffix]" value="<?php echo esc_attr( $settings['brands_heading_suffix'] ); ?>" placeholder="and Companies Globally" />
+                                </div>
+                                <p class="description"><?php esc_html_e( 'Prefix + Highlighted Crimson Text + Suffix.', 'edupro' ); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h3 class="edupro-ws-subhead"><?php esc_html_e( 'Partner & Accreditation Brands', 'edupro' ); ?></h3>
+                    <div id="edupro-brands-repeater" class="edupro-ws-repeater">
+                        <?php
+                        $brands_list = is_array( $settings['trusted_brands'] ) ? $settings['trusted_brands'] : array();
+                        foreach ( $brands_list as $b_idx => $brand ) :
+                            $b_name  = isset( $brand['name'] ) ? (string) $brand['name'] : '';
+                            $b_sub   = isset( $brand['sublabel'] ) ? (string) $brand['sublabel'] : '';
+                            $b_color = isset( $brand['badge_color'] ) && $brand['badge_color'] ? (string) $brand['badge_color'] : '#be123c';
+                            $b_logo  = isset( $brand['logo_url'] ) ? (string) $brand['logo_url'] : '';
+                            ?>
+                            <div class="edupro-ws-brand-row" data-index="<?php echo esc_attr( (string) $b_idx ); ?>">
+                                <div class="edupro-ws-brand-row__fields">
+                                    <div class="edupro-ws-brand-field">
+                                        <label><?php esc_html_e( 'Brand Name', 'edupro' ); ?></label>
+                                        <input type="text" name="edupro_site_settings[trusted_brands][<?php echo esc_attr( (string) $b_idx ); ?>][name]" value="<?php echo esc_attr( $b_name ); ?>" placeholder="Pearson" />
+                                    </div>
+                                    <div class="edupro-ws-brand-field">
+                                        <label><?php esc_html_e( 'Sub-label / Badge', 'edupro' ); ?></label>
+                                        <input type="text" name="edupro_site_settings[trusted_brands][<?php echo esc_attr( (string) $b_idx ); ?>][sublabel]" value="<?php echo esc_attr( $b_sub ); ?>" placeholder="Accredited Partner" />
+                                    </div>
+                                    <div class="edupro-ws-brand-field edupro-ws-brand-field--color">
+                                        <label><?php esc_html_e( 'Accent', 'edupro' ); ?></label>
+                                        <input type="color" name="edupro_site_settings[trusted_brands][<?php echo esc_attr( (string) $b_idx ); ?>][badge_color]" value="<?php echo esc_attr( $b_color ); ?>" />
+                                    </div>
+                                    <div class="edupro-ws-brand-field edupro-ws-brand-field--logo">
+                                        <label><?php esc_html_e( 'Logo URL (optional)', 'edupro' ); ?></label>
+                                        <div class="edupro-ws-brand-logo-wrap">
+                                            <input type="url" class="edupro-ws-brand-logo-url" name="edupro_site_settings[trusted_brands][<?php echo esc_attr( (string) $b_idx ); ?>][logo_url]" value="<?php echo esc_url( $b_logo ); ?>" placeholder="https://..." />
+                                            <button type="button" class="button button-secondary edupro-ws-brand-upload-btn"><?php esc_html_e( 'Upload', 'edupro' ); ?></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="edupro-ws-brand-row__meta">
+                                    <div class="edupro-ws-brand-thumb">
+                                        <?php if ( '' !== $b_logo ) : ?>
+                                            <img src="<?php echo esc_url( $b_logo ); ?>" alt="" />
+                                        <?php else : ?>
+                                            <span class="edupro-ws-brand-swatch" style="background:<?php echo esc_attr( $b_color ); ?>;"></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <button type="button" class="button-link-delete edupro-ws-brand-remove-btn" aria-label="<?php esc_attr_e( 'Remove brand', 'edupro' ); ?>">&times; <?php esc_html_e( 'Remove', 'edupro' ); ?></button>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="edupro-ws-repeater-actions">
+                        <button type="button" id="edupro-add-brand-btn" class="button button-secondary">
+                            + <?php esc_html_e( 'Add Brand Partner', 'edupro' ); ?>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 6C: Success Stories / Alumni Spotlight -->
+                <div class="edupro-ws-card">
+                    <h2><?php esc_html_e( 'Success Stories / Alumni Spotlight', 'edupro' ); ?></h2>
+                    <table class="form-table" role="presentation">
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Enable Alumni Spotlight', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[spotlight_enabled]" value="1" <?php checked( $settings['spotlight_enabled'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Show the frosted Alumni Spotlight & Video Interview section on the homepage', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_spotlight_badge"><?php esc_html_e( 'Eyebrow Badge', 'edupro' ); ?></label></th>
+                            <td><input type="text" id="edupro_spotlight_badge" name="edupro_site_settings[spotlight_badge]" value="<?php echo esc_attr( $settings['spotlight_badge'] ); ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_spotlight_heading"><?php esc_html_e( 'Section Heading', 'edupro' ); ?></label></th>
+                            <td><input type="text" id="edupro_spotlight_heading" name="edupro_site_settings[spotlight_heading]" value="<?php echo esc_attr( $settings['spotlight_heading'] ); ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_spotlight_text"><?php esc_html_e( 'Primary Story Paragraph', 'edupro' ); ?></label></th>
+                            <td><textarea id="edupro_spotlight_text" name="edupro_site_settings[spotlight_text]" rows="3" class="large-text"><?php echo esc_textarea( $settings['spotlight_text'] ); ?></textarea></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_spotlight_text_2"><?php esc_html_e( 'Secondary Story Paragraph', 'edupro' ); ?></label></th>
+                            <td><textarea id="edupro_spotlight_text_2" name="edupro_site_settings[spotlight_text_2]" rows="3" class="large-text"><?php echo esc_textarea( $settings['spotlight_text_2'] ); ?></textarea></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Highlight Stats (2 Metrics)', 'edupro' ); ?></th>
+                            <td>
+                                <div class="edupro-ws-inline-2">
+                                    <div>
+                                        <input type="text" name="edupro_site_settings[spotlight_stat_1_val]" value="<?php echo esc_attr( $settings['spotlight_stat_1_val'] ); ?>" placeholder="96%" style="width:100px;" />
+                                        <input type="text" name="edupro_site_settings[spotlight_stat_1_label]" value="<?php echo esc_attr( $settings['spotlight_stat_1_label'] ); ?>" placeholder="Career Advancement Rate" class="regular-text" />
+                                    </div>
+                                    <div>
+                                        <input type="text" name="edupro_site_settings[spotlight_stat_2_val]" value="<?php echo esc_attr( $settings['spotlight_stat_2_val'] ); ?>" placeholder="140+" style="width:100px;" />
+                                        <input type="text" name="edupro_site_settings[spotlight_stat_2_label]" value="<?php echo esc_attr( $settings['spotlight_stat_2_label'] ); ?>" placeholder="Countries Represented" class="regular-text" />
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_spotlight_video_url"><?php esc_html_e( 'Interview Video URL', 'edupro' ); ?></label></th>
+                            <td>
+                                <input type="url" id="edupro_spotlight_video_url" name="edupro_site_settings[spotlight_video_url]" value="<?php echo esc_url( $settings['spotlight_video_url'] ); ?>" class="large-text" placeholder="https://www.youtube.com/watch?v=... or Vimeo / MP4 URL" />
+                                <p class="description"><?php esc_html_e( 'Opens in a frosted Video Lightbox modal when clicked.', 'edupro' ); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Video Cover Thumbnail', 'edupro' ); ?></th>
+                            <td>
+                                <div class="edupro-ws-media-picker" data-preview-bg="dark">
+                                    <div class="edupro-ws-media-preview edupro-ws-media-preview--dark <?php echo empty( $settings['spotlight_video_thumb'] ) ? 'is-empty' : ''; ?>">
+                                        <?php if ( ! empty( $settings['spotlight_video_thumb'] ) ) : ?>
+                                            <img src="<?php echo esc_url( $settings['spotlight_video_thumb'] ); ?>" alt="<?php esc_attr_e( 'Spotlight video thumbnail preview', 'edupro' ); ?>" />
+                                        <?php else : ?>
+                                            <span class="edupro-ws-media-placeholder"><?php esc_html_e( 'Optional cover photo', 'edupro' ); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <input type="hidden" class="edupro-ws-media-id" value="0" />
+                                    <input type="url" class="regular-text edupro-ws-media-url" name="edupro_site_settings[spotlight_video_thumb]" value="<?php echo esc_url( $settings['spotlight_video_thumb'] ); ?>" placeholder="https://..." />
+                                    <div class="edupro-ws-media-actions">
+                                        <button type="button" class="button button-secondary edupro-ws-upload-btn"><?php esc_html_e( 'Select Thumbnail', 'edupro' ); ?></button>
+                                        <button type="button" class="button-link-delete edupro-ws-remove-btn" <?php echo empty( $settings['spotlight_video_thumb'] ) ? 'style="display:none;"' : ''; ?>><?php esc_html_e( 'Remove', 'edupro' ); ?></button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Graduate Name & Label', 'edupro' ); ?></th>
+                            <td>
+                                <div class="edupro-ws-inline-2">
+                                    <input type="text" name="edupro_site_settings[spotlight_video_name]" value="<?php echo esc_attr( $settings['spotlight_video_name'] ); ?>" placeholder="OLIVIA SZULC" class="regular-text" />
+                                    <input type="text" name="edupro_site_settings[spotlight_video_label]" value="<?php echo esc_attr( $settings['spotlight_video_label'] ); ?>" placeholder="GRADUATE INTERVIEW" class="regular-text" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- 6D: Order Gift Card Section -->
+                <div class="edupro-ws-card">
+                    <h2><?php esc_html_e( 'Order Gift Card Section', 'edupro' ); ?></h2>
+                    <table class="form-table" role="presentation">
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Enable Gift Card Section', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[giftcard_enabled]" value="1" <?php checked( $settings['giftcard_enabled'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Display the luxury 3D Gift Card showcase section on the homepage', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_giftcard_eyebrow"><?php esc_html_e( 'Eyebrow Label', 'edupro' ); ?></label></th>
+                            <td><input type="text" id="edupro_giftcard_eyebrow" name="edupro_site_settings[giftcard_eyebrow]" value="<?php echo esc_attr( $settings['giftcard_eyebrow'] ); ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_giftcard_heading"><?php esc_html_e( 'Heading', 'edupro' ); ?></label></th>
+                            <td><input type="text" id="edupro_giftcard_heading" name="edupro_site_settings[giftcard_heading]" value="<?php echo esc_attr( $settings['giftcard_heading'] ); ?>" class="large-text" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_giftcard_desc"><?php esc_html_e( 'Description', 'edupro' ); ?></label></th>
+                            <td><textarea id="edupro_giftcard_desc" name="edupro_site_settings[giftcard_desc]" rows="3" class="large-text"><?php echo esc_textarea( $settings['giftcard_desc'] ); ?></textarea></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_giftcard_bullets"><?php esc_html_e( 'Benefit Bullets (one per line)', 'edupro' ); ?></label></th>
+                            <td>
+                                <textarea id="edupro_giftcard_bullets" name="edupro_site_settings[giftcard_bullets]" rows="4" class="large-text"><?php echo esc_textarea( $settings['giftcard_bullets'] ); ?></textarea>
+                                <p class="description"><?php esc_html_e( 'Enter each checkmark benefit on its own line.', 'edupro' ); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_giftcard_value_label"><?php esc_html_e( 'Gift Value Badge', 'edupro' ); ?></label></th>
+                            <td><input type="text" id="edupro_giftcard_value_label" name="edupro_site_settings[giftcard_value_label]" value="<?php echo esc_attr( $settings['giftcard_value_label'] ); ?>" class="regular-text" placeholder="£25 – £150" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'CTA Button', 'edupro' ); ?></th>
+                            <td>
+                                <div class="edupro-ws-inline-2">
+                                    <input type="text" name="edupro_site_settings[giftcard_cta_text]" value="<?php echo esc_attr( $settings['giftcard_cta_text'] ); ?>" placeholder="Order Gift Card" class="regular-text" />
+                                    <input type="url" name="edupro_site_settings[giftcard_cta_url]" value="<?php echo esc_url( $settings['giftcard_cta_url'] ); ?>" placeholder="<?php echo esc_attr( home_url( '/courses/' ) ); ?>" class="regular-text" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                 TAB 7: SINGLE COURSE LAYOUT (v1.3.0)
+                 ========================================================== -->
+            <div class="edupro-ws-panel <?php echo 'course_layout' === $active_tab ? 'is-active' : ''; ?>" data-panel="course_layout">
+                <div class="edupro-ws-card">
+                    <h2><?php esc_html_e( 'Single Course Page Sections', 'edupro' ); ?></h2>
+                    <p class="edupro-ws-card-desc"><?php esc_html_e( 'Toggle enhanced sections across every Single Course page. Per-course facts, galleries, testimonial videos, and custom FAQs can be customized inside each Course Editor.', 'edupro' ); ?></p>
+
+                    <table class="form-table" role="presentation">
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Key Facts & Accreditation Grid', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[course_show_key_facts]" value="1" <?php checked( $settings['course_show_key_facts'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Show 6-tile Glass Key Facts grid (Duration, Study Method, Awarding Body, Assessment, Tutor Support, Certificate)', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Course at a Glance Box', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[course_show_at_a_glance]" value="1" <?php checked( $settings['course_show_at_a_glance'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Show soft rose-glass "Course at a Glance" summary highlight box in Overview', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Course Photo Gallery Strip', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[course_show_gallery]" value="1" <?php checked( $settings['course_show_gallery'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Display uploaded course gallery photos when attached to a course', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Trusted Brands Carousel', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[course_show_brands_carousel]" value="1" <?php checked( $settings['course_show_brands_carousel'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Display the compact Trusted Brands & Accreditation Carousel above Related Courses', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Google Reviews Split Carousel', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[course_show_google_reviews]" value="1" <?php checked( $settings['course_show_google_reviews'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Display the Google Reviews summary card & review carousel above Related Courses', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Sidebar Advisor Help Card', 'edupro' ); ?></th>
+                            <td>
+                                <label class="edupro-ws-toggle">
+                                    <input type="checkbox" name="edupro_site_settings[course_show_help_card]" value="1" <?php checked( $settings['course_show_help_card'], '1' ); ?> />
+                                    <span><?php esc_html_e( 'Show frosted "Need Guidance?" Call & WhatsApp advisor card in the course sidebar', 'edupro' ); ?></span>
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="edupro-ws-card">
+                    <h2><?php esc_html_e( 'Default Course Accreditation & Sidebar Copy', 'edupro' ); ?></h2>
+                    <table class="form-table" role="presentation">
+                        <tr>
+                            <th scope="row"><label for="edupro_course_default_awarding_body"><?php esc_html_e( 'Default Awarding Body', 'edupro' ); ?></label></th>
+                            <td>
+                                <input type="text" id="edupro_course_default_awarding_body" name="edupro_site_settings[course_default_awarding_body]" value="<?php echo esc_attr( $settings['course_default_awarding_body'] ); ?>" class="large-text" placeholder="CPD Accredited & QLS Endorsed" />
+                                <p class="description"><?php esc_html_e( 'Used on courses that do not specify a custom Awarding Body in the Course Editor.', 'edupro' ); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_course_help_card_title"><?php esc_html_e( 'Sidebar Help Card Title', 'edupro' ); ?></label></th>
+                            <td>
+                                <input type="text" id="edupro_course_help_card_title" name="edupro_site_settings[course_help_card_title]" value="<?php echo esc_attr( $settings['course_help_card_title'] ); ?>" class="regular-text" placeholder="Need Guidance?" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="edupro_course_help_card_desc"><?php esc_html_e( 'Sidebar Help Card Description', 'edupro' ); ?></label></th>
+                            <td>
+                                <textarea id="edupro_course_help_card_desc" name="edupro_site_settings[course_help_card_desc]" rows="2" class="large-text"><?php echo esc_textarea( $settings['course_help_card_desc'] ); ?></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
             <div class="edupro-ws-submit-bar">
                 <button type="submit" class="button button-primary button-hero">
                     <?php esc_html_e( 'Save Website Settings', 'edupro' ); ?>
                 </button>
-                <span class="edupro-ws-submit-hint"><?php esc_html_e( 'Saves all 5 tabs at once.', 'edupro' ); ?></span>
+                <span class="edupro-ws-submit-hint"><?php esc_html_e( 'Saves all 7 tabs at once.', 'edupro' ); ?></span>
             </div>
         </form>
     </div>
 
     <style>
-        .edupro-ws-wrap { max-width: 1020px; margin-top: 18px; }
+        .edupro-ws-wrap { max-width: 1080px; margin-top: 18px; }
         .edupro-ws-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #242442 100%);
+            background: linear-gradient(135deg, #120e18 0%, #24172b 100%);
             color: #ffffff;
             padding: 24px 28px;
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
             margin-bottom: 18px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 10px 28px rgba(18, 14, 24, 0.16);
         }
         .edupro-ws-header h1 {
             color: #ffffff;
@@ -946,7 +1536,7 @@ function edupro_render_site_settings_page() {
             gap: 10px;
             padding: 0;
         }
-        .edupro-ws-header h1 .dashicons { color: #e31b23; font-size: 26px; width: 26px; height: 26px; }
+        .edupro-ws-header h1 .dashicons { color: #e11d48; font-size: 26px; width: 26px; height: 26px; }
         .edupro-ws-header p { margin: 0; color: rgba(255,255,255,0.82); font-size: 13.5px; }
         .edupro-ws-header__shortcodes {
             display: flex;
@@ -974,30 +1564,30 @@ function edupro_render_site_settings_page() {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            padding: 10px 16px;
+            padding: 9px 14px;
             border: 1px solid #dcdcde;
-            border-radius: 8px;
+            border-radius: 9px;
             background: #ffffff;
             color: #334155;
             font-weight: 600;
-            font-size: 13.5px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.15s ease;
         }
-        .edupro-ws-tab:hover { border-color: #e31b23; color: #e31b23; }
+        .edupro-ws-tab:hover { border-color: #be123c; color: #be123c; }
         .edupro-ws-tab.is-active {
-            background: #e31b23;
-            border-color: #e31b23;
+            background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+            border-color: #be123c;
             color: #ffffff;
-            box-shadow: 0 4px 12px rgba(227, 27, 35, 0.25);
+            box-shadow: 0 4px 14px rgba(190, 18, 60, 0.28);
         }
-        .edupro-ws-tab .dashicons { font-size: 17px; width: 17px; height: 17px; }
+        .edupro-ws-tab .dashicons { font-size: 16px; width: 16px; height: 16px; }
         .edupro-ws-panel { display: none; }
         .edupro-ws-panel.is-active { display: block; }
         .edupro-ws-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 22px 26px;
             margin-bottom: 18px;
             box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
@@ -1006,12 +1596,55 @@ function edupro_render_site_settings_page() {
             margin: 0 0 6px;
             font-size: 17px;
             font-weight: 700;
-            color: #1a1a2e;
+            color: #120e18;
             padding-bottom: 10px;
             border-bottom: 1px solid #f1f5f9;
         }
+        .edupro-ws-subhead { margin: 18px 0 12px; font-size: 14px; font-weight: 700; color: #1e293b; }
         .edupro-ws-card-desc { margin: 8px 0 12px; color: #64748b; font-size: 13px; }
         .edupro-ws-toggle { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+        .edupro-ws-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .edupro-ws-mini-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .edupro-ws-mini-card strong { display: block; margin-bottom: 8px; color: #be123c; font-size: 13px; }
+        .edupro-ws-mini-card label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+        .edupro-ws-mini-card p { margin: 0 0 10px; }
+        .edupro-ws-mini-card p:last-child { margin-bottom: 0; }
+        .edupro-ws-inline-2 { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .edupro-ws-inline-3 { display: grid; grid-template-columns: 1fr 1.4fr 1.2fr; gap: 8px; max-width: 720px; }
+        .edupro-ws-repeater { display: flex; flex-direction: column; gap: 10px; }
+        .edupro-ws-brand-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .edupro-ws-brand-row__fields {
+            display: grid;
+            grid-template-columns: 1.2fr 1.2fr 70px 1.8fr;
+            gap: 10px;
+            flex: 1;
+            min-width: 280px;
+        }
+        .edupro-ws-brand-field label { display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .edupro-ws-brand-field input[type="text"],
+        .edupro-ws-brand-field input[type="url"] { width: 100%; }
+        .edupro-ws-brand-field input[type="color"] { width: 52px; height: 32px; padding: 2px; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; background: #fff; }
+        .edupro-ws-brand-logo-wrap { display: flex; gap: 6px; }
+        .edupro-ws-brand-row__meta { display: flex; align-items: center; gap: 12px; }
+        .edupro-ws-brand-thumb { width: 42px; height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .edupro-ws-brand-thumb img { max-width: 38px; max-height: 28px; object-fit: contain; }
+        .edupro-ws-brand-swatch { width: 18px; height: 18px; border-radius: 50%; display: inline-block; }
+        .edupro-ws-repeater-actions { margin-top: 12px; }
         .edupro-ws-media-picker { display: flex; flex-direction: column; gap: 10px; max-width: 460px; }
         .edupro-ws-media-preview {
             display: flex;
@@ -1023,7 +1656,7 @@ function edupro_render_site_settings_page() {
             border-radius: 10px;
             background: #f8fafc;
         }
-        .edupro-ws-media-preview--dark { background: #1a1a2e; border-color: #334155; color: #cbd5e1; }
+        .edupro-ws-media-preview--dark { background: #120e18; border-color: #334155; color: #cbd5e1; }
         .edupro-ws-media-preview img { max-height: 58px; max-width: 240px; width: auto; height: auto; object-fit: contain; }
         .edupro-ws-media-placeholder { font-size: 12.5px; color: #94a3b8; }
         .edupro-ws-media-actions { display: flex; align-items: center; gap: 12px; }
@@ -1040,14 +1673,17 @@ function edupro_render_site_settings_page() {
             box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         }
         .edupro-ws-submit-bar .button-primary {
-            background: #e31b23 !important;
-            border-color: #c8151c !important;
-            border-radius: 8px !important;
+            background: linear-gradient(135deg, #be123c 0%, #e11d48 100%) !important;
+            border-color: #be123c !important;
+            border-radius: 9px !important;
             font-weight: 600 !important;
             padding: 0 26px !important;
         }
-        .edupro-ws-submit-bar .button-primary:hover { background: #c8151c !important; }
+        .edupro-ws-submit-bar .button-primary:hover { filter: brightness(0.95); }
         .edupro-ws-submit-hint { color: #64748b; font-size: 13px; }
+        @media (max-width: 900px) {
+            .edupro-ws-grid-3, .edupro-ws-inline-3, .edupro-ws-brand-row__fields { grid-template-columns: 1fr; }
+        }
     </style>
 
     <script>
@@ -1080,14 +1716,14 @@ function edupro_render_site_settings_page() {
                 }
             });
 
-            // WordPress Media Library picker for Header & Footer logos.
+            // WordPress Media Library picker for Header/Footer logos & Spotlight Thumbnail.
             $('.edupro-ws-media-picker').each(function() {
-                var $picker  = $(this);
-                var $idInput = $picker.find('.edupro-ws-media-id');
+                var $picker   = $(this);
+                var $idInput  = $picker.find('.edupro-ws-media-id');
                 var $urlInput = $picker.find('.edupro-ws-media-url');
-                var $preview = $picker.find('.edupro-ws-media-preview');
-                var $remove  = $picker.find('.edupro-ws-remove-btn');
-                var frame    = null;
+                var $preview  = $picker.find('.edupro-ws-media-preview');
+                var $remove   = $picker.find('.edupro-ws-remove-btn');
+                var frame     = null;
 
                 $picker.find('.edupro-ws-upload-btn').on('click', function(e) {
                     e.preventDefault();
@@ -1096,8 +1732,8 @@ function edupro_render_site_settings_page() {
                         return;
                     }
                     frame = wp.media({
-                        title: '<?php echo esc_js( __( 'Select or Upload Logo', 'edupro' ) ); ?>',
-                        button: { text: '<?php echo esc_js( __( 'Use This Logo', 'edupro' ) ); ?>' },
+                        title: '<?php echo esc_js( __( 'Select or Upload Image', 'edupro' ) ); ?>',
+                        button: { text: '<?php echo esc_js( __( 'Use This Image', 'edupro' ) ); ?>' },
                         library: { type: 'image' },
                         multiple: false
                     });
@@ -1106,7 +1742,7 @@ function edupro_render_site_settings_page() {
                         if (!attachment || !attachment.url) { return; }
                         $idInput.val(attachment.id || 0);
                         $urlInput.val(attachment.url);
-                        $preview.removeClass('is-empty').html($('<img>', { src: attachment.url, alt: attachment.alt || 'Logo preview' }));
+                        $preview.removeClass('is-empty').html($('<img>', { src: attachment.url, alt: attachment.alt || 'Preview' }));
                         $remove.show();
                     });
                     frame.open();
@@ -1115,11 +1751,11 @@ function edupro_render_site_settings_page() {
                 $urlInput.on('change', function() {
                     var val = $.trim($(this).val());
                     if (val) {
-                        $preview.removeClass('is-empty').html($('<img>', { src: val, alt: 'Logo preview' }));
+                        $preview.removeClass('is-empty').html($('<img>', { src: val, alt: 'Preview' }));
                         $remove.show();
                     } else {
                         $idInput.val(0);
-                        $preview.addClass('is-empty').html('<span class="edupro-ws-media-placeholder"><?php echo esc_js( __( 'No logo selected', 'edupro' ) ); ?></span>');
+                        $preview.addClass('is-empty').html('<span class="edupro-ws-media-placeholder"><?php echo esc_js( __( 'No image selected', 'edupro' ) ); ?></span>');
                         $remove.hide();
                     }
                 });
@@ -1128,9 +1764,78 @@ function edupro_render_site_settings_page() {
                     e.preventDefault();
                     $idInput.val(0);
                     $urlInput.val('');
-                    $preview.addClass('is-empty').html('<span class="edupro-ws-media-placeholder"><?php echo esc_js( __( 'No logo selected', 'edupro' ) ); ?></span>');
+                    $preview.addClass('is-empty').html('<span class="edupro-ws-media-placeholder"><?php echo esc_js( __( 'No image selected', 'edupro' ) ); ?></span>');
                     $remove.hide();
                 });
+            });
+
+            // Trusted Brands Repeater (Add, Remove, Upload Logo, Live Preview).
+            var $repeater = $('#edupro-brands-repeater');
+            var brandCounter = $repeater.find('.edupro-ws-brand-row').length;
+
+            $('#edupro-add-brand-btn').on('click', function() {
+                var idx = brandCounter++;
+                var rowHtml =
+                    '<div class="edupro-ws-brand-row" data-index="' + idx + '">' +
+                        '<div class="edupro-ws-brand-row__fields">' +
+                            '<div class="edupro-ws-brand-field">' +
+                                '<label><?php echo esc_js( __( 'Brand Name', 'edupro' ) ); ?></label>' +
+                                '<input type="text" name="edupro_site_settings[trusted_brands][' + idx + '][name]" value="" placeholder="Partner Name" />' +
+                            '</div>' +
+                            '<div class="edupro-ws-brand-field">' +
+                                '<label><?php echo esc_js( __( 'Sub-label / Badge', 'edupro' ) ); ?></label>' +
+                                '<input type="text" name="edupro_site_settings[trusted_brands][' + idx + '][sublabel]" value="" placeholder="Accredited Partner" />' +
+                            '</div>' +
+                            '<div class="edupro-ws-brand-field edupro-ws-brand-field--color">' +
+                                '<label><?php echo esc_js( __( 'Accent', 'edupro' ) ); ?></label>' +
+                                '<input type="color" name="edupro_site_settings[trusted_brands][' + idx + '][badge_color]" value="#be123c" />' +
+                            '</div>' +
+                            '<div class="edupro-ws-brand-field edupro-ws-brand-field--logo">' +
+                                '<label><?php echo esc_js( __( 'Logo URL (optional)', 'edupro' ) ); ?></label>' +
+                                '<div class="edupro-ws-brand-logo-wrap">' +
+                                    '<input type="url" class="edupro-ws-brand-logo-url" name="edupro_site_settings[trusted_brands][' + idx + '][logo_url]" value="" placeholder="https://..." />' +
+                                    '<button type="button" class="button button-secondary edupro-ws-brand-upload-btn"><?php echo esc_js( __( 'Upload', 'edupro' ) ); ?></button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="edupro-ws-brand-row__meta">' +
+                            '<div class="edupro-ws-brand-thumb"><span class="edupro-ws-brand-swatch" style="background:#be123c;"></span></div>' +
+                            '<button type="button" class="button-link-delete edupro-ws-brand-remove-btn">&times; <?php echo esc_js( __( 'Remove', 'edupro' ) ); ?></button>' +
+                        '</div>' +
+                    '</div>';
+                $repeater.append(rowHtml);
+            });
+
+            $repeater.on('click', '.edupro-ws-brand-remove-btn', function() {
+                $(this).closest('.edupro-ws-brand-row').remove();
+            });
+
+            $repeater.on('click', '.edupro-ws-brand-upload-btn', function(e) {
+                e.preventDefault();
+                var $row = $(this).closest('.edupro-ws-brand-row');
+                var $urlInput = $row.find('.edupro-ws-brand-logo-url');
+                var $thumb = $row.find('.edupro-ws-brand-thumb');
+
+                var brandFrame = wp.media({
+                    title: '<?php echo esc_js( __( 'Select Partner Logo', 'edupro' ) ); ?>',
+                    button: { text: '<?php echo esc_js( __( 'Use Logo', 'edupro' ) ); ?>' },
+                    library: { type: 'image' },
+                    multiple: false
+                });
+                brandFrame.on('select', function() {
+                    var att = brandFrame.state().get('selection').first().toJSON();
+                    if (!att || !att.url) { return; }
+                    $urlInput.val(att.url);
+                    $thumb.html($('<img>', { src: att.url, alt: '' }));
+                });
+                brandFrame.open();
+            });
+
+            $repeater.on('change', 'input[type="color"]', function() {
+                var $row = $(this).closest('.edupro-ws-brand-row');
+                if (!$.trim($row.find('.edupro-ws-brand-logo-url').val())) {
+                    $row.find('.edupro-ws-brand-thumb').html('<span class="edupro-ws-brand-swatch" style="background:' + $(this).val() + ';"></span>');
+                }
             });
         });
     })(jQuery);
@@ -1423,3 +2128,152 @@ function edupro_map_shortcode( $atts = array() ) {
     return (string) ob_get_clean();
 }
 add_shortcode( 'edupro_map', 'edupro_map_shortcode' );
+
+/* ==========================================================================
+ * 7. REUSABLE TRUSTED BRANDS CAROUSEL RENDERER & SHORTCODE (v1.3.0)
+ * ========================================================================== */
+
+/**
+ * Render the Dashboard-controlled Trusted Brands & Accreditation Carousel.
+ *
+ * Shared by front-page.php, single-lms_course.php, and [edupro_brands_carousel].
+ * Returns HTML string (consistent with edupro_render_google_reviews()).
+ *
+ * @param string $extra_class Optional extra CSS class(es), e.g. 'edupro-brands-section--compact'.
+ * @return string Rendered HTML markup, or empty string if no brands are configured.
+ */
+function edupro_render_brands_carousel( $extra_class = '' ) {
+    $settings = edupro_get_site_settings();
+    $brands   = isset( $settings['trusted_brands'] ) && is_array( $settings['trusted_brands'] )
+        ? $settings['trusted_brands']
+        : array();
+
+    if ( empty( $brands ) ) {
+        return '';
+    }
+
+    $prefix    = (string) edupro_get_site_setting( 'brands_heading_prefix', __( 'Trusted by', 'edupro' ) );
+    $highlight = (string) edupro_get_site_setting( 'brands_heading_highlight', __( '300+ Leading Universities', 'edupro' ) );
+    $suffix    = (string) edupro_get_site_setting( 'brands_heading_suffix', __( 'and Companies Globally', 'edupro' ) );
+
+    $section_classes = 'edupro-brands-section';
+    if ( '' !== trim( (string) $extra_class ) ) {
+        $extra_parts = preg_split( '/\s+/', trim( (string) $extra_class ) );
+        foreach ( (array) $extra_parts as $cls ) {
+            $sanitized_cls = sanitize_html_class( $cls );
+            if ( '' !== $sanitized_cls ) {
+                $section_classes .= ' ' . $sanitized_cls;
+            }
+        }
+    }
+
+    $render_card = static function( $brand, $is_clone = false ) {
+        $name     = isset( $brand['name'] ) ? trim( (string) $brand['name'] ) : '';
+        $sublabel = isset( $brand['sublabel'] ) ? trim( (string) $brand['sublabel'] ) : '';
+        $color    = isset( $brand['badge_color'] ) ? sanitize_hex_color( (string) $brand['badge_color'] ) : '#be123c';
+        $logo_url = isset( $brand['logo_url'] ) ? trim( (string) $brand['logo_url'] ) : '';
+
+        if ( '' === $name && '' === $logo_url ) {
+            return '';
+        }
+        if ( ! $color ) {
+            $color = '#be123c';
+        }
+
+        $aria_attr = $is_clone ? ' aria-hidden="true" data-brand-clone="1"' : '';
+        ob_start();
+        ?>
+        <div class="edupro-brand-card" style="--brand-accent: <?php echo esc_attr( $color ); ?>;"<?php echo $aria_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+            <?php if ( '' !== $logo_url ) : ?>
+                <img
+                    src="<?php echo esc_url( $logo_url ); ?>"
+                    alt="<?php echo $is_clone ? '' : esc_attr( $name ? $name : __( 'Partner Logo', 'edupro' ) ); ?>"
+                    class="edupro-brand-card__logo"
+                    loading="lazy"
+                />
+                <?php if ( '' !== $sublabel ) : ?>
+                    <span class="edupro-brand-card__sub"><?php echo esc_html( $sublabel ); ?></span>
+                <?php endif; ?>
+            <?php else : ?>
+                <span class="edupro-brand-card__dot" aria-hidden="true"></span>
+                <span class="edupro-brand-card__text">
+                    <span class="edupro-brand-card__name"><?php echo esc_html( $name ); ?></span>
+                    <?php if ( '' !== $sublabel ) : ?>
+                        <span class="edupro-brand-card__sub"><?php echo esc_html( $sublabel ); ?></span>
+                    <?php endif; ?>
+                </span>
+            <?php endif; ?>
+        </div>
+        <?php
+        return (string) ob_get_clean();
+    };
+
+    ob_start();
+    ?>
+    <section class="<?php echo esc_attr( $section_classes ); ?>" aria-label="<?php esc_attr_e( 'Trusted Accreditation & Partner Brands', 'edupro' ); ?>">
+        <div class="edupro-container">
+            <?php if ( '' !== $prefix || '' !== $highlight || '' !== $suffix ) : ?>
+                <div class="edupro-brands-header">
+                    <h2 class="edupro-brands-heading">
+                        <?php if ( '' !== $prefix ) : ?>
+                            <span><?php echo esc_html( $prefix ); ?></span>
+                        <?php endif; ?>
+                        <?php if ( '' !== $highlight ) : ?>
+                            <span class="edupro-brands-heading__highlight"><?php echo esc_html( $highlight ); ?></span>
+                        <?php endif; ?>
+                        <?php if ( '' !== $suffix ) : ?>
+                            <span><?php echo esc_html( $suffix ); ?></span>
+                        <?php endif; ?>
+                    </h2>
+                </div>
+            <?php endif; ?>
+
+            <div class="edupro-brands-carousel" data-edupro-brands-carousel>
+                <button type="button" class="edupro-brands-nav edupro-brands-nav--prev" aria-label="<?php esc_attr_e( 'Previous partner brands', 'edupro' ); ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+
+                <div class="edupro-brands-viewport">
+                    <div class="edupro-brands-track">
+                        <?php
+                        foreach ( $brands as $brand ) {
+                            echo $render_card( $brand, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        }
+                        // Duplicate track items for seamless continuous infinite CSS marquee.
+                        foreach ( $brands as $brand ) {
+                            echo $render_card( $brand, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        }
+                        ?>
+                    </div>
+                </div>
+
+                <button type="button" class="edupro-brands-nav edupro-brands-nav--next" aria-label="<?php esc_attr_e( 'Next partner brands', 'edupro' ); ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+    <?php
+    return (string) ob_get_clean();
+}
+
+/**
+ * Shortcode: [edupro_brands_carousel]
+ *
+ * Renders the Dashboard-controlled Trusted Brands & Accreditation Carousel.
+ *
+ * @param array<string, mixed>|string $atts Shortcode attributes.
+ * @return string
+ */
+function edupro_brands_carousel_shortcode( $atts = array() ) {
+    $atts = shortcode_atts(
+        array(
+            'class' => '',
+        ),
+        $atts,
+        'edupro_brands_carousel'
+    );
+
+    return edupro_render_brands_carousel( (string) $atts['class'] );
+}
+add_shortcode( 'edupro_brands_carousel', 'edupro_brands_carousel_shortcode' );
