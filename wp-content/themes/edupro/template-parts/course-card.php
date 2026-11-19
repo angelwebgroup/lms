@@ -158,41 +158,25 @@ $checkout_url  = $checkout_page
             <span class="course-card__level"><?php echo esc_html( $level_label ); ?></span>
         <?php endif; ?>
 
-        <!-- Hover Quick-View / Enroll Overlay -->
+        <!-- Hover Quick-View Overlay -->
         <div class="course-card__hover-overlay">
             <?php if ( $is_enrolled ) : ?>
-                <a href="<?php echo esc_url( $course_url ); ?>" class="edupro-btn edupro-btn--primary btn-primary course-card__quick-btn">
-                    <?php esc_html_e( 'Continue Learning', 'edupro' ); ?>
+                <a href="<?php echo esc_url( $course_url ); ?>" class="course-card__overlay-pill course-card__overlay-pill--primary">
+                    <span><?php esc_html_e( 'Continue Learning', 'edupro' ); ?></span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </a>
-            <?php elseif ( $is_free ) : ?>
-                <button
-                    type="button"
-                    class="edupro-btn edupro-btn--primary btn-primary course-card__quick-btn edupro-enroll-btn"
-                    data-course-id="<?php echo absint( $course_id ); ?>"
-                    data-free="1"
-                >
-                    <?php esc_html_e( 'Enroll Free', 'edupro' ); ?>
-                </button>
             <?php else : ?>
-                <button
-                    type="button"
-                    class="edupro-btn edupro-btn--primary btn-primary course-card__quick-btn edupro-add-to-cart-btn<?php echo $is_in_cart ? ' is-in-cart' : ''; ?>"
-                    data-course-id="<?php echo absint( $course_id ); ?>"
-                    data-in-cart-label="<?php esc_attr_e( 'In Cart ✓', 'edupro' ); ?>"
-                    data-default-label="<?php esc_attr_e( 'Add to Cart', 'edupro' ); ?>"
-                >
-                    <?php echo $is_in_cart ? esc_html__( 'In Cart ✓', 'edupro' ) : esc_html__( 'Add to Cart', 'edupro' ); ?>
-                </button>
+                <a href="<?php echo esc_url( $course_url ); ?>" class="course-card__overlay-pill">
+                    <span><?php esc_html_e( 'View Course', 'edupro' ); ?></span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
             <?php endif; ?>
-            <a href="<?php echo esc_url( $course_url ); ?>" class="edupro-btn edupro-btn--ghost course-card__preview-btn">
-                <?php esc_html_e( 'View Details', 'edupro' ); ?>
-            </a>
         </div>
     </div>
 
     <!-- Card Body -->
     <div class="course-card__body">
-        <!-- Category -->
+        <!-- Category & Duration -->
         <div class="course-card__top-meta">
             <?php if ( $primary_cat ) : ?>
                 <a href="<?php echo esc_url( get_term_link( $primary_cat ) ); ?>" class="course-card__category">
@@ -201,11 +185,11 @@ $checkout_url  = $checkout_page
             <?php endif; ?>
             <?php if ( $duration_label ) : ?>
                 <span class="course-card__duration">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <?php echo esc_html( $duration_label ); ?>
+                    <span><?php echo esc_html( $duration_label ); ?></span>
                 </span>
             <?php endif; ?>
         </div>
@@ -217,11 +201,11 @@ $checkout_url  = $checkout_page
 
         <!-- Instructor -->
         <div class="course-card__instructor">
-            <?php echo get_avatar( $author_id, 22, '', $author_name, array( 'class' => 'course-card__instructor-avatar' ) ); ?>
+            <?php echo get_avatar( $author_id, 24, '', $author_name, array( 'class' => 'course-card__instructor-avatar' ) ); ?>
             <span><?php echo esc_html( $author_name ?: __( 'EduPro Instructor', 'edupro' ) ); ?></span>
         </div>
 
-        <!-- Rating & Students Row -->
+        <!-- Rating & Students / Lessons Row -->
         <div class="course-card__stats">
             <div class="course-card__rating">
                 <span class="course-card__rating-num"><?php echo esc_html( number_format( $rating > 0 ? $rating : 4.8, 1 ) ); ?></span>
@@ -232,15 +216,24 @@ $checkout_url  = $checkout_page
                 ?>
                 <span class="course-card__rating-count">(<?php echo absint( $reviews_count ); ?>)</span>
             </div>
-            <div class="course-card__students" title="<?php esc_attr_e( 'Enrolled Students', 'edupro' ); ?>">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span><?php echo esc_html( number_format_i18n( $enrolled_count ) ); ?></span>
-            </div>
+            <?php if ( $enrolled_count > 0 ) : ?>
+                <div class="course-card__students" title="<?php esc_attr_e( 'Enrolled Students', 'edupro' ); ?>">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span><?php echo esc_html( number_format_i18n( $enrolled_count ) ); ?></span>
+                </div>
+            <?php elseif ( $lessons_count > 0 ) : ?>
+                <div class="course-card__students" title="<?php esc_attr_e( 'Lessons Included', 'edupro' ); ?>">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span><?php printf( esc_html( _n( '%d lesson', '%d lessons', $lessons_count, 'edupro' ) ), absint( $lessons_count ) ); ?></span>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Footer: Price & Action -->
@@ -262,26 +255,29 @@ $checkout_url  = $checkout_page
                 <?php endif; ?>
             </div>
 
-            <?php if ( ! $is_enrolled && ! $is_free ) : ?>
+            <?php if ( $is_enrolled ) : ?>
+                <a href="<?php echo esc_url( $course_url ); ?>" class="course-card__cta-pill course-card__cta-pill--enrolled">
+                    <?php esc_html_e( 'Continue', 'edupro' ); ?>
+                </a>
+            <?php elseif ( $is_free ) : ?>
                 <button
                     type="button"
-                    class="edupro-btn edupro-btn--outline edupro-btn--sm edupro-add-to-cart-btn course-card__cart-btn<?php echo $is_in_cart ? ' is-in-cart' : ''; ?>"
+                    class="course-card__cta-pill edupro-enroll-btn"
+                    data-course-id="<?php echo absint( $course_id ); ?>"
+                    data-free="1"
+                >
+                    <?php esc_html_e( 'Enroll Free', 'edupro' ); ?>
+                </button>
+            <?php else : ?>
+                <button
+                    type="button"
+                    class="course-card__cta-pill edupro-add-to-cart-btn course-card__cart-btn<?php echo $is_in_cart ? ' is-in-cart' : ''; ?>"
                     data-course-id="<?php echo absint( $course_id ); ?>"
                     data-in-cart-label="<?php esc_attr_e( 'In Cart ✓', 'edupro' ); ?>"
                     data-default-label="<?php esc_attr_e( 'Add to Cart', 'edupro' ); ?>"
                 >
                     <?php echo $is_in_cart ? esc_html__( 'In Cart ✓', 'edupro' ) : esc_html__( 'Add to Cart', 'edupro' ); ?>
                 </button>
-            <?php elseif ( $lessons_count > 0 ) : ?>
-                <span class="course-card__lessons-meta">
-                    <?php
-                    printf(
-                        /* translators: %d: lessons count */
-                        esc_html( _n( '%d lesson', '%d lessons', $lessons_count, 'edupro' ) ),
-                        absint( $lessons_count )
-                    );
-                    ?>
-                </span>
             <?php endif; ?>
         </div>
     </div>
