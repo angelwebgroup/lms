@@ -130,11 +130,15 @@ if ( ! function_exists( 'edupro_asset_uri' ) ) :
      */
     function edupro_asset_uri( $rel_path ) {
         $rel_path = ltrim( (string) $rel_path, '/' );
-        if ( ! defined( 'SCRIPT_DEBUG' ) || ! SCRIPT_DEBUG ) {
-            $min_path = preg_replace( '/\.(css|js)$/i', '.min.$1', $rel_path );
-            if ( $min_path && $min_path !== $rel_path && file_exists( EDUPRO_DIR . '/' . $min_path ) ) {
-                return EDUPRO_URI . '/' . $min_path;
-            }
+        $min_path = preg_replace( '/\.(css|js)$/i', '.min.$1', $rel_path );
+        $has_min  = $min_path && $min_path !== $rel_path && file_exists( EDUPRO_DIR . '/' . $min_path );
+        $has_raw  = file_exists( EDUPRO_DIR . '/' . $rel_path );
+
+        if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && $has_raw ) {
+            return EDUPRO_URI . '/' . $rel_path;
+        }
+        if ( $has_min ) {
+            return EDUPRO_URI . '/' . $min_path;
         }
         return EDUPRO_URI . '/' . $rel_path;
     }
