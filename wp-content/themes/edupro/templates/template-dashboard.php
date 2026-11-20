@@ -916,7 +916,7 @@ $avatar_url = get_avatar_url( $user_id, array( 'size' => 140 ) );
 			var win = window.open('', '_blank', 'width=960,height=700');
 			if (!win) { window.print(); return; }
 			win.document.write('<!doctype html><html><head><title>Certificate</title><style>' +
-				'body{font-family:Poppins,Inter,sans-serif;margin:0;padding:40px;background:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;box-sizing:border-box;}' +
+				'body{font-family:"Plus Jakarta Sans",Inter,sans-serif;margin:0;padding:40px;background:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;box-sizing:border-box;}' +
 				'.edupro-cert-border{border:10px double #e31b23;padding:56px 64px;text-align:center;max-width:820px;width:100%;}' +
 				'.edupro-cert-academy{color:#e31b23;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;}' +
 				'.edupro-cert-heading{font-size:36px;color:#1a1a2e;margin:0 0 24px;}' +

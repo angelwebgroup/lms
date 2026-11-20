@@ -86,7 +86,7 @@
 }
 
 .dashboard-user-card__name {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--db-white);
@@ -234,7 +234,7 @@
 }
 
 .dashboard-section-title {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.45rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -300,7 +300,7 @@
 }
 
 .dashboard-stat-card__value {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.55rem;
     font-weight: 800;
     color: var(--db-text-dark);
@@ -394,7 +394,7 @@
 }
 
 .dashboard-course-card__title {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.02rem;
     font-weight: 700;
     line-height: 1.38;
@@ -517,7 +517,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -560,7 +560,7 @@
     padding: 13px 16px;
     background: var(--db-bg);
     color: var(--db-text-medium);
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -874,7 +874,7 @@
 }
 
 .achievement-badge__title {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 0.94rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -922,7 +922,7 @@
 }
 
 .certificate-item-card__title {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.02rem;
     font-weight: 700;
     margin: 0;
@@ -1141,7 +1141,7 @@
 }
 
 .edupro-dashboard-username {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.06rem;
     font-weight: 700;
     color: var(--db-white);
@@ -1295,7 +1295,7 @@
 }
 
 .edupro-kpi-value {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.6rem;
     font-weight: 800;
     color: var(--db-text-dark);
@@ -1329,7 +1329,7 @@
 }
 
 .edupro-dash-panel-header h1 {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -1382,7 +1382,7 @@
 }
 
 .edupro-dash-empty h3 {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.2rem;
     color: var(--db-text-dark);
     margin: 0 0 8px;
@@ -1451,7 +1451,7 @@
     justify-content: center;
     background: linear-gradient(135deg, var(--db-secondary), #2f2f58);
     color: var(--db-white);
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 2.4rem;
     font-weight: 800;
 }
@@ -1490,7 +1490,7 @@
 }
 
 .edupro-dash-course-title {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.02rem;
     font-weight: 700;
     line-height: 1.38;
@@ -1555,7 +1555,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -1739,7 +1739,7 @@
 }
 
 .edupro-dash-subhead {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -1848,7 +1848,7 @@
 }
 
 .edupro-certificate-card__info h3 {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1rem;
     font-weight: 700;
     color: var(--db-text-dark);
@@ -1991,7 +1991,7 @@
 }
 
 .edupro-cert-academy {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 0.95rem;
     font-weight: 800;
     letter-spacing: 0.16em;
@@ -2001,7 +2001,7 @@
 }
 
 .edupro-cert-heading {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: clamp(1.5rem, 3vw, 2.25rem);
     font-weight: 800;
     color: var(--db-secondary);
@@ -2027,7 +2027,7 @@
 }
 
 .edupro-cert-course {
-    font-family: "Poppins", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--db-primary);

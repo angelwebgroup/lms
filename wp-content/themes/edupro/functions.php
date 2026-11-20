@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 // 0. Constants
 // ---------------------------------------------------------------------------
-define( 'EDUPRO_VERSION',   '1.5.0' );
+define( 'EDUPRO_VERSION',   '1.5.1' );
 define( 'EDUPRO_DIR',       get_template_directory() );
 define( 'EDUPRO_URI',       get_template_directory_uri() );
 define( 'EDUPRO_INC',       EDUPRO_DIR . '/inc/' );

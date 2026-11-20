@@ -734,7 +734,7 @@ function edupro_demo_build_course_svg( $title, $category_label, $level, $color_s
 	$title_tspans = '';
 	$y            = 215;
 	foreach ( $lines as $line ) {
-		$title_tspans .= '<text x="64" y="' . $y . '" fill="#ffffff" font-family="Poppins, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="36" font-weight="700">'
+		$title_tspans .= '<text x="64" y="' . $y . '" fill="#ffffff" font-family="Plus Jakarta Sans, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="36" font-weight="700">'
 			. edupro_demo_xml_esc( $line ) . '</text>';
 		$y += 46;
 	}
@@ -787,7 +787,7 @@ function edupro_demo_build_instructor_svg( $name, $initials, $color_start, $colo
 		. '<rect width="400" height="400" fill="url(#avbg)"/>'
 		. '<circle cx="200" cy="148" r="62" fill="#ffffff" fill-opacity="0.18"/>'
 		. '<path d="M90 360c0-66 49-112 110-112s110 46 110 112" fill="#ffffff" fill-opacity="0.16"/>'
-		. '<text x="200" y="218" text-anchor="middle" fill="#ffffff" font-family="Poppins, Inter, -apple-system, sans-serif" font-size="112" font-weight="700">'
+		. '<text x="200" y="218" text-anchor="middle" fill="#ffffff" font-family="Plus Jakarta Sans, Inter, -apple-system, sans-serif" font-size="112" font-weight="700">'
 		. edupro_demo_xml_esc( $initials ) . '</text>'
 		. '</svg>';
 }
